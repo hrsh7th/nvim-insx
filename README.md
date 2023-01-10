@@ -9,7 +9,7 @@ Manage insert mode mapping.
 - This plugin does not support `dot-repeat`.
   - The macro have the highest priority.
 - This plugin is *usually* works as expected.
-  - Does not aim to support to always work as expected.
+  - Does not aim to support to always work as expected because this plugin uses RegExp 😅
 - It is more convenient when used with vim-matchup.
   - The demo image uses with vim-matchup. 👍
 
