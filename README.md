@@ -2,6 +2,8 @@
 
 Manage insert mode mapping.
 
+<video src="https://user-images.githubusercontent.com/629908/211611400-4912f939-386c-4ec4-b63d-f79aa543e4e1.mov" width="100%"></video>
+
 ### Warning
 
 - This plugin does not support `dot-repeat`.
