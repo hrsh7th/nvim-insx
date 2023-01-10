@@ -1,0 +1,9 @@
+{
+  "preivate": true,
+  "scripts": {
+    "check": "npm run test && npm run lint && npm run format",
+    "test": "NODE_ENV=test vusted --output=gtest --pattern=.spec ./lua",
+    "lint": "luacheck --codes ./lua",
+    "format": "stylua --config-path stylua.toml --glob 'lua/**/*.lua' -- lua"
+  }
+}
