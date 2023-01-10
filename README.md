@@ -4,8 +4,10 @@ Manage insert mode mapping.
 
 ### Warning
 
-This plugin does not support `dot-repeat`.
-The macro have the highest priority.
+- This plugin does not support `dot-repeat`.
+  - The macro have the highest priority.
+- This plugin is *usually* works as expected.
+  - Does not aim to support to always work as expected.
 
 ### Usage
 
