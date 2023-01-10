@@ -16,7 +16,9 @@ describe('minx.recipe.fast_wrap', function()
 
   it('it should wrap identifier', function()
     setup_buffer()
-    minx.add(')', require('minx.recipe.fast_wrap')())
+    minx.add(')', require('minx.recipe.fast_wrap')({
+      close = ')'
+    }))
     Keymap.spec(function()
       Keymap.send({
         Keymap.termcodes('i()<Left>'),
@@ -32,7 +34,9 @@ describe('minx.recipe.fast_wrap', function()
 
   it('it should wrap function-call', function()
     setup_buffer()
-    minx.add(')', require('minx.recipe.fast_wrap')())
+    minx.add(')', require('minx.recipe.fast_wrap')({
+      close = ')'
+    }))
     Keymap.spec(function()
       Keymap.send({
         Keymap.termcodes('/string<CR>i'),

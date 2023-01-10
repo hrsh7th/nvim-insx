@@ -22,7 +22,9 @@ do
     ['['] = ']',
     ['{'] = '}',
   }) do
-    minx.add(close, require('minx.recipe.fast_wrap')())
+    minx.add(close, require('minx.recipe.fast_wrap')({
+      close = close
+    }))
     minx.add(open, require('minx.recipe.auto_pair')({
       open = open,
       close = close,

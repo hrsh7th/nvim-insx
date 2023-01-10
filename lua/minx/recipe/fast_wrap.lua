@@ -51,9 +51,10 @@ local function wrap_string(ctx)
 end
 
 ---@class minx.recipe.fast_wrap.Option
----@field public pairwise_patterns string[]
+---@field public close string
+---@field public pairwise_patterns? string[]
 
----@param option? minx.recipe.fast_wrap.Option
+---@param option minx.recipe.fast_wrap.Option
 ---@return minx.EntrySource
 local function fast_wrap(option)
   option = option or {}
@@ -73,11 +74,11 @@ local function fast_wrap(option)
           ctx.send('<C-o>E<Right>')
         end
       end
-      ctx.send(ctx.char .. '<Left>')
+      ctx.send(option.close .. '<Left>')
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return ctx.after():sub(1, 1) == ctx.char
+      return ctx.after():sub(1, 1) == option.close
     end,
   }
 end
