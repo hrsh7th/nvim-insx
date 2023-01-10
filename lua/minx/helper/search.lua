@@ -10,10 +10,10 @@ local function get_pair(open, close, flags)
   end)
 end
 
-local pairs = {}
+local search = {}
 
 ---@type table<string, string>
-pairs.Tag = {
+search.Tag = {
   Open = [=[<\(\w\+\)\%(\s\+.\{-}\)\?>]=],
   Close = [=[</\w\+>]=],
 }
@@ -22,7 +22,7 @@ pairs.Tag = {
 ---@param open string
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
-function pairs.get_pair_open(open, close)
+function search.get_pair_open(open, close)
   local open_pos = get_pair(open .. [[\zs]], close, 'Wbnz')
   if open_pos[1] ~= 0 then
     return open_pos
@@ -33,11 +33,11 @@ end
 ---@param open string
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
-function pairs.get_pair_close(open, close)
+function search.get_pair_close(open, close)
   local close_pos = get_pair(open, close, 'Wnzc')
   if close_pos[1] ~= 0 then
     return close_pos
   end
 end
 
-return pairs
+return search

@@ -39,7 +39,7 @@ local function increase_pair_spacing(option)
         end
       else
         -- Logic for separated pair.
-        local pair_pos = helper.pairs.get_pair_close(option.open_pat, option.close_pat)
+        local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
         if pair_pos then
           local row, col = unpack(vim.api.nvim_win_get_cursor(0))
           sync_space((get_space({ row, col + 1 })), pair_pos)
@@ -60,7 +60,7 @@ local function decrease_pair_spacing(option)
     ---@param ctx minx.ActionContext
     action = function(ctx)
       ctx.send('<BS>')
-      local pair_pos = helper.pairs.get_pair_close(option.open_pat, option.close_pat) or helper.pairs.get_pair_open(option.open_pat, option.close_pat)
+      local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat) or helper.search.get_pair_open(option.open_pat, option.close_pat)
       if pair_pos then
         local row, col = unpack(vim.api.nvim_win_get_cursor(0))
         sync_space((get_space({ row, col + 1 })), pair_pos)

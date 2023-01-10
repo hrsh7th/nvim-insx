@@ -80,14 +80,14 @@ USAGE                                                               *minx-usage*
 
     -- (HTML Tag) Delete adjacent pairs.
     minx.add('<BS>', require('minx.recipe.delete_pair')({
-      open_pat = minx.helper.pairs.Tag.Open,
-      close_pat = minx.helper.pairs.Tag.Close,
+      open_pat = minx.helper.search.Tag.Open,
+      close_pat = minx.helper.search.Tag.Close,
     }))
 
     -- (HTML Tag): Break pairs.
     minx.add('<CR>', require('minx.recipe.fast_break')({
-      open_pat = minx.helper.pairs.Tag.Open,
-      close_pat = minx.helper.pairs.Tag.Close,
+      open_pat = minx.helper.search.Tag.Open,
+      close_pat = minx.helper.search.Tag.Close,
     }))
   end
 <
@@ -117,16 +117,16 @@ require('minx').helper.regex.esc(str): return~
 - *return* string
   - Return string if the specified pattern is matched.
 
-require('minx').helper.pairs.Tag~
+require('minx').helper.search.Tag~
 
 The enum value that reprecents the regex for HTML Tag elements.
 
-- *Open* string
+- *require('minx').helper.search.Tag.Open* string
   - The HTML open tag regex
-- *Close* string
+- *require('minx').helper.search.Tag.Close* string
   - The HTML open tag regex
 
-require('minx').helper.pairs.get_pair_open(open, close): return~
+require('minx').helper.search.get_pair_open(open, close): return~
 - *open* string
   - The vim regex to matche the open element.
 - *close* string
@@ -135,7 +135,7 @@ require('minx').helper.pairs.get_pair_open(open, close): return~
   - Return regex matched position of open element.
   - The position is 0-origin utf8 byte indicies.
 
-require('minx').helper.pairs.get_pair_close(open, close): return~
+require('minx').helper.search.get_pair_close(open, close): return~
 - *open* string
   - The vim regex to matche the open element.
 - *close* string
@@ -160,22 +160,22 @@ require('minx').helper.syntax.in_string_or_comment_at_cursor(cursor): return~
 TYPINGS                                                           *minx-typings*
 
 >lua
----@class minx.RecipeSource
----@field public action fun(ctx: minx.ActionContext): nil
----@field public enabled? fun(ctx: minx.Context): boolean
----@field public priority? integer
+  ---@class minx.RecipeSource
+  ---@field public action fun(ctx: minx.ActionContext): nil
+  ---@field public enabled? fun(ctx: minx.Context): boolean
+  ---@field public priority? integer
 
----@class minx.Context
----@field public char string
----@field public row fun(): integer 0-origin index
----@field public col fun(): integer 0-origin utf8 byte index
----@field public text fun(): string
----@field public after fun(): string
----@field public before fun(): string
+  ---@class minx.Context
+  ---@field public char string
+  ---@field public row fun(): integer 0-origin index
+  ---@field public col fun(): integer 0-origin utf8 byte index
+  ---@field public text fun(): string
+  ---@field public after fun(): string
+  ---@field public before fun(): string
 
----@class minx.ActionContext : minx.Context
----@field public send fun(keys: minx.kit.Vim.Keymap.KeysSpecifier): nil
----@field public move fun(row: integer, col: integer): nil
+  ---@class minx.ActionContext : minx.Context
+  ---@field public send fun(keys: minx.kit.Vim.Keymap.KeysSpecifier): nil
+  ---@field public move fun(row: integer, col: integer): nil
 <
 
 

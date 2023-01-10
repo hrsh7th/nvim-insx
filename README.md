@@ -49,12 +49,12 @@ do
     }))
   end
   minx.add('<BS>', require('minx.recipe.delete_pair')({
-    open_pat = minx.helper.pairs.Tag.Open,
-    close_pat = minx.helper.pairs.Tag.Close,
+    open_pat = minx.helper.search.Tag.Open,
+    close_pat = minx.helper.search.Tag.Close,
   }))
   minx.add('<CR>', require('minx.recipe.fast_break')({
-    open_pat = minx.helper.pairs.Tag.Open,
-    close_pat = minx.helper.pairs.Tag.Close,
+    open_pat = minx.helper.search.Tag.Open,
+    close_pat = minx.helper.search.Tag.Close,
   }))
 end
 ```
