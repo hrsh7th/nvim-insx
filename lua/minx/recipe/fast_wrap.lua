@@ -22,7 +22,7 @@ local function wrap_string(ctx)
     return false
   end
 
-  local cursor = { row - 1, e }
+  local cursor = { row - 1, e - 1 }
   if not helper.syntax.in_string_or_comment_at_pos(cursor) then
     return false
   end
@@ -30,7 +30,7 @@ local function wrap_string(ctx)
   local found = false
   while true do
     local text = vim.api.nvim_buf_get_lines(0, cursor[1], cursor[1] + 1, false)[1]
-    for i = cursor[2] + 1, #text - 1 do
+    for i = cursor[2] + 1, #text do
       cursor[2] = i
       if not helper.syntax.in_string_or_comment_at_pos(cursor) then
         found = true
@@ -44,7 +44,7 @@ local function wrap_string(ctx)
     cursor[2] = 0
   end
   if found then
-    ctx.move(cursor[1], cursor[2] + 1)
+    ctx.move(cursor[1], cursor[2])
     return true
   end
   return false
@@ -57,6 +57,10 @@ end
 ---@param option minx.recipe.fast_wrap.Option
 ---@return minx.EntrySource
 local function fast_wrap(option)
+  local _ = {
+    [=[[^[:blank:][[({]*\s*[[({]]=],
+    [=[[^[:blank:][[({]*\s*[[({]]=],
+  }
   option = option or {}
   option.pairwise_patterns = option.pairwise_patterns or {
     [=[[^[:blank:][[({]*\s*[[({]]=], -- function() or setup {} or Vec![]
