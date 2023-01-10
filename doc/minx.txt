@@ -103,6 +103,13 @@ require('minx').add(char, recipe)~
   - The action is invoked if enabled returns the *true*.
   - The `minx.Context` and `minx.ActionContext` is described in |minx-typings|.
 
+
+require('minx').expand(char): return~
+- *char* string
+  - The character for insert-mode mapping.
+- *return* string?
+  - Return the sendable key notation. (this is applied the replace_termcodes).
+
 require('minx').helper.regex.match(str, pattern): return~
 - *str* string
   - The string to match the pattern.

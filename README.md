@@ -23,18 +23,53 @@ You should define mapping by yourself like this.
 do
   local minx = require('minx')
   local esc = minx.helper.regex.esc
+
+  minx.add('<Tab>', require('minx.recipe.leave_symbol')({
+    symbol_pat = {
+      esc(';'),
+      esc(')'),
+      esc(']'),
+      esc('}'),
+      esc('>'),
+      esc('"'),
+      esc("'"),
+      esc('`'),
+    }
+  }))
+
   for open, close in pairs({
-    ['('] = ')',
-    ['['] = ']',
-    ['{'] = '}',
+    ["'"] = "'",
+    ['"'] = '"',
+    ['`'] = '`',
   }) do
-    minx.add(close, require('minx.recipe.fast_wrap')({
-      close = close
-    }))
+    -- basic.
     minx.add(open, require('minx.recipe.auto_pair')({
       open = open,
       close = close,
     }))
+    minx.add('<BS>', require('minx.recipe.delete_pair')({
+      open_pat = esc(open),
+      close_pat = esc(close),
+    }))
+  end
+
+  for open, close in pairs({
+    ['('] = ')',
+    ['['] = ']',
+    ['{'] = '}',
+    ['<'] = '>',
+  }) do
+    -- basic.
+    minx.add(open, require('minx.recipe.auto_pair')({
+      open = open,
+      close = close,
+    }))
+    minx.add('<BS>', require('minx.recipe.delete_pair')({
+      open_pat = esc(open),
+      close_pat = esc(close),
+    }))
+
+    -- spacing.
     minx.add('<Space>', require('minx.recipe.pair_spacing').increase_pair_spacing({
       open_pat = esc(open),
       close_pat = esc(close),
@@ -43,9 +78,10 @@ do
       open_pat = esc(open),
       close_pat = esc(close),
     }))
-    minx.add('<BS>', require('minx.recipe.delete_pair')({
-      open_pat = esc(open),
-      close_pat = esc(close),
+
+    -- advanced.
+    minx.add(close, require('minx.recipe.fast_wrap')({
+      close = close
     }))
     minx.add('<CR>', require('minx.recipe.fast_break')({
       open_pat = esc(open),

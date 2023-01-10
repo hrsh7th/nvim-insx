@@ -24,4 +24,7 @@ describe('minx', function()
       assert_current_line('(a|)')
     end)
   end)
+
+  it('should sendable expand result', function()
+  end)
 end)

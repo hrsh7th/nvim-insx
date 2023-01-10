@@ -59,6 +59,15 @@ function Keymap.send(keys, no_insert)
   end)
 end
 
+---Return sendabke keys with callback function.
+---@param callback fun(...: any): any
+---@return string
+function Keymap.to_sendable(callback)
+  local unique_id = kit.unique_id()
+  Keymap._callbacks[unique_id] = Async.async(callback)
+  return Keymap.termcodes(('<Cmd>lua require("minx.kit.Vim.Keymap")._resolve(%s)<CR>'):format(unique_id))
+end
+
 ---Test spec helper.
 ---@param spec fun(): any
 function Keymap.spec(spec)

@@ -1,4 +1,6 @@
+local Keymap = require('minx.kit.Vim.Keymap')
 local Runner = require('minx.Runner')
+
 
 ---@param char string
 ---@return minx.Context
@@ -64,14 +66,10 @@ function minx.add(char, recipe_source)
     minx.recipes[char] = {}
 
     vim.keymap.set('i', char, function()
-      local ctx = context(char)
-      local r = minx.get_recipe(ctx)
-      if r then
-        return Runner.new(ctx, r):run()
-      end
-      return char
+      return minx.expand(char)
     end, {
       expr = true,
+      replace_keycodes = false,
     })
   end
 
@@ -84,6 +82,20 @@ function minx.add(char, recipe_source)
     end,
     priority = recipe_source.priority,
   })
+end
+
+---Expand key mapping as cmd mapping.
+---@param char string
+---@return string
+function minx.expand(char)
+  local ctx = context(char)
+  local r = minx.get_recipe(ctx)
+  if r then
+    return Keymap.to_sendable(function()
+      Runner.new(ctx, r):run()
+    end)
+  end
+  return Keymap.termcodes(char)
 end
 
 ---Get sorted/normalized entries for specific mapping.
