@@ -3,7 +3,7 @@
 ---@field public close string
 
 ---@param option minx.recipe.auto_pair.Option
----@return minx.EntrySource
+---@return minx.RecipeSource
 local function auto_pair(option)
   return {
     ---@param ctx minx.ActionContext

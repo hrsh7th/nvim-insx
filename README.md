@@ -59,4 +59,4 @@ end
 
 ### Status
 
-early development and not documented yet.
+early development.

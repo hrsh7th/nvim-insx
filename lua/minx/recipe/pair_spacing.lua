@@ -20,8 +20,8 @@ end
 ---@field public open_pat string
 ---@field public close_pat string
 
----@param option minx.recipe.fast_break.Option
----@return minx.EntrySource
+---@param option minx.recipe.pair_spacing.Option
+---@return minx.RecipeSource
 local function increase_pair_spacing(option)
   return {
     ---@param ctx minx.ActionContext
@@ -53,8 +53,8 @@ local function increase_pair_spacing(option)
   }
 end
 
----@param option minx.recipe.fast_break.Option
----@return minx.EntrySource
+---@param option minx.recipe.pair_spacing.Option
+---@return minx.RecipeSource
 local function decrease_pair_spacing(option)
   return {
     ---@param ctx minx.ActionContext

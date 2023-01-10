@@ -5,7 +5,7 @@ local helper = require('minx.helper')
 ---@field public close_pat string
 
 ---@param option minx.recipe.fast_break.Option
----@return minx.EntrySource
+---@return minx.RecipeSource
 local function fast_break(option)
   return {
     ---@param ctx minx.ActionContext

@@ -25,16 +25,16 @@ end
 
 ---@class minx.Runner
 ---@field public ctx minx.Context
----@field public entry minx.Entry
+---@field public recipe minx.Recipe
 local Runner = {}
 
 ---Create step object.
 ---@param ctx minx.Context
----@param entry minx.Entry
-function Runner.new(ctx, entry)
+---@param recipe minx.Recipe
+function Runner.new(ctx, recipe)
   local self = setmetatable({}, { __index = Runner })
   self.ctx = ctx
-  self.entry = entry
+  self.recipe = recipe
   return self
 end
 
@@ -42,7 +42,7 @@ end
 ---@return string
 function Runner:run()
   Async.run(function()
-    self.entry.action(vim.tbl_deep_extend('keep', {
+    self.recipe.action(vim.tbl_deep_extend('keep', {
       send = function(keys)
         Keymap.send(convert(keys)):await()
       end,

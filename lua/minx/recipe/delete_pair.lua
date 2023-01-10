@@ -5,7 +5,7 @@ local helper = require('minx.helper')
 ---@field public close_pat string
 
 ---@param option minx.recipe.delete_pair.Option
----@return minx.EntrySource
+---@return minx.RecipeSource
 local function delete_pair(option)
   return {
     ---@param ctx minx.ActionContext

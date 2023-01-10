@@ -1,0 +1,192 @@
+*nvim-minx* *minx*
+
+Manage insert mode keymapping.
+
+
+
+==============================================================================
+CONTENTS                                                         *minx-contents*
+
+INTRO                                                               |minx-intro|
+USAGE                                                               |minx-usage|
+FUNCTION                                                         |minx-function|
+TYPINGS                                                           |minx-typings|
+BUILT-IN RECIPE                                           |minx-built_in-recipe|
+
+
+
+==============================================================================
+INTRO                                                               *minx-intro*
+
+This plugin provides general pair-wise functionality.
+
+The concepts are
+
+- Does not support dot-repeat
+- Aims for advanced functionality
+- Requires configuration to work
+
+
+
+==============================================================================
+USAGE                                                               *minx-usage*
+
+>lua
+  do
+    local minx = require('minx')
+    local esc = minx.helper.regex.esc
+
+    -- Basic pair-wise features.
+    for open, close in pairs({
+      ['('] = ')',
+      ['['] = ']',
+      ['{'] = '}',
+    }) do
+      -- Basic auto pair feature.
+      minx.add(open, require('minx.recipe.auto_pair')({
+        open = open,
+        close = close,
+      }))
+
+      -- Delete adjacent pairs.
+      minx.add('<BS>', require('minx.recipe.delete_pair')({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- Increase balanced pair spaces.
+      minx.add('<Space>', require('minx.recipe.pair_spacing').increase_pair_spacing({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- Decrease balanced pair spaces.
+      minx.add('<BS>', require('minx.recipe.pair_spacing').decrease_pair_spacing({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- ADVANCED: Wrap the next token via pairs.
+      minx.add(close, require('minx.recipe.fast_wrap')({
+        close = close
+      }))
+
+      -- ADVANCED: Break pairs.
+      minx.add('<CR>', require('minx.recipe.fast_break')({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+    end
+
+    -- (HTML Tag) Delete adjacent pairs.
+    minx.add('<BS>', require('minx.recipe.delete_pair')({
+      open_pat = minx.helper.pairs.Tag.Open,
+      close_pat = minx.helper.pairs.Tag.Close,
+    }))
+
+    -- (HTML Tag): Break pairs.
+    minx.add('<CR>', require('minx.recipe.fast_break')({
+      open_pat = minx.helper.pairs.Tag.Open,
+      close_pat = minx.helper.pairs.Tag.Close,
+    }))
+  end
+<
+
+
+==============================================================================
+FUNCTION                                                         *minx-function*
+
+require('minx').add(char, recipe)~
+- *char* string
+  - The character for insert-mode mapping.
+- *recipe_source* minx.RecipeSource
+  - The action is invoked if enabled returns the *true*.
+  - The `minx.Context` and `minx.ActionContext` is described in |minx-typings|.
+
+require('minx').helper.regex.match(str, pattern): return~
+- *str* string
+  - The string to match the pattern.
+- *pattern* string
+  - The vim regex to match the string.
+- *return* string?
+  - Return string if the specified pattern is matched.
+
+require('minx').helper.regex.esc(str): return~
+- *str* string
+  - The vim regex string to escape.
+- *return* string
+  - Return string if the specified pattern is matched.
+
+require('minx').helper.pairs.Tag~
+
+The enum value that reprecents the regex for HTML Tag elements.
+
+- *Open* string
+  - The HTML open tag regex
+- *Close* string
+  - The HTML open tag regex
+
+require('minx').helper.pairs.get_pair_open(open, close): return~
+- *open* string
+  - The vim regex to matche the open element.
+- *close* string
+  - The vim regex to matche the close element.
+- *return* { [1]: integer, [2]: integer }
+  - Return regex matched position of open element.
+  - The position is 0-origin utf8 byte indicies.
+
+require('minx').helper.pairs.get_pair_close(open, close): return~
+- *open* string
+  - The vim regex to matche the open element.
+- *close* string
+  - The vim regex to matche the close element.
+- *return* { [1]: integer, [2]: integer }
+  - Return regex matched position of close element.
+  - The position is 0-origin utf8 byte indicies.
+
+require('minx').helper.syntax.in_string_or_comment(): return~
+- *return* boolean
+  - Return the cursor position is string or comment.
+
+require('minx').helper.syntax.in_string_or_comment_at_cursor(cursor): return~
+- *cursor* { [1]: integer, [2]: integer }
+  - The position is 0-origin utf8 byte indicies.
+- *return* boolean
+  - Return the specified position is string or comment.
+
+
+
+==============================================================================
+TYPINGS                                                           *minx-typings*
+
+>lua
+---@class minx.RecipeSource
+---@field public action fun(ctx: minx.ActionContext): nil
+---@field public enabled? fun(ctx: minx.Context): boolean
+---@field public priority? integer
+
+---@class minx.Context
+---@field public char string
+---@field public row fun(): integer 0-origin index
+---@field public col fun(): integer 0-origin utf8 byte index
+---@field public text fun(): string
+---@field public after fun(): string
+---@field public before fun(): string
+
+---@class minx.ActionContext : minx.Context
+---@field public send fun(keys: minx.kit.Vim.Keymap.KeysSpecifier): nil
+---@field public move fun(row: integer, col: integer): nil
+<
+
+
+
+==============================================================================
+BUILT-IN RECIPE                                           *minx-built_in-recipe*
+
+TBD
+
+
+
+==============================================================================
+ vim:tw=78:ts=4:et:ft=help:norl:
+

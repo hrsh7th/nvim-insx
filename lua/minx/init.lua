@@ -29,22 +29,10 @@ local minx = {}
 
 minx.helper = require('minx.helper')
 
----@class minx.Position
----@field public row integer
----@field public col integer
-
----@alias minx.Recipe fun(matches: string[])
-
----@class minx.EntrySource
+---@class minx.RecipeSource
 ---@field public action fun(ctx: minx.ActionContext): nil
 ---@field public enabled? fun(ctx: minx.Context): boolean
 ---@field public priority? integer
-
----@class minx.Entry
----@field public index integer
----@field public action fun(ctx: minx.ActionContext): nil
----@field public enabled fun(ctx: minx.Context): boolean
----@field public priority integer
 
 ---@class minx.Context
 ---@field public char string
@@ -58,22 +46,28 @@ minx.helper = require('minx.helper')
 ---@field public send fun(keys: minx.kit.Vim.Keymap.KeysSpecifier): nil
 ---@field public move fun(row: integer, col: integer): nil
 
----@type table<string, minx.Entry[]>
-minx.entries = {}
+---@class minx.Recipe
+---@field public index integer
+---@field public action fun(ctx: minx.ActionContext): nil
+---@field public enabled fun(ctx: minx.Context): boolean
+---@field public priority integer
 
----Add new mapping entry for specific mapping.
+---@type table<string, minx.Recipe[]>
+minx.recipes = {}
+
+---Add new mapping recipe for specific mapping.
 ---@param char string
----@param entry_source minx.EntrySource
-function minx.add(char, entry_source)
+---@param recipe_source minx.RecipeSource
+function minx.add(char, recipe_source)
   -- initialize mapping.
-  if not minx.entries[char] then
-    minx.entries[char] = {}
+  if not minx.recipes[char] then
+    minx.recipes[char] = {}
 
     vim.keymap.set('i', char, function()
       local ctx = context(char)
-      local e = minx.get_entry(ctx)
-      if e then
-        return Runner.new(ctx, e):run()
+      local r = minx.get_recipe(ctx)
+      if r then
+        return Runner.new(ctx, r):run()
       end
       return char
     end, {
@@ -81,23 +75,23 @@ function minx.add(char, entry_source)
     })
   end
 
-  -- add normalized entry.
-  table.insert(minx.entries[char], {
-    index = #minx.entries[char] + 1,
-    action = entry_source.action,
-    enabled = entry_source.enabled or function()
+  -- add normalized recipe.
+  table.insert(minx.recipes[char], {
+    index = #minx.recipes[char] + 1,
+    action = recipe_source.action,
+    enabled = recipe_source.enabled or function()
       return true
     end,
-    priority = entry_source.priority,
+    priority = recipe_source.priority,
   })
 end
 
 ---Get sorted/normalized entries for specific mapping.
 ---@param ctx minx.Context
----@return minx.Entry|nil
-function minx.get_entry(ctx)
-  local entries = minx.entries[ctx.char] or {}
-  table.sort(entries, function(a, b)
+---@return minx.Recipe|nil
+function minx.get_recipe(ctx)
+  local recipes = minx.recipes[ctx.char] or {}
+  table.sort(recipes, function(a, b)
     if a.priority and b.priority then
       local diff = a.priority - b.priority
       if diff == 0 then
@@ -106,9 +100,9 @@ function minx.get_entry(ctx)
     end
     return a.index < b.index
   end)
-  for _, entry in ipairs(entries) do
-    if entry.enabled(ctx) then
-      return entry
+  for _, recipe in ipairs(recipes) do
+    if recipe.enabled(ctx) then
+      return recipe
     end
   end
 end

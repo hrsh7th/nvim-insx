@@ -55,7 +55,7 @@ end
 ---@field public pairwise_patterns? string[]
 
 ---@param option minx.recipe.fast_wrap.Option
----@return minx.EntrySource
+---@return minx.RecipeSource
 local function fast_wrap(option)
   local _ = {
     [=[[^[:blank:][[({]*\s*[[({]]=],
