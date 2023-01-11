@@ -57,12 +57,9 @@ end
 ---@param option minx.recipe.fast_wrap.Option
 ---@return minx.RecipeSource
 local function fast_wrap(option)
-  local _ = {
-    [=[[^[:blank:][[({]*\s*[[({]]=],
-    [=[[^[:blank:][[({]*\s*[[({]]=],
-  }
   option = option or {}
   option.pairwise_patterns = option.pairwise_patterns or {
+    helper.search.Tag.Open,
     [=[[^[:blank:][[({]*\s*[[({]]=], -- function() or setup {} or Vec![]
     [=[\%(\<function\>\|\<func\>\|\<fn\>\)]=],
     [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\)]=],

@@ -6,13 +6,14 @@ local Runner = require('minx.Runner')
 ---@return minx.Context
 local function context(char)
   return {
+    filetype = vim.api.nvim_buf_get_option(0, 'filetype'),
+    char = char,
     row = function()
       return vim.api.nvim_win_get_cursor(0)[1] - 1
     end,
     col = function()
       return vim.api.nvim_win_get_cursor(0)[2]
     end,
-    char = char,
     text = function()
       return vim.api.nvim_get_current_line()
     end,
@@ -37,6 +38,7 @@ minx.helper = require('minx.helper')
 ---@field public priority? integer
 
 ---@class minx.Context
+---@field public filetype string
 ---@field public char string
 ---@field public row fun(): integer 0-origin index
 ---@field public col fun(): integer 0-origin utf8 byte index

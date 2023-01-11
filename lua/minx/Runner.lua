@@ -42,26 +42,35 @@ end
 ---@return string
 function Runner:run()
   Async.run(function()
+    local lazyredraw = vim.o.lazyredraw
+    Keymap.send(convert('<Cmd>set lazyredraw<CR>')):await()
     self.recipe.action(vim.tbl_deep_extend('keep', {
       send = function(keys)
         Keymap.send(convert(keys)):await()
       end,
       move = function(row, col)
         local cursor = vim.api.nvim_win_get_cursor(0)
-        if cursor[1] == row + 1 then
-          -- Same line cursor move.
-          local delta = col - cursor[2]
+
+        -- fix row.
+        if cursor[1] ~= row + 1 then
+          local delta = cursor[1] - (row + 1)
           if delta > 0 then
-            Keymap.send(convert(('<Right>'):rep(delta))):await()
+            Keymap.send(convert(('<Up>'):rep(delta))):await()
           elseif delta < 0 then
-            Keymap.send(convert(('<Left>'):rep(math.abs(delta)))):await()
+            Keymap.send(convert(('<Down>'):rep(math.abs(delta)))):await()
           end
-        else
-          -- Jump to the other line.
-          Keymap.send(convert(('<C-o>:<C-u>call cursor(%s, %s)<CR>'):format(row + 1, col + 1))):await()
+        end
+
+        -- fix col.
+        local delta = col - cursor[2]
+        if delta > 0 then
+          Keymap.send(convert(('<Right>'):rep(delta))):await()
+        elseif delta < 0 then
+          Keymap.send(convert(('<Left>'):rep(math.abs(delta)))):await()
         end
       end,
     }, self.ctx))
+    Keymap.send(convert(('<Cmd>set %slazyredraw<CR>'):format(lazyredraw and '' or 'no'))):await()
   end)
   return ''
 end
