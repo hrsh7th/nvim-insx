@@ -28,6 +28,12 @@ local function context(char)
   }
 end
 
+---@param key string
+---@return string
+local function normalize(key)
+  return vim.fn.keytrans(Keymap.termcodes(key))
+end
+
 local minx = {}
 
 minx.helper = require('minx.helper')
@@ -63,6 +69,8 @@ minx.recipes = {}
 ---@param char string
 ---@param recipe_source minx.RecipeSource
 function minx.add(char, recipe_source)
+  char = normalize(char)
+
   -- initialize mapping.
   if not minx.recipes[char] then
     minx.recipes[char] = {}
@@ -90,6 +98,8 @@ end
 ---@param char string
 ---@return string
 function minx.expand(char)
+  char = normalize(char)
+
   local ctx = context(char)
   local r = minx.get_recipe(ctx)
   if r then

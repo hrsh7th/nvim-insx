@@ -67,6 +67,7 @@ return {
       simple([[\<for\>.*\<do\>$]], 'end'),
       simple([[^\s*\<do\>$]], 'end'),
       simple([[\<repeat\>$]], 'until'),
+      simple([[\<function\>\%(\s\+\k\+\%(:\k\+\)\?\)\?()$]], 'end'),
     },
     ['html'] = {
       {

@@ -96,13 +96,18 @@ USAGE                                                               *minx-usage*
 ==============================================================================
 FUNCTION                                                         *minx-function*
 
+minx#expand(char): return~
+- *char* string
+  - The character for insert-mode mapping (it isn't a form of keycodes).
+- *return* string
+  - Expanded keycodes.
+
 require('minx').add(char, recipe)~
 - *char* string
   - The character for insert-mode mapping.
 - *recipe_source* minx.RecipeSource
   - The action is invoked if enabled returns the *true*.
   - The `minx.Context` and `minx.ActionContext` is described in |minx-typings|.
-
 
 require('minx').expand(char): return~
 - *char* string
@@ -125,13 +130,12 @@ require('minx').helper.regex.esc(str): return~
   - Return string if the specified pattern is matched.
 
 require('minx').helper.search.Tag~
-
-The enum value that reprecents the regex for HTML Tag elements.
-
 - *require('minx').helper.search.Tag.Open* string
   - The HTML open tag regex
 - *require('minx').helper.search.Tag.Close* string
   - The HTML open tag regex
+
+The enum value that reprecents the regex for HTML Tag elements.
 
 require('minx').helper.search.get_pair_open(open, close): return~
 - *open* string
