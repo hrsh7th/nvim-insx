@@ -14,7 +14,7 @@ describe('minx.recipe.delete_pair', function()
     vim.api.nvim_win_set_cursor(0, { 1, 0 })
   end
 
-  it('it should delete pairs', function()
+  it('should delete pairs', function()
     setup_buffer()
     minx.add(
       '<BS>',
@@ -28,6 +28,25 @@ describe('minx.recipe.delete_pair', function()
       assert.are.same({
         'local function example()',
         '  return string.format("foo%sbar", "_")',
+        'end',
+      }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    end)
+  end)
+
+  it('should delete separated pairs', function()
+    setup_buffer()
+    minx.add(
+      '<BS>',
+      require('minx.recipe.delete_pair')({
+        open_pat = minx.helper.regex.esc('('),
+        close_pat = minx.helper.regex.esc(')'),
+      })
+    )
+    Keymap.spec(function()
+      Keymap.send({ Keymap.termcodes('/format<CR>w<Right>i'), { keys = Keymap.termcodes('<BS>'), remap = true } }):await()
+      assert.are.same({
+        'local function example()',
+        '  return string.format"foo%sbar", "_"',
         'end',
       }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
     end)

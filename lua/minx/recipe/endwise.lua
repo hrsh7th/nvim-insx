@@ -18,7 +18,7 @@ local function simple(trigger_pattern, addition)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return helper.regex.match(ctx.before(), trigger_pattern) ~= nil
+      return not helper.syntax.in_string_or_comment() and helper.regex.match(ctx.before(), trigger_pattern) ~= nil
     end,
   }
 end
@@ -62,7 +62,7 @@ return {
   simple = simple,
   builtin = {
     ['lua'] = {
-      simple([[\<if\>.*\%(\<then\>\)\?$]], 'end'),
+      simple([[\<if\>.*\<then\>$]], 'end'),
       simple([[\<while\>.*\<do\>$]], 'end'),
       simple([[\<for\>.*\<do\>$]], 'end'),
       simple([[^\s*\<do\>$]], 'end'),

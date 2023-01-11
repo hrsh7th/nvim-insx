@@ -79,7 +79,7 @@ local function fast_wrap(option)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return ctx.after():sub(1, 1) == option.close
+      return not helper.syntax.in_string_or_comment() and ctx.after():sub(1, 1) == option.close
     end,
   }
 end

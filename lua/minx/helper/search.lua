@@ -5,8 +5,9 @@ local syntax = require('minx.helper.syntax')
 ---@param flags string
 ---@return { [1]: integer, [2]: integer }
 local function get_pair(open, close, flags)
+  local in_string_or_comment = syntax.in_string_or_comment()
   return vim.fn.searchpairpos(open, '', close, flags, function()
-    return syntax.in_string_or_comment()
+    return in_string_or_comment ~= syntax.in_string_or_comment()
   end)
 end
 

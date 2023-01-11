@@ -48,7 +48,7 @@ local function increase_pair_spacing(option)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return not helper.syntax.in_string_or_comment() and (helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]]) or helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat))
+      return (helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]]) or helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat))
     end,
   }
 end
@@ -68,7 +68,7 @@ local function decrease_pair_spacing(option)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return not helper.syntax.in_string_or_comment() and (helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]]) or helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat))
+      return (helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]]) or helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat))
     end,
   }
 end

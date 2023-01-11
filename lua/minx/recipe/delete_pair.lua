@@ -10,14 +10,23 @@ local function delete_pair(option)
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
-      local open_text = helper.regex.match(ctx.before(), option.open_pat .. '$')
-      local close_text = helper.regex.match(ctx.after(), '^' .. option.close_pat)
-      ctx.send(('<BS>'):rep(vim.fn.strchars(open_text, true)))
-      ctx.send(('<Del>'):rep(vim.fn.strchars(close_text, true)))
+      local row, col = ctx.row(), ctx.col()
+      local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
+      if close_pos then
+        ctx.move(close_pos[1] - 1, close_pos[2] - 1)
+        local close_text = helper.regex.match(ctx.after(), [[^]] .. option.close_pat)
+        ctx.send(('<Del>'):rep(vim.fn.strchars(close_text, true)))
+
+        ctx.move(row, col)
+        local open_text = helper.regex.match(ctx.before(), option.open_pat .. [[$]])
+        ctx.send(('<BS>'):rep(vim.fn.strchars(open_text, true)))
+      else
+        ctx.send(ctx.char)
+      end
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return helper.regex.match(ctx.before(), option.open_pat .. '$') and helper.regex.match(ctx.after(), '^' .. option.close_pat)
+      return helper.regex.match(ctx.before(), option.open_pat .. '$')
     end,
   }
 end
