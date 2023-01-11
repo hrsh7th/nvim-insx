@@ -23,40 +23,11 @@ local function simple(trigger_pattern, addition)
   }
 end
 
----@type minx.recipe.endwise.Option
-local builtin = {
-  ['lua'] = {
-    simple([[\<if\>.*\%(\<then\>\)\?$]], 'end'),
-    simple([[\<while\>.*\<do\>$]], 'end'),
-    simple([[\<for\>.*\<do\>$]], 'end'),
-    simple([[^\s*\<do\>$]], 'end'),
-    simple([[\<repeat\>$]], 'until'),
-  },
-  ['html'] = {
-    {
-      ---@param ctx minx.ActionContext
-      action = function(ctx)
-        local name = ctx.before():match('<(%a+)')
-        local row, col = ctx.row(), ctx.col()
-        ctx.send('<CR>' .. ([[</%s>]]):format(name))
-        ctx.move(row, col)
-        ctx.send('<CR>')
-      end,
-      ---@param ctx minx.Context
-      enabled = function(ctx)
-        return helper.regex.match(ctx.before(), helper.search.Tag.Open) ~= nil and helper.regex.match(ctx.after(), helper.search.Tag.Close) == nil
-      end,
-    }
-  }
-}
-
 ---@alias minx.recipe.endwise.Option table<string, minx.RecipeSource[]>
 
 ---@param option minx.recipe.endwise.Option
 ---@return minx.RecipeSource
 local function endwise(option)
-  option = vim.tbl_deep_extend('keep', option, builtin)
-
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
@@ -89,4 +60,29 @@ end
 return {
   recipe = endwise,
   simple = simple,
+  builtin = {
+    ['lua'] = {
+      simple([[\<if\>.*\%(\<then\>\)\?$]], 'end'),
+      simple([[\<while\>.*\<do\>$]], 'end'),
+      simple([[\<for\>.*\<do\>$]], 'end'),
+      simple([[^\s*\<do\>$]], 'end'),
+      simple([[\<repeat\>$]], 'until'),
+    },
+    ['html'] = {
+      {
+        ---@param ctx minx.ActionContext
+        action = function(ctx)
+          local name = ctx.before():match('<(%a+)')
+          local row, col = ctx.row(), ctx.col()
+          ctx.send('<CR>' .. ([[</%s>]]):format(name))
+          ctx.move(row, col)
+          ctx.send('<CR>')
+        end,
+        ---@param ctx minx.Context
+        enabled = function(ctx)
+          return helper.regex.match(ctx.before(), helper.search.Tag.Open) ~= nil and helper.regex.match(ctx.after(), helper.search.Tag.Close) == nil
+        end,
+      }
+    }
+  },
 }

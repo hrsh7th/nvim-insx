@@ -24,6 +24,10 @@ do
   local minx = require('minx')
   local esc = minx.helper.regex.esc
 
+  -- Endwise (experimental).
+  local endwise = require('minx.recipe.endwise')
+  minx.add('<CR>', endwise.recipe(endwise.builtin))
+
   -- Leave symbols.
   minx.add('<Tab>', require('minx.recipe.leave_symbol')({
     symbol_pat = {
