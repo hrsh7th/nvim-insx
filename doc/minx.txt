@@ -97,72 +97,72 @@ USAGE                                                               *minx-usage*
 FUNCTION                                                         *minx-function*
 
 minx#expand(char): return~
-- *char* string
+- char: string
   - The character for insert-mode mapping (it isn't a form of keycodes).
-- *return* string
+- return: string
   - Expanded keycodes.
 
 require('minx').add(char, recipe)~
-- *char* string
+- char: string
   - The character for insert-mode mapping.
-- *recipe_source* minx.RecipeSource
+- recipe: minx.RecipeSource
   - The action is invoked if enabled returns the *true*.
   - The `minx.Context` and `minx.ActionContext` is described in |minx-typings|.
 
 require('minx').expand(char): return~
-- *char* string
+- char: string
   - The character for insert-mode mapping.
-- *return* string?
+- return: string?
   - Return the sendable key notation. (this is applied the replace_termcodes).
 
 require('minx').helper.regex.match(str, pattern): return~
-- *str* string
+- str: string
   - The string to match the pattern.
-- *pattern* string
+- pattern: string
   - The vim regex to match the string.
-- *return* string?
+- return: string?
   - Return string if the specified pattern is matched.
 
 require('minx').helper.regex.esc(str): return~
-- *str* string
+- str: string
   - The vim regex string to escape.
-- *return* string
+- return: string
   - Return string if the specified pattern is matched.
 
 require('minx').helper.search.Tag~
-- *require('minx').helper.search.Tag.Open* string
+- require('minx').helper.search.Tag.Open: string
   - The HTML open tag regex
-- *require('minx').helper.search.Tag.Close* string
+- require('minx').helper.search.Tag.Close: string
   - The HTML open tag regex
 
 The enum value that reprecents the regex for HTML Tag elements.
 
 require('minx').helper.search.get_pair_open(open, close): return~
-- *open* string
+- open: string
   - The vim regex to matche the open element.
-- *close* string
+- close: string
   - The vim regex to matche the close element.
-- *return* { [1]: integer, [2]: integer }
+- return: { [1]: integer, [2]: integer }
   - Return regex matched position of open element.
   - The position is 0-origin utf8 byte indicies.
 
 require('minx').helper.search.get_pair_close(open, close): return~
-- *open* string
+- open: string
   - The vim regex to matche the open element.
-- *close* string
+- close: string
   - The vim regex to matche the close element.
-- *return* { [1]: integer, [2]: integer }
+- return: { [1]: integer, [2]: integer }
   - Return regex matched position of close element.
   - The position is 0-origin utf8 byte indicies.
 
 require('minx').helper.syntax.in_string_or_comment(): return~
-- *return* boolean
+- return: boolean
   - Return the cursor position is string or comment.
 
 require('minx').helper.syntax.in_string_or_comment_at_cursor(cursor): return~
-- *cursor* { [1]: integer, [2]: integer }
+- cursor: { [1]: integer, [2]: integer }
   - The position is 0-origin utf8 byte indicies.
-- *return* boolean
+- return: boolean
   - Return the specified position is string or comment.
 
 
