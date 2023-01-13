@@ -72,7 +72,10 @@ local function fast_wrap(option)
         if is_pairwise(option) then
           ctx.send({ '<C-o>', { keys = '%', remap = true }, '<Right>' })
         else
-          ctx.send('<C-o>E<Right>')
+          local pos = helper.search.get_next([[\k\+\zs]])
+          if pos then
+            ctx.move(pos[1] - 1, pos[2] - 1)
+          end
         end
       end
       ctx.send(option.close .. '<Left>')

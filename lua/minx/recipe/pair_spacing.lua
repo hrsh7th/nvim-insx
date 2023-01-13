@@ -36,6 +36,8 @@ local function increase_pair_spacing(option)
         ctx.send((' '):rep(math.abs(diff)))
         if diff > 0 then
           ctx.send(('<Left>'):rep(math.abs(diff)))
+        elseif diff < 0 then
+          ctx.send(('<Right>'):rep(math.abs(diff)))
         end
       else
         -- Logic for separated pair.
@@ -60,10 +62,24 @@ local function decrease_pair_spacing(option)
     ---@param ctx minx.ActionContext
     action = function(ctx)
       ctx.send('<BS>')
-      local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat) or helper.search.get_pair_open(option.open_pat, option.close_pat)
-      if pair_pos then
-        local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-        sync_space((get_space({ row, col + 1 })), pair_pos)
+
+      local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]])
+      local after_match = helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat)
+      if before_match and after_match then
+        -- Logic for pairs & white only.
+        local diff = #before_match - #after_match
+        if diff > 0 then
+          ctx.send(('<BS>'):rep(math.abs(diff)))
+        elseif diff < 0 then
+          ctx.send(('<Del>'):rep(math.abs(diff)))
+        end
+      else
+        -- Logic for separated pair.
+        local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat) or helper.search.get_pair_open(option.open_pat, option.close_pat)
+        if pair_pos then
+          local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+          sync_space((get_space({ row, col + 1 })), pair_pos)
+        end
       end
     end,
     ---@param ctx minx.Context

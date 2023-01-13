@@ -41,4 +41,14 @@ function search.get_pair_close(open, close)
   end
 end
 
+---Return most nearest next pattern position.
+---@param pattern string
+---@return { [1]: integer, [2]: integer }?
+function search.get_next(pattern)
+  local pos = vim.fn.searchpos(pattern, 'Wnzc')
+  if pos[1] ~= 0 then
+    return pos
+  end
+end
+
 return search
