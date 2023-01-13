@@ -16,6 +16,10 @@ end
 ---Special handling for strings.
 ---@return boolean
 local function wrap_string(ctx)
+  if helper.syntax.in_string_or_comment() then
+    return  false
+  end
+
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local _, _, e = RegExp.extract_at(vim.api.nvim_get_current_line(), [[\s*]], col + 1)
   if not e then
@@ -82,7 +86,7 @@ local function fast_wrap(option)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
-      return not helper.syntax.in_string_or_comment() and ctx.after():sub(1, 1) == option.close
+      return ctx.after():sub(1, 1) == option.close
     end,
   }
 end
