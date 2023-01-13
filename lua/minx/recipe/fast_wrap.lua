@@ -17,7 +17,7 @@ end
 ---@return boolean
 local function wrap_string(ctx)
   if helper.syntax.in_string_or_comment() then
-    return  false
+    return false
   end
 
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))

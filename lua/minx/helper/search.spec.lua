@@ -3,7 +3,6 @@ local spec = require('minx.spec')
 local Keymap = require('minx.kit.Vim.Keymap')
 
 describe('minx.helper.search', function()
-
   local function assert_check(case, check, option)
     local ok, err = pcall(function()
       spec.setup(case, option)
