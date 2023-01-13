@@ -21,9 +21,8 @@ local function leave_symbol(option)
           return true
         end
       end
-    end
+    end,
   }
 end
 
 return leave_symbol
-

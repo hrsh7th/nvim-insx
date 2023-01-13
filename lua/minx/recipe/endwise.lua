@@ -83,7 +83,7 @@ return {
         enabled = function(ctx)
           return helper.regex.match(ctx.before(), helper.search.Tag.Open) ~= nil and helper.regex.match(ctx.after(), helper.search.Tag.Close) == nil
         end,
-      }
-    }
+      },
+    },
   },
 }

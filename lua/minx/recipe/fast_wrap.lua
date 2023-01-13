@@ -74,7 +74,7 @@ local function fast_wrap(option)
         else
           local pos = helper.search.get_next([[\k\+\zs]])
           if pos then
-            ctx.move(pos[1] - 1, pos[2] - 1)
+            ctx.move(pos[1], pos[2])
           end
         end
       end

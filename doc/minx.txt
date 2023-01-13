@@ -137,6 +137,13 @@ require('minx').helper.search.Tag~
 
 The enum value that reprecents the regex for HTML Tag elements.
 
+require('minx').helper.search.get_next(pattern): return~
+- pattern: string
+  - The vim regex to matche the next element.
+- return: { [1]: integer, [2]: integer }
+  - Return regex matched position of open element.
+  - The position is 0-origin utf8 byte indicies.
+
 require('minx').helper.search.get_pair_open(open, close): return~
 - open: string
   - The vim regex to matche the open element.
@@ -164,6 +171,14 @@ require('minx').helper.syntax.in_string_or_comment_at_cursor(cursor): return~
   - The position is 0-origin utf8 byte indicies.
 - return: boolean
   - Return the specified position is string or comment.
+
+require('minx').helper.indent.get_one_indent(): return~
+- return: string
+  - Return the current buffer's one indent string.
+
+require('minx').helper.indent.get_current_indent(): return~
+- return: string
+  - Return the current line's indent string.
 
 
 

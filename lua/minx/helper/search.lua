@@ -26,7 +26,7 @@ search.Tag = {
 function search.get_pair_open(open, close)
   local open_pos = get_pair(open .. [[\zs]], close, 'Wbnz')
   if open_pos[1] ~= 0 then
-    return open_pos
+    return { open_pos[1] - 1, open_pos[2] - 1 }
   end
 end
 
@@ -35,9 +35,9 @@ end
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
 function search.get_pair_close(open, close)
-  local close_pos = get_pair(open, close, 'Wnzc')
-  if close_pos[1] ~= 0 then
-    return close_pos
+  local pos = get_pair(open, close, 'Wnzc')
+  if pos[1] ~= 0 then
+    return { pos[1] - 1, pos[2] - 1 }
   end
 end
 
@@ -47,7 +47,7 @@ end
 function search.get_next(pattern)
   local pos = vim.fn.searchpos(pattern, 'Wnzc')
   if pos[1] ~= 0 then
-    return pos
+    return { pos[1] - 1, pos[2] - 1 }
   end
 end
 

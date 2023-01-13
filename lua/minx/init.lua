@@ -1,7 +1,6 @@
 local Keymap = require('minx.kit.Vim.Keymap')
 local Runner = require('minx.Runner')
 
-
 ---@param char string
 ---@return minx.Context
 local function context(char)

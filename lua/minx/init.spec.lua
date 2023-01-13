@@ -25,6 +25,5 @@ describe('minx', function()
     end)
   end)
 
-  it('should sendable expand result', function()
-  end)
+  it('should sendable expand result', function() end)
 end)

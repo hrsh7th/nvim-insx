@@ -4,16 +4,16 @@ local RegExp = require('minx.kit.Vim.RegExp')
 ---@param pos { [1]: integer, [2]: integer }
 ---@return string, integer, integer
 local function get_space(pos)
-  local text = vim.api.nvim_buf_get_lines(0, pos[1] - 1, pos[1], false)[1]
+  local text = vim.api.nvim_buf_get_lines(0, pos[1], pos[1] + 1, false)[1]
   ---@diagnostic disable-next-line: return-type-mismatch, missing-return-value
-  return RegExp.extract_at(text, [[\s*]], pos[2])
+  return RegExp.extract_at(text, [[\s*]], pos[2] + 1)
 end
 
 ---@param curr_space string
 ---@param pos { [1]: integer, [2]: integer }
 local function sync_space(curr_space, pos)
   local _, s, e = get_space(pos)
-  vim.api.nvim_buf_set_text(0, pos[1] - 1, s - 1, pos[1] - 1, e - 1, { curr_space })
+  vim.api.nvim_buf_set_text(0, pos[1], s - 1, pos[1], e - 1, { curr_space })
 end
 
 ---@class minx.recipe.pair_spacing.Option
@@ -43,8 +43,8 @@ local function increase_pair_spacing(option)
         -- Logic for separated pair.
         local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
         if pair_pos then
-          local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-          sync_space((get_space({ row, col + 1 })), pair_pos)
+          local row, col = ctx.row(), ctx.col()
+          sync_space((get_space({ row, col })), pair_pos)
         end
       end
     end,
@@ -77,8 +77,8 @@ local function decrease_pair_spacing(option)
         -- Logic for separated pair.
         local pair_pos = helper.search.get_pair_close(option.open_pat, option.close_pat) or helper.search.get_pair_open(option.open_pat, option.close_pat)
         if pair_pos then
-          local row, col = unpack(vim.api.nvim_win_get_cursor(0))
-          sync_space((get_space({ row, col + 1 })), pair_pos)
+          local row, col = ctx.row(), ctx.col()
+          sync_space((get_space({ row, col })), pair_pos)
         end
       end
     end,
