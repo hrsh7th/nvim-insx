@@ -12,7 +12,7 @@ local function delete_pair(option)
     action = function(ctx)
       local row, col = ctx.row(), ctx.col()
       local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
-      if close_pos then
+      if close_pos and close_pos[1] == row then
         ctx.move(close_pos[1], close_pos[2])
         local close_text = helper.regex.match(ctx.after(), [[^]] .. option.close_pat)
         ctx.send(('<Del>'):rep(vim.fn.strchars(close_text, true)))
