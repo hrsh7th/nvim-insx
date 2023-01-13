@@ -36,55 +36,87 @@ USAGE                                                               *minx-usage*
     local minx = require('minx')
     local esc = minx.helper.regex.esc
 
-    -- Basic pair-wise features.
+    -- Quotes
     for open, close in pairs({
-      ['('] = ')',
-      ['['] = ']',
-      ['{'] = '}',
+      ["'"] = "'",
+      ['"'] = '"',
+      ['`'] = '`',
     }) do
-      -- Basic auto pair feature.
+      -- Auto pair.
       minx.add(open, require('minx.recipe.auto_pair')({
         open = open,
         close = close,
       }))
 
-      -- Delete adjacent pairs.
+      -- Leave pair.
+      minx.add(close, require('minx.recipe.leave_symbol')({
+        symbol_pat = {
+          esc(close)
+        }
+      }))
+
+      -- Delete pair.
       minx.add('<BS>', require('minx.recipe.delete_pair')({
-        open_pat = esc(open),
-        close_pat = esc(close),
-      }))
-
-      -- Increase balanced pair spaces.
-      minx.add('<Space>', require('minx.recipe.pair_spacing').increase_pair_spacing({
-        open_pat = esc(open),
-        close_pat = esc(close),
-      }))
-
-      -- Decrease balanced pair spaces.
-      minx.add('<BS>', require('minx.recipe.pair_spacing').decrease_pair_spacing({
-        open_pat = esc(open),
-        close_pat = esc(close),
-      }))
-
-      -- ADVANCED: Wrap the next token via pairs.
-      minx.add(close, require('minx.recipe.fast_wrap')({
-        close = close
-      }))
-
-      -- ADVANCED: Break pairs.
-      minx.add('<CR>', require('minx.recipe.fast_break')({
         open_pat = esc(open),
         close_pat = esc(close),
       }))
     end
 
-    -- (HTML Tag) Delete adjacent pairs.
+    -- Pairs.
+    for open, close in pairs({
+      ['('] = ')',
+      ['['] = ']',
+      ['{'] = '}',
+      ['<'] = '>',
+    }) do
+      -- Auto pair.
+      minx.add(open, require('minx.recipe.auto_pair')({
+        open = open,
+        close = close,
+      }))
+
+      -- Leave pair.
+      minx.add(close, require('minx.recipe.leave_symbol')({
+        symbol_pat = {
+          esc(')')
+        }
+      }))
+
+      -- Delete pair.
+      minx.add('<BS>', require('minx.recipe.delete_pair')({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- Increase/decrease spacing.
+      minx.add('<Space>', require('minx.recipe.pair_spacing').increase_pair_spacing({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+      minx.add('<BS>', require('minx.recipe.pair_spacing').decrease_pair_spacing({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- Break pairs: `(|)` -> `<CR>` -> `(<CR>|<CR>)`
+      minx.add('<CR>', require('minx.recipe.fast_break')({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }))
+
+      -- Wrap next token: `(|)func(...)` -> `)` -> `(func(...)|)`
+      minx.add('<C-;>', require('minx.recipe.fast_wrap')({
+        close = close
+      }))
+    end
+
+    -- Remove HTML Tag: `<div>|</div>` -> `<BS>` -> `|`
     minx.add('<BS>', require('minx.recipe.delete_pair')({
       open_pat = minx.helper.search.Tag.Open,
       close_pat = minx.helper.search.Tag.Close,
     }))
 
-    -- (HTML Tag): Break pairs.
+    -- Break HTML Tag: `<div>|</div>` -> `<BS>` -> `<div><CR>|<CR></div>`
     minx.add('<CR>', require('minx.recipe.fast_break')({
       open_pat = minx.helper.search.Tag.Open,
       close_pat = minx.helper.search.Tag.Close,
