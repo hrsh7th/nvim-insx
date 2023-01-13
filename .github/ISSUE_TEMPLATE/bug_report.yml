@@ -1,0 +1,40 @@
+name: Bug Report
+description: Report a problem
+labels: [bug]
+body:
+  - type: input
+    attributes:
+      label: "FileType"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Initial buffer"
+      description: "You must set `|` as cursor position."
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: "Input key-sequence"
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Expected buffer"
+      description: "You must set `|` as cursor position."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Actual buffer"
+      description: "You must set `|` as cursor position."
+    validations:
+      required: true
+
+  - type: textarea
+    attributes:
+      label: "Information"
