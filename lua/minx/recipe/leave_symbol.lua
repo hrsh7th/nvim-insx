@@ -7,6 +7,7 @@ local helper = require('minx.helper')
 ---@param option minx.recipe.leave_symbol.Option
 ---@return minx.RecipeSource
 local function leave_symbol(option)
+  vim.deprecate('require("minx.recipe.leave_symbol")', 'require("minx.recipe.jump_next")', '', 'nvim-minx', false)
   local symbol_pat = kit.to_array(option.symbol_pat)
   return {
     ---@param ctx minx.ActionContext

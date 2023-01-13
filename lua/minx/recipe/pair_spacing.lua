@@ -22,7 +22,7 @@ end
 
 ---@param option minx.recipe.pair_spacing.Option
 ---@return minx.RecipeSource
-local function increase_pair_spacing(option)
+local function increase(option)
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
@@ -57,7 +57,7 @@ end
 
 ---@param option minx.recipe.pair_spacing.Option
 ---@return minx.RecipeSource
-local function decrease_pair_spacing(option)
+local function decrease(option)
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
@@ -90,6 +90,14 @@ local function decrease_pair_spacing(option)
 end
 
 return {
-  increase_pair_spacing = increase_pair_spacing,
-  decrease_pair_spacing = decrease_pair_spacing,
+  increase_pair_spacing = function(...)
+    vim.deprecate('require("minx.recipe.pair_spacing").increase_pair_spacing', 'require("minx.recipe.pair_spacing").increase', '', 'nvim-minx', false)
+    return increase(...)
+  end,
+  decrease_pair_spacing = function(...)
+    vim.deprecate('require("minx.recipe.pair_spacing").decrease_pair_spacing', 'require("minx.recipe.pair_spacing").decrease', '', 'nvim-minx', false)
+    return decrease(...)
+  end,
+  increase = increase,
+  decrease = decrease,
 }

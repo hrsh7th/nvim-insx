@@ -2,11 +2,11 @@ local minx = require('minx')
 local spec = require('minx.spec')
 
 describe('minx.recipe.pair_spacing', function()
-  describe('increase_pair_spacing', function()
+  describe('increase', function()
     it('should work', function()
       minx.add(
         ' ',
-        require('minx.recipe.pair_spacing').increase_pair_spacing({
+        require('minx.recipe.pair_spacing').increase({
           open_pat = minx.helper.regex.esc('('),
           close_pat = minx.helper.regex.esc(')'),
         })
@@ -19,11 +19,11 @@ describe('minx.recipe.pair_spacing', function()
       spec.assert('(|foo )', ' ', '( |foo )')
     end)
   end)
-  describe('decrease_pair_spacing', function()
+  describe('decrease', function()
     it('should work', function()
       minx.add(
         '<BS>',
-        require('minx.recipe.pair_spacing').decrease_pair_spacing({
+        require('minx.recipe.pair_spacing').decrease({
           open_pat = minx.helper.regex.esc('('),
           close_pat = minx.helper.regex.esc(')'),
         })

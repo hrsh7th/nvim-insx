@@ -7,6 +7,7 @@ local function context(char)
   return {
     filetype = vim.api.nvim_buf_get_option(0, 'filetype'),
     char = char,
+    data = {},
     row = function()
       return vim.api.nvim_win_get_cursor(0)[1] - 1
     end,
@@ -45,6 +46,7 @@ minx.helper = require('minx.helper')
 ---@class minx.Context
 ---@field public filetype string
 ---@field public char string
+---@field public data table
 ---@field public row fun(): integer 0-origin index
 ---@field public col fun(): integer 0-origin utf8 byte index
 ---@field public text fun(): string

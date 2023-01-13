@@ -40,10 +40,10 @@ do
       close = close,
     }))
 
-    -- Leave pair.
-    minx.add(close, require('minx.recipe.leave_symbol')({
-      symbol_pat = {
-        esc(close)
+    -- Jump next.
+    minx.add(close, require('minx.recipe.jump_next')({
+      jump_pat = {
+        [[\%#]] .. esc(close) .. [[\zs]]
       }
     }))
 
@@ -67,10 +67,10 @@ do
       close = close,
     }))
 
-    -- Leave pair.
-    minx.add(close, require('minx.recipe.leave_symbol')({
-      symbol_pat = {
-        esc(close)
+    -- Jump next.
+    minx.add(close, require('minx.recipe.jump_next')({
+      jump_pat = {
+        [[\%#]] .. esc(close) .. [[\zs]]
       }
     }))
 
@@ -81,11 +81,11 @@ do
     }))
 
     -- Increase/decrease spacing.
-    minx.add('<Space>', require('minx.recipe.pair_spacing').increase_pair_spacing({
+    minx.add('<Space>', require('minx.recipe.pair_spacing').increase({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
-    minx.add('<BS>', require('minx.recipe.pair_spacing').decrease_pair_spacing({
+    minx.add('<BS>', require('minx.recipe.pair_spacing').decrease({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
@@ -118,4 +118,6 @@ end
 
 ### Status
 
-early development.
+development stage.
+
+bug report & feature request are welcome.
