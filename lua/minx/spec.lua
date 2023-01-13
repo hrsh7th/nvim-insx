@@ -24,6 +24,9 @@ function spec.setup(lines_, option)
   vim.cmd([[ set noswapfile ]])
   vim.cmd([[ set syntax=on ]])
   vim.cmd([[ set virtualedit=onemore ]])
+  vim.cmd([[ set shiftwidth=2 ]])
+  vim.cmd([[ set tabstop=2 ]])
+  vim.cmd([[ set expandtab ]])
   vim.cmd([[ syntax on ]])
   if option and option.filetype then
     vim.api.nvim_buf_set_option(0, 'filetype', option.filetype)
@@ -38,8 +41,9 @@ end
 ---@param prev_lines_ string|string[]
 ---@param char string
 ---@param next_lines_ string|string[]
-function spec.assert(prev_lines_, char, next_lines_)
-  spec.setup(prev_lines_)
+---@param option? { filetype?: string }
+function spec.assert(prev_lines_, char, next_lines_, option)
+  spec.setup(prev_lines_, option)
   local ok, err = pcall(function()
     Keymap.spec(function()
       Keymap.send('i'):await()

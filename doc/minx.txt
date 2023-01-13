@@ -118,6 +118,14 @@ require('minx').helper.indent.get_current_indent(): return~
 - `return`: string
   - Return the current line's indent string.
 
+require('minx').helper.indent.adjust(f, t): return~
+- `f`: string
+  - curr indentation string.
+- `t`: string
+  - next indentation string.
+- `return`: string
+  - Return the key-sequence to modify the indentation `f` to `t` .
+
 
 
 ==============================================================================

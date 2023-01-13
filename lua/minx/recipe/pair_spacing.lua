@@ -61,7 +61,7 @@ local function decrease(option)
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
-      ctx.send('<BS>')
+      ctx.send('<Left><Del>')
 
       local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]])
       local after_match = helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat)
@@ -69,7 +69,7 @@ local function decrease(option)
         -- Logic for pairs & white only.
         local diff = #before_match - #after_match
         if diff > 0 then
-          ctx.send(('<BS>'):rep(math.abs(diff)))
+          ctx.send(('<Left><Del>'):rep(math.abs(diff)))
         elseif diff < 0 then
           ctx.send(('<Del>'):rep(math.abs(diff)))
         end
