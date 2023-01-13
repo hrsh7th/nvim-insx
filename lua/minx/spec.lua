@@ -18,13 +18,18 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
-function spec.setup(lines_)
+---@param option? { filetype?: string }
+function spec.setup(lines_, option)
   vim.cmd.enew({ bang = true })
   vim.cmd([[ set noswapfile ]])
   vim.cmd([[ set syntax=on ]])
   vim.cmd([[ set virtualedit=onemore ]])
   vim.cmd([[ syntax on ]])
-  vim.api.nvim_buf_set_option(0, 'filetype', 'lua')
+  if option and option.filetype then
+    vim.api.nvim_buf_set_option(0, 'filetype', option.filetype)
+  else
+    vim.api.nvim_buf_set_option(0, 'filetype', 'lua')
+  end
   local lines, cursor = parse(lines_)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
   vim.api.nvim_win_set_cursor(0, cursor)

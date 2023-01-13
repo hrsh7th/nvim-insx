@@ -10,7 +10,16 @@ describe('minx.recipe.delete_pair', function()
         close_pat = minx.helper.regex.esc(')'),
       })
     )
+    minx.add(
+      '<BS>',
+      require('minx.recipe.delete_pair')({
+        open_pat = minx.helper.regex.esc('"'),
+        close_pat = minx.helper.regex.esc('"'),
+      })
+    )
     spec.assert('(|)', '<BS>', '|')
     spec.assert('(|foo)', '<BS>', '|foo')
+    spec.assert('"|"', '<BS>', '|')
+    spec.assert('"|foo"', '<BS>', '|foo')
   end)
 end)

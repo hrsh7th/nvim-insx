@@ -24,7 +24,7 @@ search.Tag = {
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
 function search.get_pair_open(open, close)
-  local open_pos = get_pair(open .. [[\zs]], close, 'Wbnz')
+  local open_pos = get_pair(open .. [[\zs]], close, 'Wbncz')
   if open_pos[1] ~= 0 then
     return { open_pos[1] - 1, open_pos[2] - 1 }
   end
@@ -35,6 +35,11 @@ end
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
 function search.get_pair_close(open, close)
+  if open == close then
+    -- hack for string search... add test-case if met the problem.
+    return search.get_next([[\\\@<!]] .. open)
+  end
+
   local pos = get_pair(open, close, 'Wnzc')
   if pos[1] ~= 0 then
     return { pos[1] - 1, pos[2] - 1 }

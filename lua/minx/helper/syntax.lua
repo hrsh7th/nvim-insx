@@ -6,7 +6,6 @@ local syntax = {}
 function syntax.in_string_or_comment()
   local cursor = vim.api.nvim_win_get_cursor(0)
   cursor[1] = cursor[1] - 1
-  cursor[2] = cursor[2]
   return syntax.in_string_or_comment_at_pos({ cursor[1], cursor[2] - 1 }) and syntax.in_string_or_comment_at_pos(cursor)
 end
 
