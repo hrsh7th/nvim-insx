@@ -1,12 +1,12 @@
+local kit = require('minx.kit')
 local helper = require('minx.helper')
 local RegExp = require('minx.kit.Vim.RegExp')
 
----@param option minx.recipe.fast_wrap.Option
+---@param pairwise_pat string[]
 ---@return boolean
-local function is_pairwise(option)
-  for _, pattern in ipairs(option.pairwise_patterns) do
-    local pos = vim.fn.searchpos([=[\%#\s*]=] .. pattern, 'Wznc')
-    if pos[1] ~= 0 then
+local function is_pairwise(pairwise_pat)
+  for _, pat in ipairs(pairwise_pat) do
+    if helper.search.get_next([=[\%#\s*]=] .. pat) then
       return true
     end
   end
@@ -56,28 +56,39 @@ end
 
 ---@class minx.recipe.fast_wrap.Option
 ---@field public close string
----@field public pairwise_patterns? string[]
+---@field public pairwise_pat? string|string[]
+---@field public next_pat? string[]
 
 ---@param option minx.recipe.fast_wrap.Option
 ---@return minx.RecipeSource
 local function fast_wrap(option)
-  option = option or {}
-  option.pairwise_patterns = option.pairwise_patterns or {
+  local pairwise_pat = kit.to_array(option and option.pairwise_pat or {
     helper.search.Tag.Open,
     [=[[^[:blank:][[({]*\s*[[({]]=], -- function() or setup {} or Vec![]
     [=[\%(\<function\>\|\<func\>\|\<fn\>\)]=],
     [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\)]=],
-  }
+  })
+  local next_pat = kit.to_array(option and option.next_pat or {
+    [=[\k\+\%(\.\k\+\)\?\zs]=],
+  })
   return {
     ---@param ctx minx.ActionContext
     action = function(ctx)
       ctx.send('<Del>')
       if not wrap_string(ctx) then
-        if is_pairwise(option) then
+        if is_pairwise(pairwise_pat) then
           ctx.send({ '<C-o>', { keys = '%', remap = true }, '<Right>' })
         else
-          local pos = helper.search.get_next([[\k\+\zs]])
-          if pos then
+          local pos = { math.huge, math.huge }
+          for _, pat in ipairs(next_pat) do
+            local new_pos = helper.search.get_next(pat)
+            if new_pos then
+              if new_pos[1] < pos[1] or (new_pos[1] == pos[1] and new_pos[2] < pos[2]) then
+                pos = new_pos
+              end
+            end
+          end
+          if pos[1] ~= math.huge then
             ctx.move(pos[1], pos[2])
           end
         end

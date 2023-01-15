@@ -10,16 +10,20 @@ describe('minx.recipe.fast_break', function()
         close_pat = minx.helper.regex.esc(')'),
       })
     )
-    spec.assert({
-      'foo(',
-      '  bar(|baz)',
-      ')'
-    }, '<CR>', {
-      'foo(',
-      '  bar(',
-      '    |baz',
-      '  )',
-      ')'
-    })
+    spec.assert(
+      {
+        'foo(',
+        '  bar(|baz)',
+        ')',
+      },
+      '<CR>',
+      {
+        'foo(',
+        '  bar(',
+        '    |baz',
+        '  )',
+        ')',
+      }
+    )
   end)
 end)

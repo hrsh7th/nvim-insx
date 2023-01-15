@@ -64,7 +64,11 @@ function kit.merge(tbl1, tbl2)
     end
     for k, v in pairs(tbl1) do
       if tbl2[k] == nil then
-        new_tbl[k] = v ~= vim.NIL and v or nil
+        if v ~= vim.NIL then
+          new_tbl[k] = v
+        else
+          new_tbl[k] = nil
+        end
       end
     end
     return new_tbl

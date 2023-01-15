@@ -23,9 +23,18 @@ local function fast_break(option)
     end,
     ---@param ctx minx.Context
     enabled = function(ctx)
+      if helper.syntax.in_string_or_comment() then
+        return false
+      end
       local before = helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]])
+      if not before then
+        return false
+      end
       local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
-      return not helper.syntax.in_string_or_comment() and before and close_pos and close_pos[1] == ctx.row()
+      if close_pos and close_pos[1] ~= ctx.row() then
+        return false
+      end
+      return true
     end,
   }
 end

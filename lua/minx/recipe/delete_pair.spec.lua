@@ -24,15 +24,19 @@ describe('minx.recipe.delete_pair', function()
 
     -- Does not delete multiline pair.
     assert.error(function()
-      spec.assert({
-        '(|',
-        '  foo',
-        ')'
-      }, '<BS>', {
-        '|',
-        '  foo',
-        '',
-      })
+      spec.assert(
+        {
+          '(|',
+          '  foo',
+          ')',
+        },
+        '<BS>',
+        {
+          '|',
+          '  foo',
+          '',
+        }
+      )
     end)
   end)
 end)

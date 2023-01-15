@@ -170,6 +170,11 @@ require('minx.recipe.auto_pair'): fun(option): minx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
+  - `option.ignore_pat`: string
+    - The pattern to deciding auto-pair should enabled or not.
+    - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
+      - `|` + `'` = `'|'`
+      - `\|` + `'` = `\'|`
   >lua
   require('minx').add('(', require('minx.recipe.auto_pair')({
     open = '(',
@@ -230,15 +235,21 @@ require('minx.recipe.fast_wrap'): fun(option): minx.RecipeSource~
   This recipe provides the ability to wrap the next token on the fly.
   NOTE: highly recommend using this recipe along with vim-matchup.
 
-  - `option.open_pat`: string
-    - The open token of balanced pair like `(` .
-  - `option.close_pat`: string
-    - The close token of balanced pair like `)` .
+    1. Check the next token is `string`.
+    2. Check the next token is matched to the pairwise_pat.
+    3. Jump nearest next_pat token.
+
+  - `option.close`: string
+    - The close token like `)` .
+  - `option.pairwise_pat`: string|string[]
+    - The pattern array for deciding to use `%` or not.
+  - `option.next_pat`: string|string[]
+    - The pattern array for fallback.
+
   >lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<C-;>', require('minx.recipe.fast_wrap')({
-    open_pat = esc('('),
-    close_pat = esc(')')
+    close = ')'
   }))
 <
   Example: >lua

@@ -8,8 +8,10 @@ describe('minx.recipe.auto_pair', function()
       require('minx.recipe.auto_pair')({
         open = '(',
         close = ')',
+        ignore_pat = [[\\\%#]],
       })
     )
     spec.assert('|', '(', '(|)')
+    spec.assert('\\|', '(', '\\(|')
   end)
 end)
