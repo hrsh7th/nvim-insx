@@ -1,6 +1,6 @@
 *nvim-minx* *minx*
 
-Manage insert mode keymapping.
+Manage insert mode key mappings easily and conveniently.
 
 
 
@@ -11,6 +11,7 @@ INTRO                                                               |minx-intro|
 USAGE                                                               |minx-usage|
 FUNCTION                                                         |minx-function|
 TYPINGS                                                           |minx-typings|
+CUSTOM RECIPE                                               |minx-custom-recipe|
 BUILT-IN MODULE                                           |minx-built_in-module|
 
 
@@ -18,7 +19,8 @@ BUILT-IN MODULE                                           |minx-built_in-module|
 ==============================================================================
 INTRO                                                               *minx-intro*
 
-This plugin provides general pair-wise functionality.
+This plugin makes it easy to define complex mappings in insert mode.
+It also provides general pairwise functionality by default.
 
 The concepts are
 
@@ -29,6 +31,7 @@ The concepts are
 
 The basic usage is introduced on README.md.
 Checkout https://github.com/hrsh7th/nvim-minx
+
 
 
 ==============================================================================
@@ -153,6 +156,40 @@ TYPINGS                                                           *minx-typings*
 
 
 ==============================================================================
+CUSTOM RECIPE                                               *minx-custom-recipe*
+
+The recipe is typed as `minx.RecipeSource`.
+I recommend to define as just `function` that returns `minx.RecipeSource` like this.
+
+>lua
+  -- The example recipe (it is not useful).
+  local function your_recipe(option)
+    return {
+      ---@param ctx minx.ActionContext
+      action = function(ctx)
+        local row, col = ctx.row(), ctx.col()
+        -- you can feed key-sequence via `ctx.send(...)`
+        ctx.send('<CR>') -- The `ctx.send` is look like a `synchronous` function.
+
+        -- If the line after `<CR>` was sent is indented, remove it.
+        if ctx.text()match('^%s+') then
+          ctx.send('<C-w>')
+        end
+
+        ctx.move(row, col)
+      end,
+
+      ---@param ctx minx.Context
+      enabled = function(ctx)
+        return ctx.after() == ''
+      end
+    }
+  end
+<
+
+
+
+==============================================================================
 BUILT-IN MODULE                                           *minx-built_in-module*
 
 The built-in modules provides the pre-defined recipe.
@@ -175,7 +212,7 @@ require('minx.recipe.auto_pair'): fun(option): minx.RecipeSource~
     - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
       - `|` + `'` = `'|'`
       - `\|` + `'` = `\'|`
-  >lua
+>lua
   require('minx').add('(', require('minx.recipe.auto_pair')({
     open = '(',
     close = ')'
@@ -194,7 +231,7 @@ require('minx.recipe.delete_pair'): fun(option): minx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<BS>', require('minx.recipe.auto_pair')({
     open_pat = esc('('),
@@ -214,7 +251,7 @@ require('minx.recipe.fast_break'): fun(option): minx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<CR>', require('minx.recipe.fast_break')({
     open_pat = esc('('),
@@ -245,8 +282,7 @@ require('minx.recipe.fast_wrap'): fun(option): minx.RecipeSource~
     - The pattern array for deciding to use `%` or not.
   - `option.next_pat`: string|string[]
     - The pattern array for fallback.
-
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<C-;>', require('minx.recipe.fast_wrap')({
     close = ')'
@@ -264,7 +300,7 @@ require('minx.recipe.jump_next'): fun(option): minx.RecipeSource~
   - `option.jump_pat`: string|string[]
     - The jump patterns of string or string array.
     - You can use this recipe to achieve `exit pair feature` .
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add(')', require('minx.recipe.jump_next')({
     jump_pat = {
@@ -284,7 +320,7 @@ require('minx.recipe.pair_spacing').increase: fun(option): minx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<Space>', require('minx.recipe.pair_spacing').increase({
     open_pat = esc('('),
@@ -305,7 +341,7 @@ require('minx.recipe.pair_spacing').decrease: fun(option): minx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  >lua
+>lua
   local esc = require('minx').helper.regex.esc
   require('minx').add('<BS>', require('minx.recipe.pair_spacing').decrease({
     open_pat = esc('('),
