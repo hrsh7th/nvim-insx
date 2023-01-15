@@ -38,6 +38,7 @@ do
     minx.add(open, require('minx.recipe.auto_pair')({
       open = open,
       close = close,
+      ignore_pat = [[\\\%#]],
     }))
 
     -- Jump next.
