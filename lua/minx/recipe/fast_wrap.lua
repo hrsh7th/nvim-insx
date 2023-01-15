@@ -69,7 +69,7 @@ local function fast_wrap(option)
     [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\)]=],
   })
   local next_pat = kit.to_array(option and option.next_pat or {
-    [=[\k\+\%(\.\k\+\)\?\zs]=],
+    [=[\k\+\%(\.\k\+\)*\zs]=],
   })
   return {
     ---@param ctx minx.ActionContext
