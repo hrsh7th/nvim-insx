@@ -1,6 +1,6 @@
 # nvim-insx
 
-Extensible insert-mode key mapping manager.
+Flexible insert-mode key mapping manager.
 
 <video src="https://user-images.githubusercontent.com/629908/212733495-f8e5486c-215c-4c01-b53c-b720b9779c3f.mov" width="100%"></video>
 
