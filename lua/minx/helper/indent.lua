@@ -16,11 +16,13 @@ function indent.get_current_indent()
 end
 
 ---Return key sequence to ajudst indentation between from and to.
-function indent.ajudst_keys(f, t)
+---@param param { current: string, expected: string }
+---@return string
+function indent.make_ajudst_keys(param)
   local one_indent = indent.get_one_indent()
-  local f_count = #f:gsub(vim.pesc(one_indent), '\t')
-  local t_count = #t:gsub(vim.pesc(one_indent), '\t')
-  local delta = t_count - f_count
+  local c_count = #param.current:gsub(vim.pesc(one_indent), '\t')
+  local e_count = #param.expected:gsub(vim.pesc(one_indent), '\t')
+  local delta = e_count - c_count
   if delta > 0 then
     return one_indent:rep(delta)
   elseif delta < 0 then
