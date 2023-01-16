@@ -31,7 +31,7 @@ local function fast_break(option)
         return false
       end
       local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
-      if close_pos and close_pos[1] ~= ctx.row() then
+      if not close_pos or close_pos[1] ~= ctx.row() then
         return false
       end
       return true
