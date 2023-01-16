@@ -1,6 +1,6 @@
-# nvim-minx
+# nvim-insx
 
-Manage insert mode mapping.
+Extensible insert-mode key mapping manager.
 
 <video src="https://user-images.githubusercontent.com/629908/211611400-4912f939-386c-4ec4-b63d-f79aa543e4e1.mov" width="100%"></video>
 
@@ -21,12 +21,12 @@ You should define mapping by yourself like this.
 
 ```lua
 do
-  local minx = require('minx')
-  local esc = minx.helper.regex.esc
+  local insx = require('insx')
+  local esc = insx.helper.regex.esc
 
   -- Endwise (experimental).
-  local endwise = require('minx.recipe.endwise')
-  minx.add('<CR>', endwise.recipe(endwise.builtin))
+  local endwise = require('insx.recipe.endwise')
+  insx.add('<CR>', endwise.recipe(endwise.builtin))
 
   -- Quotes
   for open, close in pairs({
@@ -35,21 +35,21 @@ do
     ['`'] = '`',
   }) do
     -- Auto pair.
-    minx.add(open, require('minx.recipe.auto_pair')({
+    insx.add(open, require('insx.recipe.auto_pair')({
       open = open,
       close = close,
       ignore_pat = [[\\\%#]],
     }))
 
     -- Jump next.
-    minx.add(close, require('minx.recipe.jump_next')({
+    insx.add(close, require('insx.recipe.jump_next')({
       jump_pat = {
         [[\%#]] .. esc(close) .. [[\zs]]
       }
     }))
 
     -- Delete pair.
-    minx.add('<BS>', require('minx.recipe.delete_pair')({
+    insx.add('<BS>', require('insx.recipe.delete_pair')({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
@@ -63,56 +63,56 @@ do
     ['<'] = '>',
   }) do
     -- Auto pair.
-    minx.add(open, require('minx.recipe.auto_pair')({
+    insx.add(open, require('insx.recipe.auto_pair')({
       open = open,
       close = close,
     }))
 
     -- Jump next.
-    minx.add(close, require('minx.recipe.jump_next')({
+    insx.add(close, require('insx.recipe.jump_next')({
       jump_pat = {
         [[\%#]] .. esc(close) .. [[\zs]]
       }
     }))
 
     -- Delete pair.
-    minx.add('<BS>', require('minx.recipe.delete_pair')({
+    insx.add('<BS>', require('insx.recipe.delete_pair')({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
 
     -- Increase/decrease spacing.
-    minx.add('<Space>', require('minx.recipe.pair_spacing').increase({
+    insx.add('<Space>', require('insx.recipe.pair_spacing').increase({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
-    minx.add('<BS>', require('minx.recipe.pair_spacing').decrease({
+    insx.add('<BS>', require('insx.recipe.pair_spacing').decrease({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
 
     -- Break pairs: `(|)` -> `<CR>` -> `(<CR>|<CR>)`
-    minx.add('<CR>', require('minx.recipe.fast_break')({
+    insx.add('<CR>', require('insx.recipe.fast_break')({
       open_pat = esc(open),
       close_pat = esc(close),
     }))
 
     -- Wrap next token: `(|)func(...)` -> `)` -> `(func(...)|)`
-    minx.add('<C-;>', require('minx.recipe.fast_wrap')({
+    insx.add('<C-;>', require('insx.recipe.fast_wrap')({
       close = close
     }))
   end
 
   -- Remove HTML Tag: `<div>|</div>` -> `<BS>` -> `|`
-  minx.add('<BS>', require('minx.recipe.delete_pair')({
-    open_pat = minx.helper.search.Tag.Open,
-    close_pat = minx.helper.search.Tag.Close,
+  insx.add('<BS>', require('insx.recipe.delete_pair')({
+    open_pat = insx.helper.search.Tag.Open,
+    close_pat = insx.helper.search.Tag.Close,
   }))
 
   -- Break HTML Tag: `<div>|</div>` -> `<BS>` -> `<div><CR>|<CR></div>`
-  minx.add('<CR>', require('minx.recipe.fast_break')({
-    open_pat = minx.helper.search.Tag.Open,
-    close_pat = minx.helper.search.Tag.Close,
+  insx.add('<CR>', require('insx.recipe.fast_break')({
+    open_pat = insx.helper.search.Tag.Open,
+    close_pat = insx.helper.search.Tag.Close,
   }))
 end
 ```
