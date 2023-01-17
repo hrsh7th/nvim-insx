@@ -295,7 +295,7 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     )`
     `foo(|bar, baz)` + `<CR>` = `(
       |bar,
-      baz,
+      baz
     )`
 <
 
