@@ -1,5 +1,5 @@
 local Keymap = require('insx.kit.Vim.Keymap')
-local Runner = require('insx.Runner')
+local runner = require('insx.runner')
 
 ---@param char string
 ---@return insx.Context
@@ -35,6 +35,28 @@ local function normalize(key)
 end
 
 local insx = {}
+
+---Get sorted/normalized entries for specific mapping.
+---@param recipes table<string, insx.Recipe[]>
+---@param ctx insx.Context
+---@return insx.Recipe|nil
+local function get_recipe(recipes, ctx)
+  local recipes = recipes[ctx.char] or {}
+  table.sort(recipes, function(a, b)
+    if a.priority and b.priority then
+      local diff = a.priority - b.priority
+      if diff == 0 then
+        return a.priority > b.priority
+      end
+    end
+    return a.index < b.index
+  end)
+  for _, recipe in ipairs(recipes) do
+    if recipe.enabled(ctx) then
+      return recipe
+    end
+  end
+end
 
 insx.helper = require('insx.helper')
 
@@ -79,6 +101,7 @@ function insx.add(char, recipe_source)
     vim.keymap.set('i', char, function()
       return insx.expand(char)
     end, {
+      desc = 'insx',
       expr = true,
       replace_keycodes = false,
     })
@@ -95,6 +118,14 @@ function insx.add(char, recipe_source)
   })
 end
 
+---Remove mappings.
+function insx.clear()
+  for _, keymap in ipairs(vim.api.nvim_get_keymap('i')) do
+    vim.api.nvim_del_keymap('i', keymap.lhs)
+  end
+  insx.recipes = {}
+end
+
 ---Expand key mapping as cmd mapping.
 ---@param char string
 ---@return string
@@ -102,34 +133,13 @@ function insx.expand(char)
   char = normalize(char)
 
   local ctx = context(char)
-  local r = insx.get_recipe(ctx)
+  local r = get_recipe(insx.recipes, ctx)
   if r then
     return Keymap.to_sendable(function()
-      Runner.new(ctx, r):run()
+      runner.run(ctx, r)
     end)
   end
   return Keymap.termcodes(char)
-end
-
----Get sorted/normalized entries for specific mapping.
----@param ctx insx.Context
----@return insx.Recipe|nil
-function insx.get_recipe(ctx)
-  local recipes = insx.recipes[ctx.char] or {}
-  table.sort(recipes, function(a, b)
-    if a.priority and b.priority then
-      local diff = a.priority - b.priority
-      if diff == 0 then
-        return a.priority > b.priority
-      end
-    end
-    return a.index < b.index
-  end)
-  for _, recipe in ipairs(recipes) do
-    if recipe.enabled(ctx) then
-      return recipe
-    end
-  end
 end
 
 return insx
