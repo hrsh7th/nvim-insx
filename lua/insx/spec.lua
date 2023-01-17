@@ -1,6 +1,12 @@
 local assert = require('luassert')
 local Keymap = require('insx.kit.Vim.Keymap')
 
+---@class minx.spec.Option
+---@field public filetype? string
+---@field public noexpandtab? boolean
+---@field public shiftwidth? integer
+---@field public tabstop? integer
+
 ---@param lines string|string[]
 ---@return string[], { [1]: integer, [2]: integer }
 local function parse(lines)
@@ -18,21 +24,22 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
----@param option? { filetype?: string }
+---@param option? minx.spec.Option
 function spec.setup(lines_, option)
   vim.cmd.enew({ bang = true })
+  vim.cmd([[ syntax on ]])
   vim.cmd([[ set noswapfile ]])
   vim.cmd([[ set syntax=on ]])
   vim.cmd([[ set virtualedit=onemore ]])
-  vim.cmd([[ set shiftwidth=2 ]])
-  vim.cmd([[ set tabstop=2 ]])
-  vim.cmd([[ set expandtab ]])
-  vim.cmd([[ syntax on ]])
-  if option and option.filetype then
-    vim.api.nvim_buf_set_option(0, 'filetype', option.filetype)
+  vim.api.nvim_buf_set_option(0, 'filetype', option and option.filetype or 'lua')
+  vim.cmd(([[ set shiftwidth=%s ]]):format(option and option.shiftwidth or 2))
+  vim.cmd(([[ set tabstop=%s ]]):format(option and option.tabstop or 2))
+  if option and option.noexpandtab then
+    vim.cmd([[ set noexpandtab ]])
   else
-    vim.api.nvim_buf_set_option(0, 'filetype', 'lua')
+    vim.cmd([[ set expandtab ]])
   end
+
   local lines, cursor = parse(lines_)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
   vim.api.nvim_win_set_cursor(0, cursor)
@@ -41,7 +48,7 @@ end
 ---@param prev_lines_ string|string[]
 ---@param char string
 ---@param next_lines_ string|string[]
----@param option? { filetype?: string }
+---@param option? minx.spec.Option
 function spec.assert(prev_lines_, char, next_lines_, option)
   spec.setup(prev_lines_, option)
   local ok, err = pcall(function()
