@@ -43,11 +43,8 @@ local insx = {}
 local function get_recipe(recipes, ctx)
   local recipes = recipes[ctx.char] or {}
   table.sort(recipes, function(a, b)
-    if a.priority and b.priority then
-      local diff = a.priority - b.priority
-      if diff == 0 then
-        return a.priority > b.priority
-      end
+    if a.priority ~= b.priority then
+      return a.priority > b.priority
     end
     return a.index < b.index
   end)
@@ -114,7 +111,7 @@ function insx.add(char, recipe_source)
     enabled = recipe_source.enabled or function()
       return true
     end,
-    priority = recipe_source.priority,
+    priority = recipe_source.priority or 0,
   })
 end
 
