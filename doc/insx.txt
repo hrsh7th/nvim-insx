@@ -35,7 +35,25 @@ Checkout https://github.com/hrsh7th/nvim-insx
 
 
 ==============================================================================
+USAGE                                                               *insx-usage*
+
+The nvim-insx is a general purpose insert-mode key-mapping manager.
+However, this provides standard (but advanced!) pairwise features.
+
+The most popular setup is now included as built-in.
+
+>lua
+  require('insx.preset.standard').setup()
+<
+
+Please read the help if you want to know how to customize more deeper.
+
+
+
+==============================================================================
 FUNCTION                                                         *insx-function*
+
+## Public API
 
 insx#expand(char): return~
 - `char`: string
@@ -47,14 +65,21 @@ require('insx').add(char, recipe)~
 - `char`: string
   - The character for insert-mode mapping.
 - `recipe`: insx.RecipeSource
-  - The action is invoked if enabled returns the *true*.
+  - The action is invoked if enabled returns the true.
   - The `insx.Context` and `insx.ActionContext` is described in |insx-typings|.
+
+require('insx').clear()~
+  Clear all managed mappings.
+  NOTE: If mapping was hijacked, it wouldn't cleared.
 
 require('insx').expand(char): return~
 - `char`: string
   - The character for insert-mode mapping.
 - `return`: string?
   - Return the sendable key notation. (this is applied the replace_termcodes).
+
+
+## Helper API
 
 require('insx').helper.regex.match(str, pattern): return~
 - `str`: string
@@ -129,12 +154,28 @@ require('insx').helper.indent.make_adjust_keys(param): return~
 - `return`: string
   - Return the key-sequence to modify the indentation `f` to `t` .
 
+require('insx').helper.position.gt(pos1, pos2): return~
+- `pos1`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `pos2`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `return`: boolean
+  - `pos1` < `pos2`
+
+require('insx').helper.position.gte(pos1, pos2): return~
+- `pos1`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `pos2`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `return`: boolean
+  - `pos1` <= `pos2`
+
 
 
 ==============================================================================
 TYPINGS                                                           *insx-typings*
 
->lua
+ >lua
   ---@class insx.RecipeSource
   ---@field public action fun(ctx: insx.ActionContext): nil 
   ---@field public enabled? fun(ctx: insx.Context): boolean
@@ -251,11 +292,14 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
+  - `option.split`: boolean
+    - Specify enables or not the splitjoin.vim like behavior.
 >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<CR>', require('insx.recipe.fast_break')({
     open_pat = esc('('),
     open_pat = esc(')')
+    split = true,
   }))
 <
   Example: >lua
@@ -264,6 +308,10 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     )`
     `(|"string")` + `<CR>` = `(
       |"string"
+    )`
+    `foo(|bar, baz)` + `<CR>` = `(
+      |bar,
+      baz
     )`
 <
 

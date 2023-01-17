@@ -23,32 +23,24 @@ local function convert(keys_)
   end, kit.to_array(keys_))
 end
 
----@class insx.Runner
----@field public ctx insx.Context
----@field public recipe insx.Recipe
-local Runner = {}
-
----Create step object.
----@param ctx insx.Context
----@param recipe insx.Recipe
-function Runner.new(ctx, recipe)
-  local self = setmetatable({}, { __index = Runner })
-  self.ctx = ctx
-  self.recipe = recipe
-  return self
-end
+local runner = {}
 
 ---Return bootstrap keycodes.
+---@param ctx insx.Context
+---@param recipe insx.Recipe
 ---@return string
-function Runner:run()
+function runner.run(ctx, recipe)
   Async.run(function()
     local lazyredraw = vim.o.lazyredraw
     vim.o.lazyredraw = true
-    self.recipe.action(vim.tbl_deep_extend('keep', {
+    recipe.action(vim.tbl_deep_extend('keep', {
       send = function(keys)
         Keymap.send(convert(keys)):await()
       end,
       move = function(row, col)
+        local virtualedit = vim.o.virtualedit
+        vim.o.virtualedit = 'all'
+
         local cursor = vim.api.nvim_win_get_cursor(0)
 
         -- fix row.
@@ -62,17 +54,23 @@ function Runner:run()
         end
 
         -- fix col.
-        local delta = col - cursor[2]
-        if delta > 0 then
-          Keymap.send(convert(('<Right>'):rep(delta))):await()
-        elseif delta < 0 then
-          Keymap.send(convert(('<Left>'):rep(math.abs(delta)))):await()
+        local _, _, cursor_col, cursor_off = unpack(vim.fn.getpos('.'))
+        local t = vim.api.nvim_get_current_line()
+        local s = (cursor_col < col + 1) and cursor_col - 1 or col
+        local e = (cursor_col < col + 1) and col or cursor_col - 1
+        local delta_text = t:sub(s + 1, math.min(#t, e)) .. (' '):rep(cursor_off) -- for supporting `<Tab>` character width.
+        if col > cursor[2] then
+          Keymap.send(convert(('<Right>'):rep(vim.fn.strdisplaywidth(delta_text)))):await()
+        elseif col < cursor[2] then
+          Keymap.send(convert(('<Left>'):rep(vim.fn.strdisplaywidth(delta_text)))):await()
         end
+
+        vim.o.virtualedit = virtualedit
       end,
-    }, self.ctx))
+    }, ctx))
     vim.o.lazyredraw = lazyredraw
   end)
   return ''
 end
 
-return Runner
+return runner

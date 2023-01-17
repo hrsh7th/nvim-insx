@@ -83,7 +83,7 @@ local function fast_wrap(option)
           for _, pat in ipairs(next_pat) do
             local new_pos = helper.search.get_next(pat)
             if new_pos then
-              if new_pos[1] < pos[1] or (new_pos[1] == pos[1] and new_pos[2] < pos[2]) then
+              if helper.position.gt(new_pos, pos) then
                 pos = new_pos
               end
             end
