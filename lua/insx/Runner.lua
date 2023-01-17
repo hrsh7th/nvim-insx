@@ -43,7 +43,7 @@ end
 function Runner:run()
   Async.run(function()
     local lazyredraw = vim.o.lazyredraw
-    Keymap.send(convert('<Cmd>set lazyredraw<CR>')):await()
+    vim.o.lazyredraw = true
     self.recipe.action(vim.tbl_deep_extend('keep', {
       send = function(keys)
         Keymap.send(convert(keys)):await()
@@ -70,7 +70,7 @@ function Runner:run()
         end
       end,
     }, self.ctx))
-    Keymap.send(convert(('<Cmd>set %slazyredraw<CR>'):format(lazyredraw and '' or 'no'))):await()
+    vim.o.lazyredraw = lazyredraw
   end)
   return ''
 end
