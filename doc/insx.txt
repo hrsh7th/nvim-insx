@@ -35,6 +35,22 @@ Checkout https://github.com/hrsh7th/nvim-insx
 
 
 ==============================================================================
+USAGE                                                               *insx-usage*
+
+The nvim-insx is a general purpose insert-mode key-mapping manager.
+However, this provides standard (but advanced!) pairwise features.
+
+The most popular setup is now included as built-in.
+
+>lua
+  require('insx.preset.standard').setup()
+<
+
+Please read the help if you want to know how to customize more deeper.
+
+
+
+==============================================================================
 FUNCTION                                                         *insx-function*
 
 ## Public API
