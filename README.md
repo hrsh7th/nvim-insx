@@ -33,7 +33,7 @@ The standard preset enables some of the advanced features.
 <td>
 
 ```ts
-  foo(|arg1, arg2, [1, 2, 3])
+foo(|arg1, arg2, [1, 2, 3])
 ```
 
 </td>
@@ -51,11 +51,11 @@ The standard preset enables some of the advanced features.
 <td>
 
 ```ts
-  foo(
-    arg1,
-    arg2,
-    [1, 2, 3]
-  )
+foo(
+  |arg1,
+  arg2,
+  [1, 2, 3]
+)
 ```
 
 </td>
@@ -70,7 +70,7 @@ The standard preset enables some of the advanced features.
 <td>
 
 ```ts
-  (|)foo(arg1, arg2, [1, 2, 3])
+(|)foo(arg1, arg2, [1, 2, 3])
 ```
 
 </td>
@@ -88,7 +88,7 @@ The standard preset enables some of the advanced features.
 <td>
 
 ```ts
-  (foo(arg1, arg2, [1, 2, 3]))
+(foo(arg1, arg2, [1, 2, 3])|)
 ```
 
 </td>
