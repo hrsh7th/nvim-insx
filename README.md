@@ -25,32 +25,17 @@ require('insx.preset.standard').setup()
 
 The standard preset enables some of the advanced features.
 
-1. The `<CR>` behaves like a splitjoin
-
-<table>
-<tr>
-<td>before</td>
-<td>
+#### 1. The `<CR>` behaves like a splitjoin
 
 ```ts
 foo(|arg1, arg2, [1, 2, 3])
 ```
 
-</td>
-</tr>
-<tr>
-<td>input</td>
-<td>
-
 ```
 <CR>
 ```
 
-</td>
-</tr>
-<tr>
-<td>after</td>
-<td>
+↓↓↓
 
 ```ts
 foo(
@@ -60,44 +45,22 @@ foo(
 )
 ```
 
-</td>
-</tr>
-</table>
-
-2. The close paren behaves fast wrapping.
-
-<table>
-<tr>
-<td>before</td>
-<td>
+#### 2. The close paren behaves fast wrapping.
 
 ```ts
 (|)foo(arg1, arg2, [1, 2, 3])
 ```
 
-</td>
-</tr>
-<tr>
-<td>input</td>
-<td>
-
 ```
 )
 ````
 
-</td>
-</tr>
-<tr>
-<td>after</td>
-<td>
+↓↓↓
 
 ```ts
 (foo(arg1, arg2, [1, 2, 3])|)
 ```
 
-</td>
-</tr>
-</table>
 
 
 ### Status
