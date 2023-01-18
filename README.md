@@ -42,7 +42,9 @@ foo(|arg1, arg2, [1, 2, 3])
 <td>input</td>
 <td>
 
-`<CR>`
+```
+<CR>
+```
 
 </td>
 </tr>
@@ -79,7 +81,9 @@ foo(
 <td>input</td>
 <td>
 
-`)`
+```
+)
+````
 
 </td>
 </tr>
