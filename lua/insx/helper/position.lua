@@ -1,6 +1,5 @@
 local position = {}
 
-
 ---@param a { [1]: integer, [2]: integer }
 ---@param b { [1]: integer, [2]: integer }
 function position.gt(a, b)

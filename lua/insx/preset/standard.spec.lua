@@ -37,11 +37,10 @@ describe('insx.preset.standard', function()
       spec.assert(('%s|%s'):format(open, close), '<CR>', {
         open,
         '  |',
-        close
+        close,
       })
       -- wrap.
       spec.assert(('%s|%sconsole.log(foo, bar)'):format(open, close), '<C-]>', ('%sconsole.log(foo, bar)|%s'):format(open, close))
     end
-
   end)
 end)

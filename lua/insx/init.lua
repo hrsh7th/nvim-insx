@@ -34,14 +34,14 @@ local function normalize(key)
   return vim.fn.keytrans(Keymap.termcodes(key))
 end
 
-local insx = {}
+---@type table<string, insx.Recipe[]>
+local recipes_map = {}
 
 ---Get sorted/normalized entries for specific mapping.
----@param recipes table<string, insx.Recipe[]>
 ---@param ctx insx.Context
 ---@return insx.Recipe|nil
-local function get_recipe(recipes, ctx)
-  local recipes = recipes[ctx.char] or {}
+local function get_recipe(ctx)
+  local recipes = recipes_map[ctx.char] or {}
   table.sort(recipes, function(a, b)
     if a.priority ~= b.priority then
       return a.priority > b.priority
@@ -54,6 +54,8 @@ local function get_recipe(recipes, ctx)
     end
   end
 end
+
+local insx = {}
 
 insx.helper = require('insx.helper')
 
@@ -82,9 +84,6 @@ insx.helper = require('insx.helper')
 ---@field public enabled fun(ctx: insx.Context): boolean
 ---@field public priority integer
 
----@type table<string, insx.Recipe[]>
-insx.recipes = {}
-
 ---Add new mapping recipe for specific mapping.
 ---@param char string
 ---@param recipe_source insx.RecipeSource
@@ -92,8 +91,8 @@ function insx.add(char, recipe_source)
   char = normalize(char)
 
   -- initialize mapping.
-  if not insx.recipes[char] then
-    insx.recipes[char] = {}
+  if not recipes_map[char] then
+    recipes_map[char] = {}
 
     vim.keymap.set('i', char, function()
       return insx.expand(char)
@@ -105,22 +104,25 @@ function insx.add(char, recipe_source)
   end
 
   -- add normalized recipe.
-  table.insert(insx.recipes[char], {
-    index = #insx.recipes[char] + 1,
+  local recipe = {
+    index = #recipes_map[char] + 1,
     action = recipe_source.action,
     enabled = recipe_source.enabled or function()
       return true
     end,
     priority = recipe_source.priority or 0,
-  })
+  }
+  table.insert(recipes_map[char], recipe)
 end
 
 ---Remove mappings.
 function insx.clear()
   for _, keymap in ipairs(vim.api.nvim_get_keymap('i')) do
-    vim.api.nvim_del_keymap('i', keymap.lhs)
+    if keymap.desc == 'insx' then
+      vim.api.nvim_del_keymap('i', keymap.lhs)
+    end
   end
-  insx.recipes = {}
+  recipes_map = {}
 end
 
 ---Expand key mapping as cmd mapping.
@@ -130,7 +132,7 @@ function insx.expand(char)
   char = normalize(char)
 
   local ctx = context(char)
-  local r = get_recipe(insx.recipes, ctx)
+  local r = get_recipe(ctx)
   if r then
     return Keymap.to_sendable(function()
       runner.run(ctx, r)
