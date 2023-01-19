@@ -1,6 +1,8 @@
 local kit = require('insx.kit')
 local Cache = require('insx.kit.App.Cache')
 
+---@class insx.kit.App.Config.Schema
+
 ---@alias insx.kit.App.Config.SchemaInternal insx.kit.App.Config.Schema|{ revision: integer }
 
 ---@class insx.kit.App.Config
@@ -13,21 +15,15 @@ local Config = {}
 Config.__index = Config
 
 ---Create new config instance.
----@param default? insx.kit.App.Config.Schema
+---@param default insx.kit.App.Config.Schema
 function Config.new(default)
   local self = setmetatable({}, Config)
   self._cache = Cache.new()
-  self._default = default or {}
+  self._default = default
   self._global = {}
   self._filetype = {}
   self._buffer = {}
   return self
-end
-
----Set default configuration.
----@param default insx.kit.App.Config.Schema
-function Config:default(default)
-  self._default = default
 end
 
 ---Update global config.
