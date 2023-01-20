@@ -45,14 +45,14 @@ foo(
 )
 ```
 
-#### 2. The close paren behaves fast wrapping.
+#### 2. The `<C-]>` behaves fast wrapping.
 
 ```ts
 (|)foo(arg1, arg2, [1, 2, 3])
 ```
 
 ```
-)
+<C-]>
 ````
 
 ↓↓↓
