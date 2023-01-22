@@ -10,6 +10,12 @@ describe('insx.preset.standard', function()
       spec.assert('|', quote, ('%s|%s'):format(quote, quote))
       -- autopairs (disabled if escaped).
       spec.assert('\\|', quote, ('\\%s|'):format(quote))
+      -- autopairs (disabled in string or comment).
+      if quote == '"' then
+        spec.assert("'|'", quote, ("'%s|'"):format(quote))
+      else
+        spec.assert('"|"', quote, ('"%s|"'):format(quote))
+      end
       -- jumpout.
       spec.assert(('%s|%s'):format(quote, quote), quote, ('%s%s|'):format(quote, quote))
       -- delete.

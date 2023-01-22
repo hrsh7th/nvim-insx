@@ -1,5 +1,38 @@
+local kit = require('insx.kit')
 local Keymap = require('insx.kit.Vim.Keymap')
 local runner = require('insx.runner')
+
+---@alias insx.Enabled fun(ctx: insx.Context): boolean?
+---@alias insx.Action fun(ctx: insx.ActionContext): nil
+
+---@class insx.RecipeSource
+---@field public priority? integer
+---@field public enabled? insx.Enabled
+---@field public action insx.Action
+
+---@class insx.Recipe
+---@field public index integer
+---@field public priority integer
+---@field public enabled insx.Enabled
+---@field public action insx.Action
+
+---@class insx.Context
+---@field public filetype string
+---@field public char string
+---@field public data table
+---@field public row fun(): integer 0-origin index
+---@field public col fun(): integer 0-origin utf8 byte index
+---@field public text fun(): string
+---@field public after fun(): string
+---@field public before fun(): string
+
+---@class insx.ActionContext : insx.Context
+---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
+---@field public move fun(row: integer, col: integer): nil
+
+---@class insx.Override
+---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
+---@field public action? fun(action: insx.Action, ctx: insx.ActionContext): nil
 
 ---@param char string
 ---@return insx.Context
@@ -57,32 +90,8 @@ end
 
 local insx = {}
 
+insx.h = require('insx.helper')
 insx.helper = require('insx.helper')
-
----@class insx.RecipeSource
----@field public action fun(ctx: insx.ActionContext): nil
----@field public enabled? fun(ctx: insx.Context): boolean
----@field public priority? integer
-
----@class insx.Context
----@field public filetype string
----@field public char string
----@field public data table
----@field public row fun(): integer 0-origin index
----@field public col fun(): integer 0-origin utf8 byte index
----@field public text fun(): string
----@field public after fun(): string
----@field public before fun(): string
-
----@class insx.ActionContext : insx.Context
----@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
----@field public move fun(row: integer, col: integer): nil
-
----@class insx.Recipe
----@field public index integer
----@field public action fun(ctx: insx.ActionContext): nil
----@field public enabled fun(ctx: insx.Context): boolean
----@field public priority integer
 
 ---Add new mapping recipe for specific mapping.
 ---@param char string
@@ -139,6 +148,28 @@ function insx.expand(char)
     end)
   end
   return Keymap.termcodes(char)
+end
+
+---@param recipe insx.RecipeSource
+---@param override insx.Override
+---@return insx.RecipeSource
+function insx.with(recipe, override)
+  override = override or {}
+
+  local new_recipe = kit.merge({}, recipe)
+  if override.action then
+    new_recipe.action = function(ctx)
+      return override.action(recipe.action, ctx)
+    end
+  end
+  if override.enabled then
+    new_recipe.enabled = function(ctx)
+      return override.enabled(recipe.enabled or function()
+        return true
+      end, ctx)
+    end
+  end
+  return new_recipe
 end
 
 return insx

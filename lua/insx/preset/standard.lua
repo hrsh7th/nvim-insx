@@ -16,10 +16,14 @@ function standard.setup()
     )
     insx.add(
       quote,
-      require('insx.recipe.auto_pair')({
+      insx.with(require('insx.recipe.auto_pair')({
         open = quote,
         close = quote,
         ignore_pat = [[\\\%#]],
+      }), {
+        enabled = function(enabled, ctx)
+          return enabled(ctx) and not insx.helper.syntax.in_string_or_comment()
+        end
       })
     )
     insx.add(
