@@ -2,6 +2,7 @@ local assert = require('luassert')
 local Keymap = require('insx.kit.Vim.Keymap')
 
 ---@class minx.spec.Option
+---@field public mode? 'i' | 'c'
 ---@field public filetype? string
 ---@field public noexpandtab? boolean
 ---@field public shiftwidth? integer
@@ -24,7 +25,7 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
----@param option? minx.spec.Option
+---@param option minx.spec.Option
 function spec.setup(lines_, option)
   vim.cmd.enew({ bang = true })
   vim.cmd([[ syntax on ]])
@@ -41,8 +42,14 @@ function spec.setup(lines_, option)
   end
 
   local lines, cursor = parse(lines_)
-  vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
-  vim.api.nvim_win_set_cursor(0, cursor)
+  if option.mode == 'c' then
+    Keymap.send(':'):await()
+    vim.fn.setcmdline(lines[1], cursor[2] + 1)
+  else
+    vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
+    vim.api.nvim_win_set_cursor(0, cursor)
+    Keymap.send('i'):await()
+  end
 end
 
 ---@param prev_lines_ string|string[]
@@ -50,14 +57,20 @@ end
 ---@param next_lines_ string|string[]
 ---@param option? minx.spec.Option
 function spec.assert(prev_lines_, char, next_lines_, option)
-  spec.setup(prev_lines_, option)
+  option = option or {}
+
   local ok, err = pcall(function()
     Keymap.spec(function()
-      Keymap.send('i'):await()
+      spec.setup(prev_lines_, option)
       Keymap.send({ keys = Keymap.termcodes(char), remap = true }):await()
       local next_lines, next_cursor = parse(next_lines_)
-      assert.are.same(next_lines, vim.api.nvim_buf_get_lines(0, 0, -1, false))
-      assert.are.same(next_cursor, vim.api.nvim_win_get_cursor(0))
+      if option.mode == 'c' then
+        assert.are.same(next_lines, { vim.fn.getcmdline() })
+        assert.are.same(next_cursor, { 1, vim.fn.getcmdpos() - 1 })
+      else
+        assert.are.same(next_lines, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+        assert.are.same(next_cursor, vim.api.nvim_win_get_cursor(0))
+      end
     end)
   end)
   if not ok then
