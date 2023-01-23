@@ -17,7 +17,7 @@ local function convert(keys_, ctx)
       keys = { keys = keys, remap = false }
     end
     keys.keys = Keymap.termcodes(keys.keys)
-    if ctx.mode == 'i' then
+    if ctx.mode() == 'i' then
       keys.keys = RegExp.gsub(keys.keys, undojoin, '')
       keys.keys = RegExp.gsub(keys.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
       keys.keys = RegExp.gsub(keys.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
@@ -48,6 +48,9 @@ function runner.run(ctx, recipe)
 
         -- fix row.
         if cursor[1] ~= row then
+          if ctx.mode() == 'c' then
+            error("[insx] cursor can't move to up/down if mode is cmdline.")
+          end
           local delta = cursor[1] - row
           if delta > 0 then
             Keymap.send(convert(('<Up>'):rep(delta), ctx)):await()
