@@ -14,7 +14,7 @@ local function jump_out(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      if option.ignore_escaped and helper.regex.match(ctx.before(), [[\\$]])then
+      if option.ignore_escaped and helper.regex.match(ctx.before(), [[\\$]]) then
         return false
       end
       return helper.regex.match(ctx.after(), [[^]] .. helper.regex.esc(option.close))

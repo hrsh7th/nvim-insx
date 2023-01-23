@@ -107,23 +107,35 @@ function standard.setup_cmdline_mode()
   -- quotes
   for _, quote in ipairs({ '"', "'", '`' }) do
     -- jump_out
-    insx.add(quote, require('insx.recipe.cmdline.jump_out')({
-      close = quote,
-      ignore_escaped = true,
-    }), { mode = 'c' })
+    insx.add(
+      quote,
+      require('insx.recipe.cmdline.jump_out')({
+        close = quote,
+        ignore_escaped = true,
+      }),
+      { mode = 'c' }
+    )
 
     -- auto_pair
-    insx.add(quote, require('insx.recipe.cmdline.auto_pair')({
-      open = quote,
-      close = quote,
-      ignore_escaped = true,
-    }), { mode = 'c' })
+    insx.add(
+      quote,
+      require('insx.recipe.cmdline.auto_pair')({
+        open = quote,
+        close = quote,
+        ignore_escaped = true,
+      }),
+      { mode = 'c' }
+    )
 
     -- delete_pair
-    insx.add('<BS>', require('insx.recipe.cmdline.delete_pair')({
-      open = quote,
-      close = quote,
-    }), { mode = 'c' })
+    insx.add(
+      '<BS>',
+      require('insx.recipe.cmdline.delete_pair')({
+        open = quote,
+        close = quote,
+      }),
+      { mode = 'c' }
+    )
   end
 
   -- pairs
@@ -134,23 +146,35 @@ function standard.setup_cmdline_mode()
     ['<'] = '>',
   }) do
     -- jump_out
-    insx.add(close, require('insx.recipe.cmdline.jump_out')({
-      close = close,
-      ignore_escaped = true,
-    }), { mode = 'c' })
+    insx.add(
+      close,
+      require('insx.recipe.cmdline.jump_out')({
+        close = close,
+        ignore_escaped = true,
+      }),
+      { mode = 'c' }
+    )
 
     -- auto_pair
-    insx.add(open, require('insx.recipe.cmdline.auto_pair')({
-      open = open,
-      close = close,
-      ignore_escaped = true,
-    }), { mode = 'c' })
+    insx.add(
+      open,
+      require('insx.recipe.cmdline.auto_pair')({
+        open = open,
+        close = close,
+        ignore_escaped = true,
+      }),
+      { mode = 'c' }
+    )
 
     -- delete_pair
-    insx.add('<BS>', require('insx.recipe.cmdline.delete_pair')({
-      open = open,
-      close = close,
-    }), { mode = 'c' })
+    insx.add(
+      '<BS>',
+      require('insx.recipe.cmdline.delete_pair')({
+        open = open,
+        close = close,
+      }),
+      { mode = 'c' }
+    )
   end
 end
 
