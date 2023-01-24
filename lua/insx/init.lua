@@ -42,7 +42,6 @@ local runner = require('insx.runner')
 ---@field public fast_break? { enabled?: boolean, split?: boolean }
 ---@field public fast_wrap? { enabled?: boolean }
 
-
 ---@type table<string, table<string, insx.Recipe[]>>
 local mode_map = {}
 
