@@ -8,7 +8,7 @@ describe('insx.recipe.cmdline.auto_pair', function()
       require('insx.recipe.cmdline.auto_pair')({
         open = '(',
         close = ')',
-        ignore_escaped = true
+        ignore_escaped = true,
       }),
       { mode = 'c' }
     )
