@@ -20,6 +20,8 @@ local function delete_pair(option)
         ctx.move(row, col)
         local open_text = helper.regex.match(ctx.before(), option.open_pat .. [[$]])
         ctx.send(('<Left><Del>'):rep(vim.fn.strchars(open_text, true)))
+      elseif helper.regex.match(ctx.before(), option.open_pat .. '$') and helper.regex.match(ctx.after(), '^' .. option.close_pat) then
+        ctx.send('<BS><Del>')
       else
         ctx.send(ctx.char)
       end

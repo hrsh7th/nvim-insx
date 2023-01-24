@@ -12,6 +12,8 @@ Flexible insert-mode key mapping manager.
   - Does not aim to support to always work as expected because this plugin uses RegExp 😅
 - It is more convenient when used with vim-matchup.
   - The demo image uses with vim-matchup. 👍
+- This plugin provides cmdline pairwise features.
+  - But it's limited support. Not all public APIs provided by this plugin support cmdline mode.
 
 ### Usage
 
