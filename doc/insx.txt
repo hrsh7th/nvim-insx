@@ -1,6 +1,6 @@
 *nvim-insx* *insx*
 
-Flexible insert-mode key mapping manager.
+Flexible key mapping manager.
 
 
 
@@ -8,45 +8,47 @@ Flexible insert-mode key mapping manager.
 CONTENTS                                                         *insx-contents*
 
 INTRO                                                               |insx-intro|
-USAGE                                                               |insx-usage|
+CMDLINE SUPPORT                                           |insx-cmdline-support|
 FUNCTION                                                         |insx-function|
 TYPINGS                                                           |insx-typings|
 CUSTOM RECIPE                                               |insx-custom-recipe|
-BUILT-IN MODULE                                           |insx-built_in-module|
+BUILT-IN RECIPE                                           |insx-built_in-recipe|
 
 
 
 ==============================================================================
 INTRO                                                               *insx-intro*
 
-This plugin makes it easy to define complex mappings in insert mode.
-It also provides general pairwise functionality by default.
+This plugin makes it easy to define & manage complex mappings.
 
-The concepts are
+The concepts are...
 
 - Does not support dot-repeat
 - Aims for advanced functionality
-- Requires configuration to work
 
 
-The basic usage is introduced on README.md.
-Checkout https://github.com/hrsh7th/nvim-insx
+This plugin provides default preset by built-in.
+You can define general pairwise functionality like this.
+
+>lua
+  require('insx.preset.standard').setup({
+    ...
+  })
+<
+
+The standard preset has configuration options.
+You can find it in |insx-typings| section. Checkout.
 
 
 
 ==============================================================================
-USAGE                                                               *insx-usage*
+CMDLINE-SUPPORT                                           *insx-cmdline-support*
 
-The nvim-insx is a general purpose insert-mode key-mapping manager.
-However, this provides standard (but advanced!) pairwise features.
+This plugin supports *basic* command line pairwise functionality.
 
-The most popular setup is now included as built-in.
+However, not all public APIs provided by this plugin support cmdline mode.
+Please refer to the documentation for each function.
 
->lua
-  require('insx.preset.standard').setup()
-<
-
-Please read the help if you want to know how to customize more deeper.
 
 
 ==============================================================================
@@ -59,7 +61,6 @@ insx#expand(char): return~
   - The character for insert-mode mapping (it isn't a form of keycodes).
 - `return`: string
   - Expanded keycodes.
-
 
 require('insx').add(char, recipe)~
 - `char`: string
@@ -100,7 +101,7 @@ require('insx').expand(char): return~
 
 
 
-## Helper API
+## Helper API (universal)
 
 require('insx').helper.regex.match(str, pattern): return~
 - `str`: string
@@ -116,6 +117,28 @@ require('insx').helper.regex.esc(str): return~
   - The vim regex string to escape.
 - `return`: string
   - Return string if the specified pattern is matched.
+
+
+require('insx').helper.position.gt(pos1, pos2): return~
+- `pos1`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `pos2`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `return`: boolean
+  - `pos1` < `pos2`
+
+
+require('insx').helper.position.gte(pos1, pos2): return~
+- `pos1`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `pos2`: { [1]: integer, [2]: integer }
+  - position to be compared.
+- `return`: boolean
+  - `pos1` <= `pos2`
+
+
+
+## Helper API (insert-mode only)
 
 
 require('insx').helper.search.Tag~
@@ -186,30 +209,12 @@ require('insx').helper.indent.make_adjust_keys(param): return~
   - Return the key-sequence to modify the indentation `f` to `t` .
 
 
-require('insx').helper.position.gt(pos1, pos2): return~
-- `pos1`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `pos2`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `return`: boolean
-  - `pos1` < `pos2`
-
-
-require('insx').helper.position.gte(pos1, pos2): return~
-- `pos1`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `pos2`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `return`: boolean
-  - `pos1` <= `pos2`
-
-
 
 ==============================================================================
 TYPINGS                                                           *insx-typings*
 
- >lua
-  ---@alias insx.Enabled fun(ctx: insx.Context): boolean?
+>lua
+  ---@alias insx.Enabled fun(ctx: insx.Context): any
   ---@alias insx.Action fun(ctx: insx.ActionContext): nil
 
   ---@class insx.RecipeSource
@@ -227,8 +232,10 @@ TYPINGS                                                           *insx-typings*
   ---@field public filetype string
   ---@field public char string
   ---@field public data table
+  ---@field public mode fun(): string
   ---@field public row fun(): integer 0-origin index
   ---@field public col fun(): integer 0-origin utf8 byte index
+  ---@field public off fun(): integer 0-origin utf8 byte index
   ---@field public text fun(): string
   ---@field public after fun(): string
   ---@field public before fun(): string
@@ -240,6 +247,12 @@ TYPINGS                                                           *insx-typings*
   ---@class insx.Override
   ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
   ---@field public action? fun(action: insx.Action, ctx: insx.ActionContext): nil
+
+  ---@class insx.preset.standard.Config
+  ---@field public cmdline? { enabled?: boolean }
+  ---@field public spacing? { enabled?: boolean }
+  ---@field public fast_break? { enabled?: boolean, split?: boolean }
+  ---@field public fast_wrap? { enabled?: boolean }
 <
 
 
@@ -256,7 +269,7 @@ I recommend to define as just `function` that returns `insx.RecipeSource` like t
       ---@param ctx insx.ActionContext
       action = function(ctx)
         local row, col = ctx.row(), ctx.col()
-        -- you can feed key-sequence via `ctx.send(...)`
+        -- You can feed key-sequence via `ctx.send(...)`
         ctx.send('<CR>') -- The `ctx.send` is look like a `synchronous` function.
 
         -- If the line after `<CR>` was sent is indented, remove it.
@@ -277,7 +290,7 @@ I recommend to define as just `function` that returns `insx.RecipeSource` like t
 
 
 ==============================================================================
-BUILT-IN MODULE                                           *insx-built_in-module*
+BUILT-IN RECIPE                                           *insx-built_in-recipe*
 
 The built-in modules provides the pre-defined recipe.
 
