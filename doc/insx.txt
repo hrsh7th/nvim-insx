@@ -345,7 +345,7 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
 
                                                         *insx-recipe-fast_break*
 require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
-  This recipe provides basic pair break feature.
+  This recipe provides pair break feature.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
@@ -459,6 +459,57 @@ require('insx.recipe.pair_spacing').decrease: fun(option): insx.RecipeSource~
     `( | )` + `<BS>` = `(|)`
     `(  | )` + `<BS>` = `( | )`
     `( |  )` + `<BS>` = `(|)`
+<
+
+                                                 *insx-recipe-cmdline.auto_pair*
+require('insx.recipe.cmdline.auto_pair'): fun(option): insx.RecipeSource~
+  This recipe provides the basic auto-pairs feature.
+
+  - `option.open`: string
+    - The open token of balanced pair like `(` .
+  - `option.close`: string
+    - The close token of balanced pair like `)` .
+  - `option.ignore_escaped`: boolean
+    - Specify this feature disabled if prev char is backslash.
+>lua
+  require('insx').add('(', require('insx.recipe.cmdline.auto_pair')({
+    open = '(',
+    close = ')'
+    ignore_escaped = true,
+  }), { mode = 'c' })
+<
+
+                                               *insx-recipe-cmdline.delete_pair*
+require('insx.recipe.cmdline.delete_pair'): fun(option): insx.RecipeSource~
+  This recipe provides the basic delete-pairs feature.
+
+  - `option.open`: string
+    - The open token of balanced pair like `(` .
+  - `option.close`: string
+    - The close token of balanced pair like `)` .
+>lua
+  require('insx').add('<BS>', require('insx.recipe.cmdline.delete_pair')({
+    open = '(',
+    close = ')'
+  }), { mode = 'c' })
+<
+
+
+                                                  *insx-recipe-cmdline.jump_out*
+require('insx.recipe.cmdline.jump_out'): fun(option): insx.RecipeSource~
+  This recipe provides the feature that jump out the from inner pair.
+
+  - `option.close`: string
+    - The close token of balanced pair like `)` .
+  - `option.ignore_escaped`: boolean
+    - Specify this feature disabled if prev char is backslash.
+>lua
+  require('insx').add(')', require('insx.recipe.cmdline.jump_out')({
+    close = ')'
+    ignore_escaped = true,
+  }), { mode = 'c' })
+<
+
 
 ==============================================================================
  vim:tw=78:ts=4:et:ft=help:norl:
