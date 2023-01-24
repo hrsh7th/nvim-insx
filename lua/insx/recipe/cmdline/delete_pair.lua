@@ -1,5 +1,3 @@
-local helper = require('insx.helper')
-
 ---@class insx.recipe.cmdline.delete_pair.Option
 ---@field public open string
 ---@field public close string
@@ -14,8 +12,8 @@ local function delete_pair(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      local match_open = helper.regex.match(ctx.before(), helper.regex.esc(option.open) .. [[$]])
-      local match_close = helper.regex.match(ctx.after(), helper.regex.esc(option.close) .. [[$]])
+      local match_open = ctx.before():sub(-1) == option.open
+      local match_close = ctx.after():sub(1, 1) == option.close
       return match_open and match_close
     end,
   }

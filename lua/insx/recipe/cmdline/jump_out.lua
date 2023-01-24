@@ -1,5 +1,3 @@
-local helper = require('insx.helper')
-
 ---@class insx.recipe.cmdline.jump_out.Option
 ---@field public close string
 ---@field public ignore_escaped? boolean
@@ -14,10 +12,10 @@ local function jump_out(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      if option.ignore_escaped and helper.regex.match(ctx.before(), [[\\$]]) then
+      if option.ignore_escaped and ctx.before():sub(-1) == [[\]] then
         return false
       end
-      return helper.regex.match(ctx.after(), [[^]] .. helper.regex.esc(option.close))
+      return ctx.after():sub(1, 1) == option.close
     end,
   }
 end

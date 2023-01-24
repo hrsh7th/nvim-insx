@@ -1,5 +1,3 @@
-local helper = require('insx.helper')
-
 ---@class insx.recipe.cmdline.auto_pair.Option
 ---@field public open string
 ---@field public close string
@@ -15,7 +13,7 @@ local function auto_pair(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      if option.ignore_escaped and helper.regex.match(ctx.before(), [[\\$]]) then
+      if option.ignore_escaped and ctx.before():sub(-1) == [[\]] then
         return false
       end
       return true
