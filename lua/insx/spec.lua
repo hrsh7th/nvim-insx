@@ -1,3 +1,4 @@
+local kit = require('insx.kit')
 local assert = require('luassert')
 local Keymap = require('insx.kit.Vim.Keymap')
 
@@ -8,10 +9,10 @@ local Keymap = require('insx.kit.Vim.Keymap')
 ---@field public shiftwidth? integer
 ---@field public tabstop? integer
 
----@param lines string|string[]
+---@param lines_ string|string[]
 ---@return string[], { [1]: integer, [2]: integer }
-local function parse(lines)
-  lines = type(lines) == 'table' and lines or { lines }
+local function parse(lines_)
+  local lines = kit.to_array(lines_)
   for i, line in ipairs(lines) do
     local s = line:find('|', 1, true)
     if s then
