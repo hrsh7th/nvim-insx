@@ -9,8 +9,10 @@ describe('insx.recipe.fast_wrap', function()
         close = ')',
       })
     )
+
     spec.assert('(|)foo', ')', '(foo|)')
     spec.assert('(|)"foo"', ')', '("foo"|)')
+    spec.assert('(|) "foo"', ')', '( "foo"|)')
     spec.assert('(|)[[foo]]', ')', '([[foo]]|)')
     spec.assert('(|){ "foo" }', ')', '({ "foo" }|)')
     spec.assert('(|){ "foo" }', ')', '({ "foo" }|)')

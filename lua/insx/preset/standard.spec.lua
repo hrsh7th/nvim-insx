@@ -15,9 +15,9 @@ describe('insx.preset.standard', function()
         -- autopairs (disabled in string or comment).
         if mode == 'i' then
           if quote == '"' then
-            spec.assert("'|'", quote, ("'%s|'"):format(quote), option)
+            spec.assert("local _ = '|'", quote, ("local _ = '%s|'"):format(quote), option)
           else
-            spec.assert('"|"', quote, ('"%s|"'):format(quote), option)
+            spec.assert('local _ = "|"', quote, ('local _ = "%s|"'):format(quote), option)
           end
         end
         -- jumpout.

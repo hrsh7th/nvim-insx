@@ -16,18 +16,14 @@ end
 ---Special handling for strings.
 ---@return boolean
 local function wrap_string(ctx)
-  if helper.syntax.in_string_or_comment() then
-    return false
-  end
-
   local row, col = unpack(vim.api.nvim_win_get_cursor(0))
   local _, _, e = RegExp.extract_at(vim.api.nvim_get_current_line(), [[\s*]], col + 1)
   if not e then
     return false
   end
 
-  local cursor = { row - 1, e - 1 }
-  if not helper.syntax.in_string_or_comment_at_pos(cursor) then
+  local cursor = { row - 1, e }
+  if not helper.syntax.in_string_at_pos(cursor) then
     return false
   end
 
@@ -36,7 +32,7 @@ local function wrap_string(ctx)
     local text = vim.api.nvim_buf_get_lines(0, cursor[1], cursor[1] + 1, false)[1]
     for i = cursor[2] + 1, #text do
       cursor[2] = i
-      if not helper.syntax.in_string_or_comment_at_pos(cursor) then
+      if not helper.syntax.in_string_at_pos(cursor) then
         found = true
         break
       end
@@ -48,7 +44,7 @@ local function wrap_string(ctx)
     cursor[2] = 0
   end
   if found then
-    ctx.move(cursor[1], cursor[2])
+    ctx.move(cursor[1], cursor[2] + 1)
     return true
   end
   return false

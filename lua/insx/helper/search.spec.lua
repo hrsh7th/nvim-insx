@@ -11,6 +11,9 @@ describe('insx.helper.search', function()
       end)
     end)
     if not ok then
+      if type(err) == 'string' then
+        error(err)
+      end
       ---@diagnostic disable-next-line: need-check-nil
       error(err.message, 2)
     end

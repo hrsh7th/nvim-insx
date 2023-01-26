@@ -28,18 +28,30 @@ local spec = {}
 ---@param lines_ string|string[]
 ---@param option minx.spec.Option
 function spec.setup(lines_, option)
+  local filetype = option and option.filetype or 'lua'
   vim.cmd.enew({ bang = true })
-  vim.cmd([[ syntax on ]])
   vim.cmd([[ set noswapfile ]])
-  vim.cmd([[ set syntax=on ]])
   vim.cmd([[ set virtualedit=onemore ]])
-  vim.api.nvim_buf_set_option(0, 'filetype', option and option.filetype or 'lua')
+  vim.api.nvim_buf_set_option(0, 'filetype', filetype)
   vim.cmd(([[ set shiftwidth=%s ]]):format(option and option.shiftwidth or 2))
   vim.cmd(([[ set tabstop=%s ]]):format(option and option.tabstop or 2))
   if option and option.noexpandtab then
     vim.cmd([[ set noexpandtab ]])
   else
     vim.cmd([[ set expandtab ]])
+  end
+
+  vim.o.runtimepath = vim.o.runtimepath .. ',' .. vim.fn.fnamemodify('./tmp/nvim-treesitter', ':p')
+  require('nvim-treesitter').setup()
+  require('nvim-treesitter.configs').setup({
+    highlight = {
+      enable = true,
+    },
+  })
+  if not require('nvim-treesitter.parsers').has_parser() then
+    vim.cmd(([[silent! TSInstallSync! %s]]):format(filetype))
+  else
+    vim.cmd(([[silent! TSUpdateSync %s]]):format(filetype))
   end
 
   local lines, cursor = parse(lines_)
@@ -51,6 +63,7 @@ function spec.setup(lines_, option)
     vim.api.nvim_win_set_cursor(0, cursor)
     Keymap.send('i'):await()
   end
+  vim.treesitter.get_parser(0, filetype):parse()
 end
 
 ---@param prev_lines_ string|string[]
@@ -75,6 +88,9 @@ function spec.assert(prev_lines_, char, next_lines_, option)
     end)
   end)
   if not ok then
+    if type(err) == 'string' then
+      error(err)
+    end
     ---@diagnostic disable-next-line: need-check-nil
     error(err.message, 2)
   end

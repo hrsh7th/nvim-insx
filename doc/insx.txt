@@ -183,11 +183,25 @@ require('insx').helper.syntax.in_string_or_comment(): return~
   - Return the cursor position is string or comment.
 
 
-require('insx').helper.syntax.in_string_or_comment_at_cursor(cursor): return~
+require('insx').helper.syntax.in_string_or_comment_at_pos(cursor): return~
 - `cursor`: { [1]: integer, [2]: integer }
   - The position is 0-origin utf8 byte indicies.
 - `return`: boolean
   - Return the specified position is string or comment.
+
+
+require('insx').helper.syntax.in_string_at_pos(cursor): return~
+- `cursor`: { [1]: integer, [2]: integer }
+  - The position is 0-origin utf8 byte indicies.
+- `return`: boolean
+  - Return the specified position is string.
+
+
+require('insx').helper.syntax.in_comment_at_pos(cursor): return~
+- `cursor`: { [1]: integer, [2]: integer }
+  - The position is 0-origin utf8 byte indicies.
+- `return`: boolean
+  - Return the specified position is string.
 
 
 require('insx').helper.indent.get_one_indent(): return~

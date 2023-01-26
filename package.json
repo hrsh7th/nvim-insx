@@ -4,6 +4,9 @@
     "check": "npm run test && npm run lint && npm run format",
     "test": "NODE_ENV=test vusted --output=gtest --pattern=.spec ./lua",
     "lint": "luacheck --codes ./lua",
-    "format": "stylua --config-path stylua.toml --glob 'lua/**/*.lua' -- lua"
+    "format": "stylua --config-path stylua.toml --glob 'lua/**/*.lua' -- lua",
+    "setup": "npm run setup:nvim-treesitter:clone && npm run setup:nvim-treesitter:pull",
+    "setup:nvim-treesitter:clone": "git clone https://github.com/nvim-treesitter/nvim-treesitter ./tmp/nvim-treesitter",
+    "setup:nvim-treesitter:pull": "git -C ./tmp/nvim-treesitter pull --rebase"
   }
 }

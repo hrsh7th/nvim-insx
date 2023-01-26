@@ -11,19 +11,24 @@ describe('insx.helper.syntax', function()
       end)
     end)
     if not ok then
+      if type(err) == 'string' then
+        error(err)
+      end
       ---@diagnostic disable-next-line: need-check-nil
       error(err.message, 2)
     end
   end
 
   it('should work', function()
-    assert_syntax('(|"foo")', false)
-    assert_syntax('("|foo")', true)
-    assert_syntax('("foo|")', true)
-    assert_syntax('("foo"|)', false)
-    assert_syntax('(|[[foo]])', false)
-    assert_syntax('([[|foo]])', true)
-    assert_syntax('([[foo|]])', true)
-    assert_syntax('([[foo]]|)', false)
+    assert_syntax('local _ = |"foo"', false)
+    assert_syntax('local _ = "foo"|', false)
+    assert_syntax('local _ = "|foo"', true)
+    assert_syntax('local _ = "foo|"', true)
+    assert_syntax('local _ = [[|foo]]', true)
+    assert_syntax('local _ = [[foo|]]', true)
+    assert_syntax('local _ = |[[foo]]', false)
+    assert_syntax('local _ = [[foo]]|', false)
+    assert_syntax('-- |', true)
+    assert_syntax('-- | ', true)
   end)
 end)
