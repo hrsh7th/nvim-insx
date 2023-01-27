@@ -132,7 +132,7 @@ end
 
 ---@param config insx.preset.standard.Config
 function standard.setup_cmdline_mode(config)
-  if kit.get(config, { 'cmdline', 'enabled' }, false) then
+  if not kit.get(config, { 'cmdline', 'enabled' }, false) then
     return
   end
 
