@@ -6,8 +6,8 @@ describe('insx.preset.standard', function()
     it(('should work (%s)'):format(mode), function()
       require('insx.preset.standard').setup({
         cmdline = {
-          enabled = true
-        }
+          enabled = true,
+        },
       })
 
       -- quotes.
