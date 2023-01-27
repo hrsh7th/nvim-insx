@@ -62,21 +62,6 @@ function Async.async(runner)
   return function(...)
     local args = { ... }
 
-    local running = (coroutine.running())
-    if Async.___threads___[running] then
-      Async.___threads___[running] = Async.___threads___[running] + 1
-      if Async.___threads___[running] <= 1024 then
-        return AsyncTask.new(function(resolve, reject)
-          local v = runner(unpack(args))
-          if AsyncTask.is(v) then
-            v:dispatch(resolve, reject)
-          else
-            resolve(v)
-          end
-        end)
-      end
-    end
-
     local thread = coroutine.create(runner)
     return AsyncTask.new(function(resolve, reject)
       Async.___threads___[thread] = 1

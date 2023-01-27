@@ -4,7 +4,11 @@ describe('insx.preset.standard', function()
   for _, mode in ipairs({ 'i', 'c' }) do
     local option = { mode = mode }
     it(('should work (%s)'):format(mode), function()
-      require('insx.preset.standard').setup()
+      require('insx.preset.standard').setup({
+        cmdline = {
+          enabled = true
+        }
+      })
 
       -- quotes.
       for _, quote in ipairs({ '"', "'", '`' }) do
