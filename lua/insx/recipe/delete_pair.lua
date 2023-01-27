@@ -1,12 +1,15 @@
+local kit = require('insx.kit')
 local helper = require('insx.helper')
 
 ---@class insx.recipe.delete_pair.Option
 ---@field public open_pat string
 ---@field public close_pat string
+---@field public ignore_pat? string{}
 
 ---@param option insx.recipe.delete_pair.Option
 ---@return insx.RecipeSource
 local function delete_pair(option)
+  local ignore_pat = kit.to_array(option and option.ignore_pat or {})
   return {
     ---@param ctx insx.ActionContext
     action = function(ctx)
@@ -28,6 +31,11 @@ local function delete_pair(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
+      for _, pat in ipairs(ignore_pat) do
+        if helper.search.get_next(pat) then
+          return false
+        end
+      end
       return helper.regex.match(ctx.before(), option.open_pat .. '$')
     end,
   }

@@ -15,11 +15,13 @@ describe('insx.recipe.delete_pair', function()
       require('insx.recipe.delete_pair')({
         open_pat = insx.helper.regex.esc('"'),
         close_pat = insx.helper.regex.esc('"'),
+        ignore_pat = [[\\]] .. insx.helper.regex.esc('"') .. [[\%#]]
       })
     )
     spec.assert('(|)', '<BS>', '|')
     spec.assert('(|foo)', '<BS>', '|foo')
     spec.assert('"|"', '<BS>', '|')
+    spec.assert('"\\"|"', '<BS>', '"\\|"')
     spec.assert('"|foo"', '<BS>', '|foo')
 
     -- Does not delete multiline pair.

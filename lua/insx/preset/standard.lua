@@ -48,6 +48,7 @@ function standard.setup_insert_mode(config)
       require('insx.recipe.delete_pair')({
         open_pat = esc(quote),
         close_pat = esc(quote),
+        ignore_pat = ([[\\%s\%%#]]):format(esc(quote)),
       })
     )
   end
@@ -164,6 +165,7 @@ function standard.setup_cmdline_mode(config)
       require('insx.recipe.cmdline.delete_pair')({
         open = quote,
         close = quote,
+        ignore_escaped = true,
       }),
       { mode = 'c' }
     )

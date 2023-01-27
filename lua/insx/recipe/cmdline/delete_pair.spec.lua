@@ -11,15 +11,17 @@ describe('insx.recipe.cmdline.delete_pair', function()
       }),
       { mode = 'c' }
     )
+    spec.assert('(|)', '<BS>', '|', { mode = 'c' })
     insx.add(
       '<BS>',
       require('insx.recipe.cmdline.delete_pair')({
         open = '"',
         close = '"',
+        ignore_escaped = true,
       }),
       { mode = 'c' }
     )
-    spec.assert('(|)', '<BS>', '|', { mode = 'c' })
     spec.assert('"|"', '<BS>', '|', { mode = 'c' })
+    spec.assert('\\"|"', '<BS>', '\\|"', { mode = 'c' })
   end)
 end)

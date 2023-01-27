@@ -24,6 +24,8 @@ describe('insx.preset.standard', function()
         spec.assert(('%s|%s'):format(quote, quote), quote, ('%s%s|'):format(quote, quote), option)
         -- delete.
         spec.assert(('%s|%s'):format(quote, quote), '<BS>', '|', option)
+        -- delete (disabled if escaped).
+        spec.assert(('%s\\%s|%s'):format(quote, quote, quote), '<BS>', ('%s\\|%s'):format(quote, quote), option)
       end
 
       -- pairs.

@@ -322,7 +322,7 @@ require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
   - `option.close`: string
     - The close token of balanced pair like `)` .
   - `option.ignore_pat`: string
-    - The pattern to deciding auto-pair should enabled or not.
+    - The pattern to decide the auto-pair should enabled or not.
     - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
       - `|` + `'` = `'|'`
       - `\|` + `'` = `\'|`
@@ -345,6 +345,10 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
+  - `option.ignore_pat`: string
+    - The pattern to decide the delete-pair should enabled or not.
+    - The `ignore_pat = [[\\"\%#]]` will be useful for string delete-pair.
+    - `"\"|"` + `<BS>` = `"\|"`
 >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<BS>', require('insx.recipe.auto_pair')({
@@ -501,6 +505,8 @@ require('insx.recipe.cmdline.delete_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
+  - `option.ignore_escaped`: boolean
+    - Specify this feature disabled if open token is escaped.
 >lua
   require('insx').add('<BS>', require('insx.recipe.cmdline.delete_pair')({
     open = '(',
