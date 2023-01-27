@@ -60,6 +60,7 @@ jobs:
 
       - name: Run check
         run: |
+          npm run setup
           npm run check
 
       - name: Auto commit if needed
