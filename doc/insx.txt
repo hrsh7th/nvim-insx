@@ -13,6 +13,7 @@ FUNCTION                                                         |insx-function|
 TYPINGS                                                           |insx-typings|
 CUSTOM RECIPE                                               |insx-custom-recipe|
 BUILT-IN RECIPE                                           |insx-built_in-recipe|
+TIPS                                                                 |insx-tips|
 
 
 
@@ -529,6 +530,28 @@ require('insx.recipe.cmdline.jump_out'): fun(option): insx.RecipeSource~
     ignore_escaped = true,
   }), { mode = 'c' })
 <
+
+
+==============================================================================
+TIPS                                                                 *insx-tips*
+
+How to add the undo point?~
+
+  You can enhance built-in recipe.
+
+>lua
+  require('insx').add(
+    insx.with(require('insx.recipe.fast_wrap')({
+      ...
+    }), {
+      action = function(action, ctx)
+        vim.o.undolevels = vim.o.undolevels
+        return action(ctx)
+      end
+    }
+  ))
+<
+
 
 
 ==============================================================================
