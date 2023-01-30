@@ -38,6 +38,7 @@ local function wrap_string(ctx)
       end
     end
     if found then
+      cursor[2] = cursor[2] - 1
       break
     end
     cursor[1] = cursor[1] + 1
@@ -62,19 +63,27 @@ local function fast_wrap(option)
     helper.search.Tag.Open,
     [=[[^[:blank:][[({]*\s*[[({]]=], -- function() or setup {} or Vec![]
     [=[\%(\<function\>\|\<func\>\|\<fn\>\)]=],
-    [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\)]=],
+    [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\|do\)]=],
   })
   local next_pat = kit.to_array(option and option.next_pat or {
-    [=[\k\+\%(\.\k\+\)*\zs]=],
+    [=[\k\+\%(\%(\.\|->\|::\)\k\+\)*\zs]=],
   })
   return {
     ---@param ctx insx.ActionContext
     action = function(ctx)
       ctx.send('<Del>')
       if not wrap_string(ctx) then
+        local done_in_pair = false
         if is_pairwise(pairwise_pat) then
-          ctx.send({ '<C-o>', { keys = '%', remap = true }, '<Right>' })
-        else
+          local prev_pos = { ctx.row(), ctx.col() }
+          ctx.send({ '<C-o>', { keys = '%', remap = true } })
+          ctx.send('<Ignore>')
+          if prev_pos[1] ~= ctx.row() or prev_pos[2] ~= ctx.col() then
+            ctx.send('<Right>')
+            done_in_pair = true
+          end
+        end
+        if not done_in_pair then
           local pos = { math.huge, math.huge }
           for _, pat in ipairs(next_pat) do
             local new_pos = helper.search.get_next(pat)
