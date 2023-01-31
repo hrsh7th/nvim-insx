@@ -1,11 +1,11 @@
 local insx = require('insx')
 local spec = require('insx.spec')
 
-describe('insx.recipe.cmdline.jump_out', function()
+describe('insx.recipe.universal.jump_out', function()
   it('should work', function()
     insx.add(
       '"',
-      require('insx.recipe.cmdline.jump_out')({
+      require('insx.recipe.universal.jump_out')({
         close = '"',
         ignore_escaped = true,
       }),

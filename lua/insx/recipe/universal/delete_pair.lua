@@ -1,11 +1,11 @@
 local helper = require('insx.helper')
 
----@class insx.recipe.cmdline.delete_pair.Option
+---@class insx.recipe.universal.delete_pair.Option
 ---@field public open string
 ---@field public close string
 ---@field public ignore_escaped? boolean
 
----@param option insx.recipe.cmdline.delete_pair.Option
+---@param option insx.recipe.universal.delete_pair.Option
 ---@return insx.RecipeSource
 local function delete_pair(option)
   return {

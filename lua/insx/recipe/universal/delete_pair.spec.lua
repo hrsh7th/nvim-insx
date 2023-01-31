@@ -1,11 +1,11 @@
 local insx = require('insx')
 local spec = require('insx.spec')
 
-describe('insx.recipe.cmdline.delete_pair', function()
+describe('insx.recipe.universal.delete_pair', function()
   it('should work', function()
     insx.add(
       '<BS>',
-      require('insx.recipe.cmdline.delete_pair')({
+      require('insx.recipe.universal.delete_pair')({
         open = '(',
         close = ')',
       }),
@@ -14,7 +14,7 @@ describe('insx.recipe.cmdline.delete_pair', function()
     spec.assert('(|)', '<BS>', '|', { mode = 'c' })
     insx.add(
       '<BS>',
-      require('insx.recipe.cmdline.delete_pair')({
+      require('insx.recipe.universal.delete_pair')({
         open = '"',
         close = '"',
         ignore_escaped = true,

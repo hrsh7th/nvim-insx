@@ -1,9 +1,9 @@
----@class insx.recipe.cmdline.auto_pair.Option
+---@class insx.recipe.universal.auto_pair.Option
 ---@field public open string
 ---@field public close string
 ---@field public ignore_escaped? boolean
 
----@param option insx.recipe.cmdline.auto_pair.Option
+---@param option insx.recipe.universal.auto_pair.Option
 ---@return insx.RecipeSource
 local function auto_pair(option)
   return {

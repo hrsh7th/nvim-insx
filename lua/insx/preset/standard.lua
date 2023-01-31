@@ -141,7 +141,7 @@ function standard.setup_cmdline_mode(config)
     -- jump_out
     insx.add(
       quote,
-      require('insx.recipe.cmdline.jump_out')({
+      require('insx.recipe.universal.jump_out')({
         close = quote,
         ignore_escaped = true,
       }),
@@ -151,7 +151,7 @@ function standard.setup_cmdline_mode(config)
     -- auto_pair
     insx.add(
       quote,
-      require('insx.recipe.cmdline.auto_pair')({
+      require('insx.recipe.universal.auto_pair')({
         open = quote,
         close = quote,
         ignore_escaped = true,
@@ -162,7 +162,7 @@ function standard.setup_cmdline_mode(config)
     -- delete_pair
     insx.add(
       '<BS>',
-      require('insx.recipe.cmdline.delete_pair')({
+      require('insx.recipe.universal.delete_pair')({
         open = quote,
         close = quote,
         ignore_escaped = true,
@@ -181,7 +181,7 @@ function standard.setup_cmdline_mode(config)
     -- jump_out
     insx.add(
       close,
-      require('insx.recipe.cmdline.jump_out')({
+      require('insx.recipe.universal.jump_out')({
         close = close,
         ignore_escaped = true,
       }),
@@ -191,7 +191,7 @@ function standard.setup_cmdline_mode(config)
     -- auto_pair
     insx.add(
       open,
-      require('insx.recipe.cmdline.auto_pair')({
+      require('insx.recipe.universal.auto_pair')({
         open = open,
         close = close,
         ignore_escaped = true,
@@ -202,7 +202,7 @@ function standard.setup_cmdline_mode(config)
     -- delete_pair
     insx.add(
       '<BS>',
-      require('insx.recipe.cmdline.delete_pair')({
+      require('insx.recipe.universal.delete_pair')({
         open = open,
         close = close,
       }),

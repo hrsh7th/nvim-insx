@@ -1,8 +1,8 @@
----@class insx.recipe.cmdline.jump_out.Option
+---@class insx.recipe.universal.jump_out.Option
 ---@field public close string
 ---@field public ignore_escaped? boolean
 
----@param option insx.recipe.cmdline.jump_out.Option
+---@param option insx.recipe.universal.jump_out.Option
 ---@return insx.RecipeSource
 local function jump_out(option)
   return {
