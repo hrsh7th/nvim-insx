@@ -36,7 +36,7 @@ function standard.setup_insert_mode(config)
             [[\\\%#]],
             [[\a\%#]],
           } or {
-            [[\\\%#]]
+            [[\\\%#]],
           },
         }),
         {
@@ -163,7 +163,7 @@ function standard.setup_cmdline_mode(config)
           [[\\\%#]],
           [[\a\%#]],
         } or {
-          [[\\\%#]]
+          [[\\\%#]],
         },
       }),
       { mode = 'c' }
