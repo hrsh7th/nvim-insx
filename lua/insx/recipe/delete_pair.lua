@@ -4,7 +4,7 @@ local helper = require('insx.helper')
 ---@class insx.recipe.delete_pair.Option
 ---@field public open_pat string
 ---@field public close_pat string
----@field public ignore_pat? string{}
+---@field public ignore_pat? string|string[]
 
 ---@param option insx.recipe.delete_pair.Option
 ---@return insx.RecipeSource
@@ -32,7 +32,7 @@ local function delete_pair(option)
     ---@param ctx insx.Context
     enabled = function(ctx)
       for _, pat in ipairs(ignore_pat) do
-        if helper.search.get_next(pat) then
+        if ctx.match(pat) then
           return false
         end
       end

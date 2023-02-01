@@ -254,6 +254,7 @@ TYPINGS                                                           *insx-typings*
   ---@field public text fun(): string
   ---@field public after fun(): string
   ---@field public before fun(): string
+  ---@field public match fun(pattern: string): boolean
 
   ---@class insx.ActionContext : insx.Context
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
@@ -322,11 +323,9 @@ require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string
+  - `option.ignore_pat`: string|string[]
     - The pattern to decide the auto-pair should enabled or not.
     - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
-      - `|` + `'` = `'|'`
-      - `\|` + `'` = `\'|`
 >lua
   require('insx').add('(', require('insx.recipe.auto_pair')({
     open = '(',
@@ -346,10 +345,9 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string
+  - `option.ignore_pat`: string|string[]
     - The pattern to decide the delete-pair should enabled or not.
     - The `ignore_pat = [[\\"\%#]]` will be useful for string delete-pair.
-    - `"\"|"` + `<BS>` = `"\|"`
 >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<BS>', require('insx.recipe.auto_pair')({
@@ -360,6 +358,25 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
   Example: >lua
     `(|)` + `<BS>` = `|`
     `(|foo)` + `<BS>` = `|foo`
+<
+
+                                                         *insx-recipe-jump_next*
+require('insx.recipe.jump_next'): fun(option): insx.RecipeSource~
+  This recipe provides cursor movement feature for the next pattern.
+
+  - `option.jump_pat`: string|string[]
+    - The jump patterns of string or string array.
+    - You can use this recipe to achieve `exit pair feature` .
+>lua
+  local esc = require('insx').helper.regex.esc
+  require('insx').add(')', require('insx.recipe.jump_next')({
+    jump_pat = {
+      [[\%#]] .. esc(')') .. [[\zs]]
+    }
+  }))
+<
+  Example: >lua
+    `(|)` + `)` = `()|`
 <
 
                                                         *insx-recipe-fast_break*
@@ -419,25 +436,6 @@ require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
     `(|)"string"` + `<C-;>` = `("string"|)`
 <
 
-                                                         *insx-recipe-jump_next*
-require('insx.recipe.jump_next'): fun(option): insx.RecipeSource~
-  This recipe provides cursor movement feature for the next pattern.
-
-  - `option.jump_pat`: string|string[]
-    - The jump patterns of string or string array.
-    - You can use this recipe to achieve `exit pair feature` .
->lua
-  local esc = require('insx').helper.regex.esc
-  require('insx').add(')', require('insx.recipe.jump_next')({
-    jump_pat = {
-      [[\%#]] .. esc(')') .. [[\zs]]
-    }
-  }))
-<
-  Example: >lua
-    `(|)` + `)` = `()|`
-<
-
                                              *insx-recipe-pair_spacing.increase*
 require('insx.recipe.pair_spacing').increase: fun(option): insx.RecipeSource~
   This recipe provides the feature that increase&adjust white-space between pairs.
@@ -488,13 +486,14 @@ require('insx.recipe.universal.auto_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_escaped`: boolean
-    - Specify this feature disabled if prev char is backslash.
+  - `option.ignore_pat`: string|string[]
+    - The pattern to decide the auto-pair should enabled or not.
+    - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
 >lua
   require('insx').add('(', require('insx.recipe.universal.auto_pair')({
     open = '(',
-    close = ')'
-    ignore_escaped = true,
+    close = ')',
+    ignore_pat = [[\\\%#]],
   }), { mode = 'c' })
 <
 
@@ -506,12 +505,13 @@ require('insx.recipe.universal.delete_pair'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_escaped`: boolean
-    - Specify this feature disabled if open token is escaped.
+  - `option.ignore_pat`: string|string[]
+    - The pattern to decide the delete-pair should enabled or not.
+    - The `ignore_pat = [[\\"\%#]]` will be useful for string delete-pair.
 >lua
   require('insx').add('<BS>', require('insx.recipe.universal.delete_pair')({
     open = '(',
-    close = ')'
+    close = ')',
   }), { mode = 'c' })
 <
 
@@ -522,12 +522,13 @@ require('insx.recipe.universal.jump_out'): fun(option): insx.RecipeSource~
 
   - `option.close`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_escaped`: boolean
-    - Specify this feature disabled if prev char is backslash.
+  - `option.ignore_pat`: string|string[]
+    - The pattern to decide the jump-out should enabled or not.
+    - The `ignore_pat = [[\\\%#]]` will be useful for string delete-pair.
 >lua
   require('insx').add(')', require('insx.recipe.universal.jump_out')({
-    close = ')'
-    ignore_escaped = true,
+    close = ')',
+    ignore_pat = [[\\\%#]],
   }), { mode = 'c' })
 <
 

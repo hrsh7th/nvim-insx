@@ -1,10 +1,9 @@
-local helper = require('insx.helper')
 local kit = require('insx.kit')
 
 ---@class insx.recipe.auto_pair.Option
 ---@field public open string
 ---@field public close string
----@field public ignore_pat? string{}
+---@field public ignore_pat? string|string[]
 
 ---@param option insx.recipe.auto_pair.Option
 ---@return insx.RecipeSource
@@ -15,10 +14,10 @@ local function auto_pair(option)
     action = function(ctx)
       ctx.send(option.open .. option.close .. '<Left>')
     end,
-    ---@param _ insx.Context
-    enabled = function(_)
+    ---@param ctx insx.Context
+    enabled = function(ctx)
       for _, pat in ipairs(ignore_pat) do
-        if helper.search.get_next(pat) then
+        if ctx.match(pat) then
           return false
         end
       end

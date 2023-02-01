@@ -7,7 +7,7 @@ describe('insx.recipe.universal.jump_out', function()
       '"',
       require('insx.recipe.universal.jump_out')({
         close = '"',
-        ignore_escaped = true,
+        ignore_pat = [[\\\%#]],
       }),
       { mode = 'c' }
     )

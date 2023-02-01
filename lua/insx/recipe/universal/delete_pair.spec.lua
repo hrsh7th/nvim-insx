@@ -12,12 +12,13 @@ describe('insx.recipe.universal.delete_pair', function()
       { mode = 'c' }
     )
     spec.assert('(|)', '<BS>', '|', { mode = 'c' })
+
     insx.add(
       '<BS>',
       require('insx.recipe.universal.delete_pair')({
         open = '"',
         close = '"',
-        ignore_escaped = true,
+        ignore_pat = [[\\"\%#]],
       }),
       { mode = 'c' }
     )
