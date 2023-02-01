@@ -9,7 +9,7 @@ local kit = require('insx.kit')
 local function jump_out(option)
   local ignore_pat = kit.to_array(option.ignore_pat or {})
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       ctx.send('<Right>')
     end,

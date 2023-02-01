@@ -11,7 +11,7 @@ local helper = require('insx.helper')
 local function delete_pair(option)
   local ignore_pat = kit.to_array(option and option.ignore_pat or {})
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       local row, col = ctx.row(), ctx.col()
       local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)

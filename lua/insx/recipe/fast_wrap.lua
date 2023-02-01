@@ -69,7 +69,7 @@ local function fast_wrap(option)
     [=[\k\+\%(\%(\.\|->\|::\)\k\+\)*\zs]=],
   })
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       ctx.send('<Del>')
       if not wrap_string(ctx) then

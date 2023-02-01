@@ -24,7 +24,7 @@ end
 ---@return insx.RecipeSource
 local function increase(option)
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       ctx.send(' ')
 
@@ -59,7 +59,7 @@ end
 ---@return insx.RecipeSource
 local function decrease(option)
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       ctx.send('<Left><Del>')
 

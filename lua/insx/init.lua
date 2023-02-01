@@ -1,9 +1,10 @@
 local kit = require('insx.kit')
+local Async = require('insx.kit.Async')
 local Keymap = require('insx.kit.Vim.Keymap')
-local runner = require('insx.runner')
+local context = require('insx.context')
 
 ---@alias insx.Enabled fun(ctx: insx.Context): any
----@alias insx.Action fun(ctx: insx.ActionContext): nil
+---@alias insx.Action fun(ctx: insx.Context): nil
 
 ---@class insx.RecipeSource
 ---@field public priority? integer
@@ -28,14 +29,12 @@ local runner = require('insx.runner')
 ---@field public after fun(): string
 ---@field public before fun(): string
 ---@field public match fun(pattern: string): boolean
-
----@class insx.ActionContext : insx.Context
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
 ---@field public move fun(row: integer, col: integer): nil
 
 ---@class insx.Override
 ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
----@field public action? fun(action: insx.Action, ctx: insx.ActionContext): nil
+---@field public action? fun(action: insx.Action, ctx: insx.Context): nil
 
 ---@class insx.preset.standard.Config
 ---@field public cmdline? { enabled?: boolean }
@@ -52,81 +51,29 @@ local function normalize(key)
   return vim.fn.keytrans(Keymap.termcodes(key))
 end
 
----@param char string
----@return insx.Context
-local function context(char)
-  local ctx
-  ctx = {
-    filetype = vim.api.nvim_buf_get_option(0, 'filetype'),
-    char = char,
-    data = {},
-    mode = function()
-      return vim.api.nvim_get_mode().mode
-    end,
-    row = function()
-      if ctx.mode() == 'c' then
-        return 0
-      end
-      return vim.api.nvim_win_get_cursor(0)[1] - 1
-    end,
-    col = function()
-      if ctx.mode() == 'c' then
-        return vim.fn.getcmdpos() - 1
-      end
-      return vim.api.nvim_win_get_cursor(0)[2]
-    end,
-    off = function()
-      if ctx.mode() == 'c' then
-        return 0
-      end
-      return vim.fn.getpos('.')[4]
-    end,
-    text = function()
-      if ctx.mode() == 'c' then
-        return vim.fn.getcmdline()
-      end
-      return vim.api.nvim_get_current_line()
-    end,
-    before = function()
-      return ctx.text():sub(1, ctx.col())
-    end,
-    after = function()
-      return ctx.text():sub(ctx.col() + 1)
-    end,
-    match = function(pattern)
-      if not pattern:find([[\%#]], 1, true) then
-        error('pattern must contain cursor position (\\%#)')
-      end
-
-      local _, before_e = vim.regex([[^.*\ze\\%#]]):match_str(pattern)
-      local after_s, _ = vim.regex([[\\%#\zs.*$]]):match_str(pattern)
-      local before_pat = pattern:sub(1, before_e)
-      local after_pat = pattern:sub(after_s + 1)
-      local before_match = vim.regex(before_pat .. [[$]]):match_str(ctx.before())
-      local after_match = vim.regex([[^]] .. after_pat):match_str(ctx.after())
-      return before_match and after_match
-    end,
-  }
-  return ctx
-end
-
 ---Get sorted/normalized entries for specific mapping.
+---@generic T: insx.RecipeSource
 ---@param ctx insx.Context
----@return insx.Recipe|nil
-local function get_recipe(ctx)
-  local recipe_map = mode_map[ctx.mode()] or {}
-  local recipes = recipe_map[ctx.char] or {}
+---@param recipes T[]
+---@return T[]
+local function get_recipes(ctx, recipes)
+  for i, recipe in ipairs(recipes) do
+    recipe.index = recipe.index or i
+  end
   table.sort(recipes, function(a, b)
     if a.priority ~= b.priority then
       return a.priority > b.priority
     end
     return a.index < b.index
   end)
+
+  local ok_recipes = {}
   for _, recipe in ipairs(recipes) do
     if recipe.enabled(ctx) then
-      return recipe
+      table.insert(ok_recipes, recipe)
     end
   end
+  return ok_recipes
 end
 
 local insx = {}
@@ -140,11 +87,13 @@ insx.helper = require('insx.helper')
 function insx.add(char, recipe_source, option)
   char = normalize(char)
 
-  -- initialize mapping.
+  -- ensure tables.
   local mode = option and option.mode or 'i'
   if not mode_map[mode] then
     mode_map[mode] = {}
   end
+
+  -- initialize mapping.
   if not mode_map[mode][char] then
     mode_map[mode][char] = {}
 
@@ -158,27 +107,23 @@ function insx.add(char, recipe_source, option)
   end
 
   -- add normalized recipe.
-  local recipe = {
+  table.insert(mode_map[mode][char], {
     index = #mode_map[mode][char] + 1,
     action = recipe_source.action,
     enabled = recipe_source.enabled or function()
       return true
     end,
     priority = recipe_source.priority or 0,
-  }
-  table.insert(mode_map[mode][char], recipe)
+  })
 end
 
 ---Remove mappings.
 function insx.clear()
-  for _, keymap in ipairs(vim.api.nvim_get_keymap('i')) do
-    if keymap.desc == 'insx' then
-      vim.api.nvim_del_keymap('i', keymap.lhs)
-    end
-  end
-  for _, keymap in ipairs(vim.api.nvim_get_keymap('c')) do
-    if keymap.desc == 'insx' then
-      vim.api.nvim_del_keymap('c', keymap.lhs)
+  for _, mode in ipairs({ 'i', 'c' }) do
+    for _, keymap in ipairs(vim.api.nvim_get_keymap(mode)) do
+      if keymap.desc == 'insx' then
+        vim.api.nvim_del_keymap(mode, keymap.lhs)
+      end
     end
   end
   mode_map = {}
@@ -190,14 +135,22 @@ end
 function insx.expand(char)
   char = normalize(char)
 
-  local ctx = context(char)
-  local r = get_recipe(ctx)
-  if r then
-    return Keymap.to_sendable(function()
-      runner.run(ctx, r)
+  local ctx = context.create(char)
+  local recipes = get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})--[=[@as insx.Recipe[]]=] )
+  table.insert(recipes, {
+    ---@param ctx insx.Context
+    action = function(ctx)
+      ctx.send(ctx.char)
+    end
+  })
+  return Keymap.to_sendable(function()
+    Async.run(function()
+      local lazyredraw = vim.o.lazyredraw
+      vim.o.lazyredraw = true
+      recipes[1].action(ctx)
+      vim.o.lazyredraw = lazyredraw
     end)
-  end
-  return Keymap.termcodes(char)
+  end)
 end
 
 ---@param recipe insx.RecipeSource

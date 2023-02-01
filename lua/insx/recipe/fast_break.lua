@@ -16,7 +16,7 @@ local function fast_break(option)
   }
 
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       local open_indent = helper.indent.get_current_indent()
 

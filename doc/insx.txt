@@ -230,7 +230,7 @@ TYPINGS                                                           *insx-typings*
 
 >lua
   ---@alias insx.Enabled fun(ctx: insx.Context): any
-  ---@alias insx.Action fun(ctx: insx.ActionContext): nil
+  ---@alias insx.Action fun(ctx: insx.Context): nil
 
   ---@class insx.RecipeSource
   ---@field public priority? integer
@@ -255,14 +255,12 @@ TYPINGS                                                           *insx-typings*
   ---@field public after fun(): string
   ---@field public before fun(): string
   ---@field public match fun(pattern: string): boolean
-
-  ---@class insx.ActionContext : insx.Context
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
   ---@field public move fun(row: integer, col: integer): nil
 
   ---@class insx.Override
   ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
-  ---@field public action? fun(action: insx.Action, ctx: insx.ActionContext): nil
+  ---@field public action? fun(action: insx.Action, ctx: insx.Context): nil
 
   ---@class insx.preset.standard.Config
   ---@field public cmdline? { enabled?: boolean }

@@ -9,7 +9,7 @@ local helper = require('insx.helper')
 local function jump_next(option)
   local jump_pat = kit.to_array(option.jump_pat)
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       ctx.move(ctx.data.pos[1], ctx.data.pos[2])
     end,

@@ -9,7 +9,7 @@ local helper = require('insx.helper')
 ---@return insx.RecipeSource
 local function simple(trigger_pattern, addition)
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       local row, col = ctx.row(), ctx.col()
       ctx.send('<CR>' .. addition)
@@ -29,7 +29,7 @@ end
 ---@return insx.RecipeSource
 local function endwise(option)
   return {
-    ---@param ctx insx.ActionContext
+    ---@param ctx insx.Context
     action = function(ctx)
       local definitions = option[ctx.filetype] or {}
       if definitions then
@@ -71,7 +71,7 @@ return {
     },
     ['html'] = {
       {
-        ---@param ctx insx.ActionContext
+        ---@param ctx insx.Context
         action = function(ctx)
           local name = ctx.before():match('<(%w+)')
           local row, col = ctx.row(), ctx.col()
