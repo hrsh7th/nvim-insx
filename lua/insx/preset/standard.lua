@@ -32,7 +32,12 @@ function standard.setup_insert_mode(config)
         require('insx.recipe.auto_pair')({
           open = quote,
           close = quote,
-          ignore_pat = [[\\\%#]],
+          ignore_pat = quote == [[']] and {
+            [[\\\%#]],
+            [[\a\%#]],
+          } or {
+            [[\\\%#]]
+          },
         }),
         {
           enabled = function(enabled, ctx)
@@ -143,7 +148,7 @@ function standard.setup_cmdline_mode(config)
       quote,
       require('insx.recipe.universal.jump_out')({
         close = quote,
-        ignore_escaped = true,
+        ignore_pat = [[\\\%#]],
       }),
       { mode = 'c' }
     )
@@ -154,7 +159,12 @@ function standard.setup_cmdline_mode(config)
       require('insx.recipe.universal.auto_pair')({
         open = quote,
         close = quote,
-        ignore_escaped = true,
+        ignore_pat = quote == [[']] and {
+          [[\\\%#]],
+          [[\a\%#]],
+        } or {
+          [[\\\%#]]
+        },
       }),
       { mode = 'c' }
     )
@@ -165,7 +175,7 @@ function standard.setup_cmdline_mode(config)
       require('insx.recipe.universal.delete_pair')({
         open = quote,
         close = quote,
-        ignore_escaped = true,
+        ignore_pat = [[\\]] .. quote .. [[\%#]],
       }),
       { mode = 'c' }
     )
@@ -183,7 +193,6 @@ function standard.setup_cmdline_mode(config)
       close,
       require('insx.recipe.universal.jump_out')({
         close = close,
-        ignore_escaped = true,
       }),
       { mode = 'c' }
     )
@@ -194,7 +203,6 @@ function standard.setup_cmdline_mode(config)
       require('insx.recipe.universal.auto_pair')({
         open = open,
         close = close,
-        ignore_escaped = true,
       }),
       { mode = 'c' }
     )

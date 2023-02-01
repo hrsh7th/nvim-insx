@@ -27,6 +27,7 @@ local runner = require('insx.runner')
 ---@field public text fun(): string
 ---@field public after fun(): string
 ---@field public before fun(): string
+---@field public match fun(pattern: string): boolean
 
 ---@class insx.ActionContext : insx.Context
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
@@ -91,6 +92,19 @@ local function context(char)
     end,
     after = function()
       return ctx.text():sub(ctx.col() + 1)
+    end,
+    match = function(pattern)
+      if not pattern:find([[\%#]], 1, true) then
+        error('pattern must contain cursor position (\\%#)')
+      end
+
+      local _, before_e = vim.regex([[^.*\ze\\%#]]):match_str(pattern)
+      local after_s, _ = vim.regex([[\\%#\zs.*$]]):match_str(pattern)
+      local before_pat = pattern:sub(1, before_e)
+      local after_pat = pattern:sub(after_s + 1)
+      local before_match = vim.regex(before_pat .. [[$]]):match_str(ctx.before())
+      local after_match = vim.regex([[^]] .. after_pat):match_str(ctx.after())
+      return before_match and after_match
     end,
   }
   return ctx

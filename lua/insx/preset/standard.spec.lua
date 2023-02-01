@@ -16,6 +16,10 @@ describe('insx.preset.standard', function()
         spec.assert('|', quote, ('%s|%s'):format(quote, quote), option)
         -- autopairs (disabled if escaped).
         spec.assert('\\|', quote, ('\\%s|'):format(quote), option)
+        if quote == [[']] then
+          -- autopairs (auto `'` is disabled if previous char is alphabet).
+          spec.assert('I|', quote, ("I'|"):format(quote), option)
+        end
         -- autopairs (disabled in string or comment).
         if mode == 'i' then
           if quote == '"' then

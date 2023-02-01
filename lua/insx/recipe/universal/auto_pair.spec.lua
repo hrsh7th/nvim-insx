@@ -8,7 +8,7 @@ describe('insx.recipe.universal.auto_pair', function()
       require('insx.recipe.universal.auto_pair')({
         open = '(',
         close = ')',
-        ignore_escaped = true,
+        ignore_pat = [[\\\%#]],
       }),
       { mode = 'c' }
     )
