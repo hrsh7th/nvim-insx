@@ -72,7 +72,7 @@ describe('insx.preset.standard', function()
         spec.assert('<div>|</div>', '<CR>', {
           '<div>',
           '  |',
-          '</div>'
+          '</div>',
         }, option)
       end
     end)
