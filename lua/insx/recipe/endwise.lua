@@ -73,7 +73,7 @@ return {
       {
         ---@param ctx insx.ActionContext
         action = function(ctx)
-          local name = ctx.before():match('<(%a+)')
+          local name = ctx.before():match('<(%w+)')
           local row, col = ctx.row(), ctx.col()
           ctx.send('<CR>' .. ([[</%s>]]):format(name))
           ctx.move(row, col)
