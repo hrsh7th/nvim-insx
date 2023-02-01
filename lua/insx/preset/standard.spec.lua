@@ -14,6 +14,7 @@ describe('insx.preset.standard', function()
       for _, quote in ipairs({ '"', "'", '`' }) do
         -- autopairs.
         spec.assert('|', quote, ('%s|%s'):format(quote, quote), option)
+        spec.assert(' | ', quote, (' %s|%s '):format(quote, quote), option)
         -- autopairs (disabled if escaped).
         spec.assert('\\|', quote, ('\\%s|'):format(quote), option)
         if quote == [[']] then
@@ -45,6 +46,7 @@ describe('insx.preset.standard', function()
       }) do
         -- autopairs.
         spec.assert('|', open, ('%s|%s'):format(open, close), option)
+        spec.assert(' | ', open, (' %s|%s '):format(open, close), option)
         -- jumpout.
         spec.assert(('%s|%s'):format(open, close), close, ('%s%s|'):format(open, close), option)
         -- delete.
@@ -63,6 +65,15 @@ describe('insx.preset.standard', function()
           -- wrap.
           spec.assert(('%s|%sconsole.log(foo, bar)'):format(open, close), '<C-]>', ('%sconsole.log(foo, bar)|%s'):format(open, close))
         end
+      end
+
+      -- tags.
+      if option.mode == 'i' then
+        spec.assert('<div>|</div>', '<CR>', {
+          '<div>',
+          '  |',
+          '</div>'
+        }, option)
       end
     end)
   end

@@ -133,6 +133,12 @@ function standard.setup_insert_mode(config)
       )
     end
   end
+
+  -- tags.
+  insx.add('<CR>', require('insx.recipe.fast_break')({
+    open_pat = insx.helper.search.Tag.Open,
+    close_pat = insx.helper.search.Tag.Close,
+  }))
 end
 
 ---@param config insx.preset.standard.Config
