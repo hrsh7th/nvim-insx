@@ -136,12 +136,12 @@ function insx.expand(char)
   char = normalize(char)
 
   local ctx = context.create(char)
-  local recipes = get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})--[=[@as insx.Recipe[]]=] )
+  local recipes = get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})--[=[@as insx.Recipe[]]=])
   table.insert(recipes, {
     ---@param ctx insx.Context
     action = function(ctx)
       ctx.send(ctx.char)
-    end
+    end,
   })
   return Keymap.to_sendable(function()
     Async.run(function()

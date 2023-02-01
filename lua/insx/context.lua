@@ -61,20 +61,18 @@ function context.create(char)
       return before_match and after_match
     end,
     send = function(key_specifiers)
-      Keymap.send(
-        vim.tbl_map(function(key_specifier)
-          if type(key_specifier) == 'string' then
-            key_specifier = { keys = key_specifier, remap = false }
-          end
-          key_specifier.keys = Keymap.termcodes(key_specifier.keys)
-          if ctx.mode() == 'i' then
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
-          end
-          return key_specifier
-        end, kit.to_array(key_specifiers))
-      ):await()
+      Keymap.send(vim.tbl_map(function(key_specifier)
+        if type(key_specifier) == 'string' then
+          key_specifier = { keys = key_specifier, remap = false }
+        end
+        key_specifier.keys = Keymap.termcodes(key_specifier.keys)
+        if ctx.mode() == 'i' then
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
+        end
+        return key_specifier
+      end, kit.to_array(key_specifiers))):await()
     end,
     move = function(row, col)
       if ctx.row() ~= row then
