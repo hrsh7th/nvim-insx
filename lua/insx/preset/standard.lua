@@ -175,7 +175,7 @@ function standard.setup_cmdline_mode(config)
       require('insx.recipe.universal.delete_pair')({
         open = quote,
         close = quote,
-        ignore_pat = [[\\]] .. quote .. [[\%#]],
+        ignore_pat = [[\\]] .. esc(quote) .. [[\%#]],
       }),
       { mode = 'c' }
     )
