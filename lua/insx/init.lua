@@ -3,7 +3,7 @@ local Async = require('insx.kit.Async')
 local Keymap = require('insx.kit.Vim.Keymap')
 local context = require('insx.context')
 
----@alias insx.Enabled fun(ctx: insx.Context): any
+---@alias insx.Enabled fun(ctx: insx.ContextSource): nil
 ---@alias insx.Action fun(ctx: insx.Context): nil
 
 ---@class insx.RecipeSource
@@ -17,7 +17,7 @@ local context = require('insx.context')
 ---@field public enabled insx.Enabled
 ---@field public action insx.Action
 
----@class insx.Context
+---@class insx.ContextSource
 ---@field public filetype string
 ---@field public char string
 ---@field public data table
@@ -29,8 +29,11 @@ local context = require('insx.context')
 ---@field public after fun(): string
 ---@field public before fun(): string
 ---@field public match fun(pattern: string): boolean
+
+---@class insx.Context: insx.ContextSource
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
 ---@field public move fun(row: integer, col: integer): nil
+---@field public next fun(): nil
 
 ---@class insx.Override
 ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
@@ -52,11 +55,10 @@ local function normalize(key)
 end
 
 ---Get sorted/normalized entries for specific mapping.
----@generic T: insx.RecipeSource
----@param ctx insx.Context
----@param recipes T[]
----@return T[]
-local function get_recipes(ctx, recipes)
+---@param ctx_source insx.ContextSource
+---@param recipes insx.Recipe[]
+---@return insx.Recipe[]
+local function get_recipes(ctx_source, recipes)
   for i, recipe in ipairs(recipes) do
     recipe.index = recipe.index or i
   end
@@ -66,14 +68,9 @@ local function get_recipes(ctx, recipes)
     end
     return a.index < b.index
   end)
-
-  local ok_recipes = {}
-  for _, recipe in ipairs(recipes) do
-    if recipe.enabled(ctx) then
-      table.insert(ok_recipes, recipe)
-    end
-  end
-  return ok_recipes
+  return vim.tbl_filter(function(recipe)
+    return recipe.enabled(ctx_source)
+  end, recipes)
 end
 
 local insx = {}
@@ -82,9 +79,9 @@ insx.helper = require('insx.helper')
 
 ---Add new mapping recipe for specific mapping.
 ---@param char string
----@param recipe_source insx.RecipeSource
+---@param recipe_sources insx.RecipeSource|insx.RecipeSource[]
 ---@param option? { mode?: 'i' | 'c' }
-function insx.add(char, recipe_source, option)
+function insx.add(char, recipe_sources, option)
   char = normalize(char)
 
   -- ensure tables.
@@ -107,14 +104,20 @@ function insx.add(char, recipe_source, option)
   end
 
   -- add normalized recipe.
-  table.insert(mode_map[mode][char], {
-    index = #mode_map[mode][char] + 1,
-    action = recipe_source.action,
-    enabled = recipe_source.enabled or function()
-      return true
-    end,
-    priority = recipe_source.priority or 0,
-  })
+  for _, recipe_source in ipairs(kit.to_array(recipe_sources)) do
+    ---@type insx.Recipe
+    local recipe = {
+      index = #mode_map[mode][char] + 1,
+      enabled = function(ctx)
+        return not recipe_source.enabled or recipe_source.enabled(ctx)
+      end,
+      action = function(ctx)
+        recipe_source.action(ctx)
+      end,
+      priority = recipe_source.priority or 0,
+    }
+    table.insert(mode_map[mode][char], recipe)
+  end
 end
 
 ---Remove mappings.
@@ -135,8 +138,8 @@ end
 function insx.expand(char)
   char = normalize(char)
 
-  local ctx = context.create(char)
-  local recipes = get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})--[=[@as insx.Recipe[]]=] )
+  local ctx_source = context.create_source(char)
+  local recipes = get_recipes(ctx_source, kit.get(mode_map, { ctx_source.mode(), char }, {})--[=[@as insx.Recipe[]]=] )
   table.insert(recipes, {
     ---@param ctx insx.Context
     action = function(ctx)
@@ -147,7 +150,7 @@ function insx.expand(char)
     Async.run(function()
       local lazyredraw = vim.o.lazyredraw
       vim.o.lazyredraw = true
-      recipes[1].action(ctx)
+      context.create(ctx_source, recipes).next()
       vim.o.lazyredraw = lazyredraw
     end)
   end)
