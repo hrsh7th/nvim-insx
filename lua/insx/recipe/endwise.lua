@@ -1,4 +1,5 @@
 local helper = require('insx.helper')
+local insx = require('insx')
 
 ---The basic endwise recipe.
 ---This is early stage recipe so this can be modified in the future.
@@ -8,7 +9,7 @@ local helper = require('insx.helper')
 ---@param addition string
 ---@return insx.RecipeSource
 local function simple(trigger_pattern, addition)
-  return {
+  return insx.with({
     ---@param ctx insx.Context
     action = function(ctx)
       local row, col = ctx.row(), ctx.col()
@@ -16,49 +17,31 @@ local function simple(trigger_pattern, addition)
       ctx.move(row, col)
       ctx.send('<CR>')
     end,
-    ---@param ctx insx.Context
+    ---@param ctx insx.ContextSource
     enabled = function(ctx)
-      return not helper.syntax.in_string_or_comment() and helper.regex.match(ctx.before(), trigger_pattern) ~= nil
-    end,
-  }
+      return helper.regex.match(ctx.before(), trigger_pattern) ~= nil
+    end
+  }, insx.with.in_string(false), insx.with.in_comment(false))
 end
 
 ---@alias insx.recipe.endwise.Option table<string, insx.RecipeSource[]>
 
 ---@param option insx.recipe.endwise.Option
----@return insx.RecipeSource
+---@return insx.RecipeSource[]
 local function endwise(option)
-  return {
-    ---@param ctx insx.Context
-    action = function(ctx)
-      local definitions = option[ctx.filetype] or {}
-      if definitions then
-        for _, definition in ipairs(definitions) do
-          if definition.enabled(ctx) then
-            return definition.action(ctx)
-          end
-        end
-      else
-        ctx.send(ctx.char)
-      end
-    end,
-    ---@param ctx insx.Context
-    enabled = function(ctx)
-      local definitions = option[ctx.filetype] or {}
-      if definitions then
-        for _, definition in ipairs(definitions) do
-          if definition.enabled(ctx) then
-            return true
-          end
-        end
-      end
-      return false
-    end,
-  }
+  local recipe_sources = {}
+  for filetype, recipe_sources_ in pairs(option) do
+    for _, recipe_source in ipairs(recipe_sources_) do
+      table.insert(recipe_sources, insx.with(
+        recipe_source,
+        insx.with.filetype(filetype)
+      ))
+    end
+  end
+  return recipe_sources
 end
 
-return {
-  recipe = endwise,
+return setmetatable({
   simple = simple,
   builtin = {
     ['lua'] = {
@@ -86,4 +69,16 @@ return {
       },
     },
   },
-}
+  ---@param option insx.recipe.endwise.Option
+  ---@return insx.RecipeSource[]
+  recipe = function(option)
+    vim.deprecate('endwise.recipe', 'endwise()', '0', 'nvim-insx')
+    return endwise(option)
+  end,
+}, {
+  ---@param option insx.recipe.endwise.Option
+  ---@return insx.RecipeSource[]
+  __call = function(_, option)
+    return endwise(option)
+  end
+})

@@ -2,6 +2,7 @@ local insx = require('insx')
 local spec = require('insx.spec')
 
 describe('insx.recipe.pair_spacing', function()
+  before_each(insx.clear)
   describe('increase', function()
     it('should work', function()
       insx.add(

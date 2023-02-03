@@ -1,6 +1,8 @@
+local insx = require('insx')
 local spec = require('insx.spec')
 
 describe('insx.preset.standard', function()
+  before_each(insx.clear)
   for _, mode in ipairs({ 'i', 'c' }) do
     local option = { mode = mode }
     it(('should work (%s)'):format(mode), function()

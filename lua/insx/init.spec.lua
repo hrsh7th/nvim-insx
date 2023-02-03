@@ -10,11 +10,7 @@ describe('insx', function()
       insx.with(require('insx.recipe.auto_pair')({
         open = '(',
         close = ')'
-      }), {
-        enabled = function(enabled, ctx)
-          return enabled(ctx) and not insx.helper.syntax.in_string_or_comment()
-        end,
-      })
+      }), insx.with.in_string(false))
     )
     spec.assert('|', '(', '(|)')
     spec.assert('[[|]]', '(', '[[(|]]')
