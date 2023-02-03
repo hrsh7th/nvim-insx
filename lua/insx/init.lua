@@ -104,7 +104,9 @@ function insx.add(char, recipe_sources, option)
   end
 
   -- add normalized recipe.
-  for _, recipe_source in ipairs(kit.to_array(recipe_sources)) do
+  ---@type insx.RecipeSource[]
+  recipe_sources = kit.to_array(recipe_sources)
+  for _, recipe_source in ipairs(recipe_sources) do
     ---@type insx.Recipe
     local recipe = {
       index = #mode_map[mode][char] + 1,
@@ -156,26 +158,82 @@ function insx.expand(char)
   end)
 end
 
----@param recipe insx.RecipeSource
----@param override insx.Override
----@return insx.RecipeSource
-function insx.with(recipe, override)
-  override = override or {}
-
-  local new_recipe = kit.merge({}, recipe)
-  if override.action then
-    new_recipe.action = function(ctx)
-      return override.action(recipe.action, ctx)
+insx.with = setmetatable({
+  ---Create filetype override.
+  ---@param filetypes string|string[]
+  ---@return insx.Override
+  filetype = function(filetypes)
+    filetypes = kit.to_array(filetypes) --[=[@as string[]]=]
+    return {
+      enabled = function(enabled, ctx)
+        return vim.tbl_contains(filetypes, ctx.filetype) and enabled(ctx)
+      end
+    }
+  end,
+  ---Create string syntax override.
+  ---@param ok_or_ng boolean default=false
+  ---@return insx.Override
+  in_string = function(ok_or_ng)
+    ok_or_ng = kit.default(ok_or_ng, false)
+    return {
+      enabled = function(enabled, ctx)
+        return insx.helper.syntax.in_string() == ok_or_ng and enabled(ctx)
+      end
+    }
+  end,
+  ---Create comment syntax override.
+  ---@param ok_or_ng boolean default=false
+  ---@return insx.Override
+  in_comment = function(ok_or_ng)
+    ok_or_ng = kit.default(ok_or_ng, false)
+    return {
+      enabled = function(enabled, ctx)
+        return insx.helper.syntax.in_comment() == ok_or_ng and enabled(ctx)
+      end
+    }
+  end,
+  ---Create undopoint overrides.
+  ---@param post boolean default=false
+  undopoint = function(post)
+    post = kit.default(post, false)
+    return {
+      action = function(action, ctx)
+        if not post then
+          vim.o.undolevels = vim.o.undolevels
+        end
+        action(ctx)
+        if post then
+          vim.o.undolevels = vim.o.undolevels
+        end
+      end
+    }
+  end,
+}, {
+  ---Enhance existing recipe with overrides.
+  ---@param recipe insx.RecipeSource
+  ---@param ... insx.Override
+  ---@return insx.RecipeSource
+  __call = function(_, recipe, ...)
+    for _, override_ in ipairs({ ... }) do
+      recipe = (function(override, recipe_)
+        local new_recipe = kit.merge({}, recipe_)
+        if override.action then
+          new_recipe.action = function(ctx)
+            return override.action(recipe.action, ctx)
+          end
+        end
+        if override.enabled then
+          new_recipe.enabled = function(ctx)
+            return override.enabled(recipe_.enabled or function()
+              return true
+            end, ctx)
+          end
+        end
+        return new_recipe
+      end)(override_, recipe)
     end
+    return recipe
   end
-  if override.enabled then
-    new_recipe.enabled = function(ctx)
-      return override.enabled(recipe.enabled or function()
-        return true
-      end, ctx)
-    end
-  end
-  return new_recipe
-end
+})
 
 return insx

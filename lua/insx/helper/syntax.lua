@@ -1,12 +1,26 @@
 local Syntax = require('insx.kit.Vim.Syntax')
 
+local function make_cursor()
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  cursor[1] = cursor[1] - 1
+  return cursor
+end
+
 local syntax = {}
 
 ---@return boolean
 function syntax.in_string_or_comment()
-  local cursor = vim.api.nvim_win_get_cursor(0)
-  cursor[1] = cursor[1] - 1
-  return syntax.in_string_or_comment_at_pos(cursor)
+  return syntax.in_string_or_comment_at_pos(make_cursor())
+end
+
+---@return boolean
+function syntax.in_string()
+  return syntax.in_string_at_pos(make_cursor())
+end
+
+---@return boolean
+function syntax.in_comment()
+  return syntax.in_comment_at_pos(make_cursor())
 end
 
 ---@param cursor { [1]: integer, [2]: integer }

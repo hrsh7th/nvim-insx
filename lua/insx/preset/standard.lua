@@ -39,11 +39,8 @@ function standard.setup_insert_mode(config)
             [[\\\%#]],
           },
         }),
-        {
-          enabled = function(enabled, ctx)
-            return enabled(ctx) and not insx.helper.syntax.in_string_or_comment()
-          end,
-        }
+        insx.with.in_string(false),
+        insx.with.in_comment(false)
       )
     )
 

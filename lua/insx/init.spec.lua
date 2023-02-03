@@ -24,19 +24,18 @@ describe('insx', function()
     insx.add(
       '(',
       {
-        priority = 1,
-        action = function(ctx)
-          ctx.next()
-        end
-      }
-    )
-    insx.add(
-      '(',
-      {
-        priority = 0,
-        action = function(ctx)
-          ctx.send('()<Left>')
-        end
+        {
+          priority = 1,
+          action = function(ctx)
+            ctx.next()
+          end
+        },
+        {
+          priority = 0,
+          action = function(ctx)
+            ctx.send('()<Left>')
+          end
+        }
       }
     )
     spec.assert('|', '(', '(|)')
