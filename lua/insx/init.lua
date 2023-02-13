@@ -165,8 +165,12 @@ insx.with = setmetatable({
   filetype = function(filetypes)
     filetypes = kit.to_array(filetypes) --[=[@as string[]]=]
     return {
-      enabled = function(enabled, ctx)
-        return vim.tbl_contains(filetypes, ctx.filetype) and enabled(ctx)
+      action = function(action, ctx)
+        if vim.tbl_contains(filetypes, ctx.filetype) then
+          action(ctx)
+        else
+          ctx.next()
+        end
       end
     }
   end,
@@ -176,8 +180,12 @@ insx.with = setmetatable({
   in_string = function(ok_or_ng)
     ok_or_ng = kit.default(ok_or_ng, false)
     return {
-      enabled = function(enabled, ctx)
-        return insx.helper.syntax.in_string() == ok_or_ng and enabled(ctx)
+      action = function(action, ctx)
+        if insx.helper.syntax.in_string() == ok_or_ng then
+          action(ctx)
+        else
+          ctx.next()
+        end
       end
     }
   end,
@@ -187,9 +195,13 @@ insx.with = setmetatable({
   in_comment = function(ok_or_ng)
     ok_or_ng = kit.default(ok_or_ng, false)
     return {
-      enabled = function(enabled, ctx)
-        return insx.helper.syntax.in_comment() == ok_or_ng and enabled(ctx)
-      end
+      action = function(action, ctx)
+        if insx.helper.syntax.in_comment() == ok_or_ng then
+          action(ctx)
+        else
+          ctx.next()
+        end
+      end,
     }
   end,
   ---Create undopoint overrides.
@@ -219,7 +231,7 @@ insx.with = setmetatable({
         local new_recipe = kit.merge({}, recipe_)
         if override.action then
           new_recipe.action = function(ctx)
-            return override.action(recipe.action, ctx)
+            return override.action(recipe_.action, ctx)
           end
         end
         if override.enabled then
