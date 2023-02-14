@@ -59,8 +59,8 @@ function context.create_source(char)
       local after_s, _ = vim.regex([[\\%#\zs.*$]]):match_str(pattern)
       local before_pat = pattern:sub(1, before_e)
       local after_pat = pattern:sub(after_s + 1)
-      local before_match = vim.regex(before_pat .. [[$]]):match_str(ctx.before())
-      local after_match = vim.regex([[^]] .. after_pat):match_str(ctx.after())
+      local before_match = before_pat == '' or vim.regex(before_pat .. [[$]]):match_str(ctx.before())
+      local after_match = after_pat == '' or vim.regex([[^]] .. after_pat):match_str(ctx.after())
       return before_match and after_match
     end,
   }

@@ -82,11 +82,7 @@ require('insx').with(recipe, override)~
 
   -- Setup `auto_pair` recipe.
   -- Disable for string or comment syntax.
-  insx.add('(', insx.with(require('insx.preset.auto_pair')(), {
-    enabled = function(enabled, ctx)
-      return enabled(ctx) and not insx.helper.syntax.in_string_or_comment()
-    end
-  }))
+  insx.add('(', insx.with(require('insx.preset.auto_pair')(), insx.with.in_string(false), insx.with.in_comment(false)))
 <
 
 require('insx').clear()~

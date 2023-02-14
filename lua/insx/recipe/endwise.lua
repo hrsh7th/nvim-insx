@@ -19,7 +19,11 @@ local function simple(trigger_pattern, addition)
     end,
     ---@param ctx insx.ContextSource
     enabled = function(ctx)
-      return helper.regex.match(ctx.before(), trigger_pattern) ~= nil
+      if trigger_pattern:match('%$$') then
+        vim.deprecate('endwise.simple\' trigger_pattern', 'remove `$` from regexp', '0', 'nvim-insx')
+        trigger_pattern = trigger_pattern:gsub('%$$', '')
+      end
+      return ctx.match(trigger_pattern .. [[\%#]])
     end
   }, insx.with.in_string(false), insx.with.in_comment(false))
 end
@@ -45,12 +49,12 @@ return setmetatable({
   simple = simple,
   builtin = {
     ['lua'] = {
-      simple([[\<if\>.*\<then\>$]], 'end'),
-      simple([[\<while\>.*\<do\>$]], 'end'),
-      simple([[\<for\>.*\<do\>$]], 'end'),
-      simple([[^\s*\<do\>$]], 'end'),
-      simple([[\<repeat\>$]], 'until'),
-      simple([[\<function\>\%(\s\+\k\+\%(:\k\+\)\?\)\?()$]], 'end'),
+      simple([[\<if\>.*\<then\>]], 'end'),
+      simple([[\<while\>.*\<do\>]], 'end'),
+      simple([[\<for\>.*\<do\>]], 'end'),
+      simple([[^\s*\<do\>]], 'end'),
+      simple([[\<repeat\>]], 'until'),
+      simple([[\<function\>\%(\s\+\k\+\%(:\k\+\)\?\)\?()]], 'end'),
     },
     ['html'] = {
       {
