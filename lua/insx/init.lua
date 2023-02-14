@@ -79,9 +79,9 @@ insx.helper = require('insx.helper')
 
 ---Add new mapping recipe for specific mapping.
 ---@param char string
----@param recipe_sources insx.RecipeSource|insx.RecipeSource[]
+---@param recipe_source insx.RecipeSource
 ---@param option? { mode?: 'i' | 'c' }
-function insx.add(char, recipe_sources, option)
+function insx.add(char, recipe_source, option)
   char = normalize(char)
 
   -- ensure tables.
@@ -104,22 +104,18 @@ function insx.add(char, recipe_sources, option)
   end
 
   -- add normalized recipe.
-  ---@type insx.RecipeSource[]
-  recipe_sources = kit.to_array(recipe_sources)
-  for _, recipe_source in ipairs(recipe_sources) do
-    ---@type insx.Recipe
-    local recipe = {
-      index = #mode_map[mode][char] + 1,
-      enabled = function(ctx)
-        return not recipe_source.enabled or recipe_source.enabled(ctx)
-      end,
-      action = function(ctx)
-        recipe_source.action(ctx)
-      end,
-      priority = recipe_source.priority or 0,
-    }
-    table.insert(mode_map[mode][char], recipe)
-  end
+  ---@type insx.Recipe
+  local recipe = {
+    index = #mode_map[mode][char] + 1,
+    enabled = function(ctx)
+      return not recipe_source.enabled or recipe_source.enabled(ctx)
+    end,
+    action = function(ctx)
+      recipe_source.action(ctx)
+    end,
+    priority = recipe_source.priority or 0,
+  }
+  table.insert(mode_map[mode][char], recipe)
 end
 
 ---Remove mappings.
@@ -141,7 +137,7 @@ function insx.expand(char)
   char = normalize(char)
 
   local ctx_source = context.create_source(char)
-  local recipes = get_recipes(ctx_source, kit.get(mode_map, { ctx_source.mode(), char }, {})--[=[@as insx.Recipe[]]=] )
+  local recipes = get_recipes(ctx_source, kit.get(mode_map, { ctx_source.mode(), char }, {}) --[=[@as insx.Recipe[]]=])
   table.insert(recipes, {
     ---@param ctx insx.Context
     action = function(ctx)
@@ -156,6 +152,31 @@ function insx.expand(char)
       vim.o.lazyredraw = lazyredraw
     end)
   end)
+end
+
+---Compose multiple recipes as one recipe.
+---@param recipes insx.RecipeSource[]
+---@return insx.RecipeSource
+function insx.compose(recipes)
+  return {
+    ---@param ctx insx.Context
+    action = function(ctx)
+      local new_recipes = vim.tbl_filter(function(recipe)
+        return not recipe.enabled or recipe.enabled(ctx)
+      end, kit.concat({}, recipes))
+
+      local next = ctx.next
+      ctx.next = function()
+        if #new_recipes > 0 then
+          table.remove(new_recipes, 1).action(ctx)
+        else
+          ctx.next = next
+          ctx.next()
+        end
+      end
+      ctx.next()
+    end
+  }
 end
 
 insx.with = setmetatable({
@@ -228,21 +249,21 @@ insx.with = setmetatable({
   __call = function(_, recipe, ...)
     for _, override_ in ipairs({ ... }) do
       recipe = (function(override, recipe_)
-        local new_recipe = kit.merge({}, recipe_)
-        if override.action then
-          new_recipe.action = function(ctx)
-            return override.action(recipe_.action, ctx)
-          end
-        end
-        if override.enabled then
-          new_recipe.enabled = function(ctx)
-            return override.enabled(recipe_.enabled or function()
-              return true
-            end, ctx)
-          end
-        end
-        return new_recipe
-      end)(override_, recipe)
+            local new_recipe = kit.merge({}, recipe_)
+            if override.action then
+              new_recipe.action = function(ctx)
+                return override.action(recipe_.action, ctx)
+              end
+            end
+            if override.enabled then
+              new_recipe.enabled = function(ctx)
+                return override.enabled(recipe_.enabled or function()
+                  return true
+                end, ctx)
+              end
+            end
+            return new_recipe
+          end)(override_, recipe)
     end
     return recipe
   end

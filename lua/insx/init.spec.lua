@@ -57,24 +57,51 @@ describe('insx', function()
   end)
 
   it('should chain to next recipe', function()
+    local step = {}
     insx.add(
       '(',
       {
+        action = function(ctx)
+          table.insert(step, '0')
+          ctx.next()
+        end
+      }
+    )
+    insx.add(
+      '(',
+      insx.compose({
         {
-          priority = 1,
           action = function(ctx)
+            table.insert(step, '1')
             ctx.next()
           end
         },
         {
-          priority = 0,
           action = function(ctx)
-            ctx.send('()<Left>')
+            table.insert(step, '2')
+            ctx.send('()')
+            ctx.next()
           end
-        }
+        },
+        {
+          action = function(ctx)
+            table.insert(step, '3')
+            ctx.next()
+          end
+        },
+      })
+    )
+    insx.add(
+      '(',
+      {
+        action = function(ctx)
+          table.insert(step, '4')
+          ctx.send('<Left>')
+        end
       }
     )
     spec.assert('|', '(', '(|)')
+    assert.are.same({ '0', '1', '2', '3', '4' }, step)
   end)
 
   it('should match cursor before/after text', function()

@@ -42,7 +42,7 @@ local function endwise(option)
       ))
     end
   end
-  return recipe_sources
+  return insx.compose(recipe_sources)
 end
 
 return setmetatable({
