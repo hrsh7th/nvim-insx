@@ -106,7 +106,7 @@ function context.create(ctx_source, recipes)
         end
       end
     end,
-  })
+  }) --[[@as insx.Context]]
   return ctx
 end
 
