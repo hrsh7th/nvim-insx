@@ -89,8 +89,22 @@ end
 
 ---Concatenate two tables.
 ---NOTE: This doesn't concatenate dict-like table.
+---@param array table
+---@param fn fun(item: unknown, index: integer): unknown
+---@return unknown[]
+function kit.map(array, fn)
+  local new_array = {}
+  for i, item in ipairs(array) do
+    table.insert(new_array, fn(item, i))
+  end
+  return new_array
+end
+
+---Concatenate two tables.
+---NOTE: This doesn't concatenate dict-like table.
 ---@param tbl1 table
 ---@param tbl2 table
+---@return table
 function kit.concat(tbl1, tbl2)
   local new_tbl = {}
   for _, item in ipairs(tbl1) do
@@ -118,7 +132,7 @@ end
 ---@param value any
 ---@return boolean
 function kit.is_array(value)
-  return type(value) == 'table' and (vim.tbl_islist(value) or vim.tbl_isempty(value))
+  return not not (type(value) == 'table' and (vim.tbl_islist(value) or vim.tbl_isempty(value)))
 end
 
 ---Reverse the array.

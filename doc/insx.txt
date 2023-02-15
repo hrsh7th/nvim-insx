@@ -82,7 +82,10 @@ require('insx').with(recipe, override)~
 
   -- Setup `auto_pair` recipe.
   -- Disable for string or comment syntax.
-  insx.add('(', insx.with(require('insx.preset.auto_pair')(), insx.with.in_string(false), insx.with.in_comment(false)))
+  insx.add('(', insx.with(require('insx.preset.auto_pair')(), {
+    insx.with.in_string(false),
+    insx.with.in_comment(false)
+  }))
 <
 
 require('insx').clear()~
@@ -539,11 +542,8 @@ How to add the undo point?~
     insx.with(require('insx.recipe.fast_wrap')({
       ...
     }), {
-      action = function(action, ctx)
-        vim.o.undolevels = vim.o.undolevels
-        return action(ctx)
-      end
-    }
+      insx.with.undopoint(false)
+    })
   ))
 <
 

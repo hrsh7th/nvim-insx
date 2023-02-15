@@ -10,8 +10,8 @@ local right = Keymap.termcodes('<Right>')
 local context = {}
 
 ---@param char string
----@return insx.ContextSource
-function context.create_source(char)
+---@return insx.Context
+function context.create(char)
   ---@type insx.Context
   local ctx
   ctx = {
@@ -63,20 +63,8 @@ function context.create_source(char)
       local after_match = after_pat == '' or vim.regex([[^]] .. after_pat):match_str(ctx.after())
       return before_match and after_match
     end,
-  }
-  return ctx
-end
-
----@param ctx_source insx.ContextSource
----@param recipes insx.Recipe[]
----@return insx.Context
-function context.create(ctx_source, recipes)
-  recipes = kit.concat({}, recipes)
-
-  local ctx
-  ctx = kit.merge(ctx_source, {
     next = function()
-      table.remove(recipes, 1).action(ctx)
+      error('ctx.next` can only be called in `recipe.action`.')
     end,
     send = function(key_specifiers)
       Keymap.send(
@@ -106,7 +94,17 @@ function context.create(ctx_source, recipes)
         end
       end
     end,
-  }) --[[@as insx.Context]]
+  }
+  return ctx
+end
+
+---@param ctx insx.Context
+---@param recipes insx.Recipe[]
+---@return insx.Context
+function context.enhance(ctx, recipes)
+  function ctx.next()
+    table.remove(recipes, 1).action(ctx)
+  end
   return ctx
 end
 

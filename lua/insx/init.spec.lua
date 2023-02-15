@@ -34,23 +34,25 @@ describe('insx', function()
           open = '(',
           close = ')'
         }),
-        chain('1'),
-        chain('2')
+        {
+          chain('1'),
+          chain('2')
+        }
       )
     )
     spec.assert('|', '(', '(|)')
     assert.are.same({
       {
-        id = '2',
-        type = 'enabled',
-      }, {
         id = '1',
         type = 'enabled',
       }, {
         id = '2',
+        type = 'enabled',
+      }, {
+        id = '1',
         type = 'action',
       }, {
-        id = '1',
+        id = '2',
         type = 'action',
       }
     }, events)

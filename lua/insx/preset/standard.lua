@@ -39,8 +39,10 @@ function standard.setup_insert_mode(config)
             [[\\\%#]],
           },
         }),
-        insx.with.in_string(false),
-        insx.with.in_comment(false)
+        {
+          insx.with.in_string(false),
+          insx.with.in_comment(false)
+        }
       )
     )
 
