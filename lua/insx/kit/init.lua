@@ -53,8 +53,8 @@ kit.unique_id = setmetatable({
 ---@param tbl2 T
 ---@return T
 function kit.merge(tbl1, tbl2)
-  local is_dict1 = type(tbl1) == 'table' and (not vim.tbl_islist(tbl1) or vim.tbl_isempty(tbl1))
-  local is_dict2 = type(tbl2) == 'table' and (not vim.tbl_islist(tbl2) or vim.tbl_isempty(tbl2))
+  local is_dict1 = kit.is_dict(tbl1)
+  local is_dict2 = kit.is_dict(tbl2)
   if is_dict1 and is_dict2 then
     local new_tbl = {}
     for k, v in pairs(tbl2) do
@@ -87,8 +87,22 @@ function kit.merge(tbl1, tbl2)
   end
 end
 
----Concatenate two tables.
----NOTE: This doesn't concatenate dict-like table.
+---Recursive convert value via callback function.
+---@param tbl table
+---@param callback fun(value: any): any
+---@return table
+function kit.convert(tbl, callback)
+  if kit.is_dict(tbl) then
+    local new_tbl = {}
+    for k, v in pairs(tbl) do
+      new_tbl[k] = kit.convert(v, callback)
+    end
+    return new_tbl
+  end
+  return callback(tbl)
+end
+
+---Map array.
 ---@param array table
 ---@param fn fun(item: unknown, index: integer): unknown
 ---@return unknown[]
@@ -133,6 +147,13 @@ end
 ---@return boolean
 function kit.is_array(value)
   return not not (type(value) == 'table' and (vim.tbl_islist(value) or vim.tbl_isempty(value)))
+end
+
+---Check the value is dict.
+---@param value any
+---@return boolean
+function kit.is_dict(value)
+  return type(value) == 'table' and (not vim.tbl_islist(value) or vim.tbl_isempty(value))
 end
 
 ---Reverse the array.

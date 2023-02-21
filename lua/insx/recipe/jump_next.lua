@@ -17,7 +17,7 @@ local function jump_next(option)
     enabled = function(ctx)
       local curr_pos = { math.huge, math.huge }
       for _, pat in ipairs(jump_pat) do
-        local pos = helper.search.get_next(pat)
+        local pos = ctx.search(pat)
         if pos then
           if helper.position.gt(pos, curr_pos) then
             curr_pos = pos

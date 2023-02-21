@@ -6,10 +6,11 @@ describe('insx.recipe.auto_pair', function()
   it('should work', function()
     insx.add(
       '(',
-      require('insx.recipe.auto_pair')({
+      insx.with( require('insx.recipe.auto_pair')({
         open = '(',
         close = ')',
-        ignore_pat = [[\\\%#]],
+      }), {
+        insx.with.nomatch([[\\\%#]])
       })
     )
     spec.assert('|', '(', '(|)')

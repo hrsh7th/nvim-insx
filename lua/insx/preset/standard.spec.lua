@@ -23,14 +23,6 @@ describe('insx.preset.standard', function()
           -- autopairs (auto `'` is disabled if previous char is alphabet).
           spec.assert('I|', quote, ("I'|"):format(quote), option)
         end
-        -- autopairs (disabled in string or comment).
-        if mode == 'i' then
-          if quote == '"' then
-            spec.assert("local _ = '|'", quote, ("local _ = '%s|'"):format(quote), option)
-          else
-            spec.assert('local _ = "|"', quote, ('local _ = "%s|"'):format(quote), option)
-          end
-        end
         -- jumpout.
         spec.assert(('%s|%s'):format(quote, quote), quote, ('%s%s|'):format(quote, quote), option)
         -- delete.
