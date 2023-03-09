@@ -63,7 +63,6 @@ function standard.setup_insert_mode(config)
     ['('] = ')',
     ['['] = ']',
     ['{'] = '}',
-    ['<'] = '>',
   }) do
     -- jump_out
     insx.add(
@@ -195,7 +194,6 @@ function standard.setup_cmdline_mode(config)
     ['('] = ')',
     ['['] = ']',
     ['{'] = '}',
-    ['<'] = '>',
   }) do
     -- jump_out
     insx.add(
