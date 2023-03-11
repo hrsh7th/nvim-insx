@@ -18,7 +18,7 @@ describe('insx', function()
           enabled = function(enabled, ctx)
             table.insert(events, { id = id, type = 'enabled' })
             return enabled(ctx)
-          end
+          end,
         }
       end
 
@@ -27,11 +27,11 @@ describe('insx', function()
         insx.with(
           require('insx.recipe.auto_pair')({
             open = '(',
-            close = ')'
+            close = ')',
           }),
           {
             chain('1'),
-            chain('2')
+            chain('2'),
           }
         )
       )
@@ -40,16 +40,19 @@ describe('insx', function()
         {
           id = '1',
           type = 'enabled',
-        }, {
-        id = '2',
-        type = 'enabled',
-      }, {
-        id = '1',
-        type = 'action',
-      }, {
-        id = '2',
-        type = 'action',
-      }
+        },
+        {
+          id = '2',
+          type = 'enabled',
+        },
+        {
+          id = '1',
+          type = 'action',
+        },
+        {
+          id = '2',
+          type = 'action',
+        },
       }, events)
     end)
   end)
@@ -57,15 +60,12 @@ describe('insx', function()
   describe('insx.compose', function()
     it('should chain to the next recipe', function()
       local step = {}
-      insx.add(
-        '(',
-        {
-          action = function(ctx)
-            table.insert(step, '0')
-            ctx.next()
-          end
-        }
-      )
+      insx.add('(', {
+        action = function(ctx)
+          table.insert(step, '0')
+          ctx.next()
+        end,
+      })
       insx.add(
         '(',
         insx.compose({
@@ -74,7 +74,7 @@ describe('insx', function()
             action = function(ctx)
               table.insert(step, '3')
               ctx.next()
-            end
+            end,
           },
           {
             priority = 3,
@@ -82,26 +82,23 @@ describe('insx', function()
               table.insert(step, '1')
               ctx.send('()')
               ctx.next()
-            end
+            end,
           },
           {
             priority = 2,
             action = function(ctx)
               table.insert(step, '2')
               ctx.next()
-            end
+            end,
           },
         })
       )
-      insx.add(
-        '(',
-        {
-          action = function(ctx)
-            table.insert(step, '4')
-            ctx.send('<Left>')
-          end
-        }
-      )
+      insx.add('(', {
+        action = function(ctx)
+          table.insert(step, '4')
+          ctx.send('<Left>')
+        end,
+      })
       spec.assert('|', '(', '(|)')
       assert.are.same({ '0', '1', '2', '3', '4' }, step)
     end)
@@ -153,15 +150,17 @@ describe('insx', function()
             setup = '|',
             pattern = [[\\\%#]],
             expected = nil,
-          }, {
+          },
+          {
             setup = 'a|b',
             pattern = [[a\%#]],
             expected = { 0, 0 },
-          }, {
+          },
+          {
             setup = '"|"',
             pattern = [[\\\@<!\%#]] .. insx.helper.regex.esc('"') .. [[\zs]],
             expected = { 0, 2 },
-          }
+          },
         }) do
           insx.clear()
 
@@ -172,7 +171,7 @@ describe('insx', function()
             end,
           }, { mode = mode })
           spec.assert(case.setup, '<CR>', case.setup, {
-            mode = mode
+            mode = mode,
           })
           vim.pretty_print({ case.setup, case.pattern })
           assert.are.same(case.expected, actual)

@@ -13,12 +13,15 @@ describe('insx.recipe.delete_pair', function()
     )
     insx.add(
       '<BS>',
-      insx.with(require('insx.recipe.delete_pair')({
-        open_pat = insx.helper.regex.esc('"'),
-        close_pat = insx.helper.regex.esc('"'),
-      }), {
-        insx.with.nomatch([[\\]] .. insx.helper.regex.esc('"') .. [[\%#]])
-      })
+      insx.with(
+        require('insx.recipe.delete_pair')({
+          open_pat = insx.helper.regex.esc('"'),
+          close_pat = insx.helper.regex.esc('"'),
+        }),
+        {
+          insx.with.nomatch([[\\]] .. insx.helper.regex.esc('"') .. [[\%#]]),
+        }
+      )
     )
     spec.assert('(|)', '<BS>', '|')
     spec.assert('"|"', '<BS>', '|')

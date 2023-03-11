@@ -27,7 +27,7 @@ describe('insx.recipe.jump_next', function()
       { mode = 'c' }
     )
     spec.assert('"|"', '<Tab>', '""|', {
-      mode = 'c'
+      mode = 'c',
     })
   end)
 end)

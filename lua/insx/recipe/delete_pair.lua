@@ -23,13 +23,12 @@ return setmetatable({
   ---@param option insx.recipe.delete_pair.Option
   strings = function(option)
     return insx.with(delete_pair(option), {
-      insx.with.nomatch([[\\]] .. option.open_pat .. [[\%#]])
+      insx.with.nomatch([[\\]] .. option.open_pat .. [[\%#]]),
     })
-  end
+  end,
 }, {
   ---@param option insx.recipe.delete_pair.Option
   __call = function(_, option)
     return delete_pair(option)
-  end
+  end,
 })
-

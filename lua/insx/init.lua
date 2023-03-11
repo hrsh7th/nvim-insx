@@ -163,20 +163,18 @@ local function create_context(char)
       error('ctx.next` can only be called in `recipe.action`.')
     end,
     send = function(key_specifiers)
-      Keymap.send(
-        vim.tbl_map(function(key_specifier)
-          if type(key_specifier) == 'string' then
-            key_specifier = { keys = key_specifier, remap = false }
-          end
-          key_specifier.keys = Keymap.termcodes(key_specifier.keys)
-          if ctx.mode() == 'i' then
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
-            key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
-          end
-          return key_specifier
-        end, kit.to_array(key_specifiers))
-      ):await()
+      Keymap.send(vim.tbl_map(function(key_specifier)
+        if type(key_specifier) == 'string' then
+          key_specifier = { keys = key_specifier, remap = false }
+        end
+        key_specifier.keys = Keymap.termcodes(key_specifier.keys)
+        if ctx.mode() == 'i' then
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
+        end
+        return key_specifier
+      end, kit.to_array(key_specifiers))):await()
     end,
     move = function(row, col)
       if ctx.row() ~= row then
@@ -254,8 +252,8 @@ function insx.expand(char)
         ---@param ctx insx.Context
         action = function(ctx)
           ctx.send(ctx.char)
-        end
-      }
+        end,
+      },
     })
     function ctx.next()
       table.remove(recipes, 1).action(ctx)
@@ -290,7 +288,7 @@ function insx.compose(recipe_sources)
         end
       end
       ctx.next()
-    end
+    end,
   }
 end
 
@@ -304,7 +302,7 @@ insx.with = setmetatable({
       ---@param ctx insx.Context
       enabled = function(enabled, ctx)
         return ctx.match(pattern) and enabled(ctx)
-      end
+      end,
     }
   end,
   ---Create pattern match override.
@@ -316,7 +314,7 @@ insx.with = setmetatable({
       ---@param ctx insx.Context
       enabled = function(enabled, ctx)
         return not ctx.match(pattern) and enabled(ctx)
-      end
+      end,
     }
   end,
   ---Create filetype override.
@@ -329,7 +327,7 @@ insx.with = setmetatable({
       ---@param ctx insx.Context
       enabled = function(enabled, ctx)
         return vim.tbl_contains(filetypes, ctx.filetype) and enabled(ctx)
-      end
+      end,
     }
   end,
   ---Create string syntax override.
@@ -342,7 +340,7 @@ insx.with = setmetatable({
       ---@param ctx insx.Context
       enabled = function(enabled, ctx)
         return insx.helper.syntax.in_string() == ok_or_ng and enabled(ctx)
-      end
+      end,
     }
   end,
   ---Create comment syntax override.
@@ -355,7 +353,7 @@ insx.with = setmetatable({
       ---@param ctx insx.Context
       enabled = function(enabled, ctx)
         return insx.helper.syntax.in_comment() == ok_or_ng and enabled(ctx)
-      end
+      end,
     }
   end,
   ---Create undopoint overrides.
@@ -371,7 +369,7 @@ insx.with = setmetatable({
         if post then
           vim.o.undolevels = vim.o.undolevels
         end
-      end
+      end,
     }
   end,
 }, {
@@ -410,7 +408,7 @@ insx.with = setmetatable({
       end)(override_, new_recipe)
     end
     return new_recipe
-  end
+  end,
 })
 
 return insx

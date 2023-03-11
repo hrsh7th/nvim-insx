@@ -20,14 +20,14 @@ local function simple(trigger_pattern, addition)
     ---@param ctx insx.Context
     enabled = function(ctx)
       if trigger_pattern:match('%$$') then
-        vim.deprecate('endwise.simple\' trigger_pattern', 'remove `$` from regexp', '0', 'nvim-insx')
+        vim.deprecate("endwise.simple' trigger_pattern", 'remove `$` from regexp', '0', 'nvim-insx')
         trigger_pattern = trigger_pattern:gsub('%$$', '')
       end
       return ctx.match(trigger_pattern .. [[\%#]])
-    end
+    end,
   }, {
     insx.with.in_string(false),
-    insx.with.in_comment(false)
+    insx.with.in_comment(false),
   })
 end
 
@@ -39,9 +39,12 @@ local function endwise(option)
   local recipe_sources = {}
   for filetype, recipe_sources_ in pairs(option) do
     for _, recipe_source in ipairs(recipe_sources_) do
-      table.insert(recipe_sources, insx.with(recipe_source, {
-        insx.with.filetype(filetype)
-      }))
+      table.insert(
+        recipe_sources,
+        insx.with(recipe_source, {
+          insx.with.filetype(filetype),
+        })
+      )
     end
   end
   return insx.compose(recipe_sources)
@@ -86,5 +89,5 @@ return setmetatable({
   ---@return insx.RecipeSource[]
   __call = function(_, option)
     return endwise(option)
-  end
+  end,
 })

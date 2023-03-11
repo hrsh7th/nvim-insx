@@ -23,10 +23,10 @@ return setmetatable({
       table.insert(overrides, insx.with.nomatch([[\a\%#]]))
     end
     return insx.with(auto_pair(option), overrides)
-  end
+  end,
 }, {
   ---@param option insx.recipe.auto_pair.Option
   __call = function(_, option)
     return auto_pair(option)
-  end
+  end,
 })

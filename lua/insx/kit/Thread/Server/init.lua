@@ -4,7 +4,7 @@ local Session = require('insx.kit.Thread.Server.Session')
 ---Return current executing file directory.
 ---@return string
 local function dirname()
-  return debug.getinfo(2, "S").source:sub(2):match("(.*)/")
+  return debug.getinfo(2, 'S').source:sub(2):match('(.*)/')
 end
 
 ---@class insx.kit.Thread.Server
@@ -41,13 +41,13 @@ function Server:connect()
       '--noplugin',
       '-l',
       ('%s/_bootstrap.lua'):format(dirname()),
-      vim.o.runtimepath
+      vim.o.runtimepath,
     },
-    stdio = { self.stdin, self.stdout, self.stderr }
+    stdio = { self.stdin, self.stdout, self.stderr },
   })
   self.session = Session.new(self.stdout, self.stdin)
   return self.session:request('connect', {
-    dispatcher = string.dump(self.dispatcher)
+    dispatcher = string.dump(self.dispatcher),
   })
 end
 
