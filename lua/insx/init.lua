@@ -67,11 +67,13 @@ local function get_recipes(ctx, recipe_sources)
   local recipes = kit.map(recipe_sources, function(recipe_source, index)
     return {
       index = index,
-      enabled = function(ctx)
-        return not recipe_source.enabled or recipe_source.enabled(ctx)
+      ---@param ctx_ insx.Context
+      enabled = function(ctx_)
+        return not recipe_source.enabled or recipe_source.enabled(ctx_)
       end,
-      action = function(ctx)
-        recipe_source.action(ctx)
+      ---@param ctx_ insx.Context
+      action = function(ctx_)
+        recipe_source.action(ctx_)
       end,
       priority = recipe_source.priority or 0,
     }
@@ -386,26 +388,26 @@ insx.with = setmetatable({
     local new_recipe = recipe
     for _, override_ in ipairs(kit.reverse(overrides)) do
       new_recipe = (function(override, prev_recipe)
-            local next_recipe = kit.merge({}, prev_recipe)
+        local next_recipe = kit.merge({}, prev_recipe)
 
-            -- enhance action.
-            if override.action then
-              next_recipe.action = function(ctx)
-                return override.action(prev_recipe.action, ctx)
-              end
-            end
+        -- enhance action.
+        if override.action then
+          next_recipe.action = function(ctx)
+            return override.action(prev_recipe.action, ctx)
+          end
+        end
 
-            -- enhance enabled.
-            if override.enabled then
-              next_recipe.enabled = function(ctx)
-                return override.enabled(prev_recipe.enabled or function()
-                  return true
-                end, ctx)
-              end
-            end
+        -- enhance enabled.
+        if override.enabled then
+          next_recipe.enabled = function(ctx)
+            return override.enabled(prev_recipe.enabled or function()
+              return true
+            end, ctx)
+          end
+        end
 
-            return next_recipe
-          end)(override_, new_recipe)
+        return next_recipe
+      end)(override_, new_recipe)
     end
     return new_recipe
   end
