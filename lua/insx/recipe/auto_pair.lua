@@ -1,29 +1,32 @@
-local kit = require('insx.kit')
+local insx = require('insx')
 
 ---@class insx.recipe.auto_pair.Option
 ---@field public open string
 ---@field public close string
----@field public ignore_pat? string|string[]
 
 ---@param option insx.recipe.auto_pair.Option
 ---@return insx.RecipeSource
 local function auto_pair(option)
-  local ignore_pat = kit.to_array(option and option.ignore_pat or {})
   return {
     ---@param ctx insx.Context
     action = function(ctx)
       ctx.send(option.open .. option.close .. '<Left>')
     end,
-    ---@param ctx insx.Context
-    enabled = function(ctx)
-      for _, pat in ipairs(ignore_pat) do
-        if ctx.match(pat) then
-          return false
-        end
-      end
-      return true
-    end,
   }
 end
 
-return auto_pair
+return setmetatable({
+  ---@param option insx.recipe.auto_pair.Option
+  strings = function(option)
+    local overrides = { insx.with.nomatch([[\\\%#]]) }
+    if option.open == [[']] then
+      table.insert(overrides, insx.with.nomatch([[\a\%#]]))
+    end
+    return insx.with(auto_pair(option), overrides)
+  end,
+}, {
+  ---@param option insx.recipe.auto_pair.Option
+  __call = function(_, option)
+    return auto_pair(option)
+  end,
+})

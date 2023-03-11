@@ -2,6 +2,7 @@ local insx = require('insx')
 local spec = require('insx.spec')
 
 describe('insx.recipe.fast_wrap', function()
+  before_each(insx.clear)
   it('should work', function()
     insx.add(
       ')',

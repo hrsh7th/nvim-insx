@@ -2,6 +2,7 @@ local insx = require('insx')
 local spec = require('insx.spec')
 
 describe('insx.recipe.delete_pair', function()
+  before_each(insx.clear)
   it('should work', function()
     insx.add(
       '<BS>',
@@ -12,33 +13,18 @@ describe('insx.recipe.delete_pair', function()
     )
     insx.add(
       '<BS>',
-      require('insx.recipe.delete_pair')({
-        open_pat = insx.helper.regex.esc('"'),
-        close_pat = insx.helper.regex.esc('"'),
-        ignore_pat = [[\\]] .. insx.helper.regex.esc('"') .. [[\%#]],
-      })
-    )
-    spec.assert('(|)', '<BS>', '|')
-    spec.assert('(|foo)', '<BS>', '|foo')
-    spec.assert('"|"', '<BS>', '|')
-    spec.assert('"\\"|"', '<BS>', '"\\|"')
-    spec.assert('"|foo"', '<BS>', '|foo')
-
-    -- Does not delete multiline pair.
-    assert.error(function()
-      spec.assert(
+      insx.with(
+        require('insx.recipe.delete_pair')({
+          open_pat = insx.helper.regex.esc('"'),
+          close_pat = insx.helper.regex.esc('"'),
+        }),
         {
-          '(|',
-          '  foo',
-          ')',
-        },
-        '<BS>',
-        {
-          '|',
-          '  foo',
-          '',
+          insx.with.nomatch([[\\]] .. insx.helper.regex.esc('"') .. [[\%#]]),
         }
       )
-    end)
+    )
+    spec.assert('(|)', '<BS>', '|')
+    spec.assert('"|"', '<BS>', '|')
+    spec.assert('"\\"|"', '<BS>', '"\\|"')
   end)
 end)

@@ -45,10 +45,9 @@ You can find it in |insx-typings| section. Checkout.
 ==============================================================================
 CMDLINE-SUPPORT                                           *insx-cmdline-support*
 
-This plugin supports *basic* command line pairwise functionality.
+This plugin provides *basic* command line recipes.
 
-However, not all public APIs provided by this plugin support cmdline mode.
-Please refer to the documentation for each function.
+However, all recipes provided by this plugin doesn't support cmdline mode.
 
 
 
@@ -57,179 +56,90 @@ FUNCTION                                                         *insx-function*
 
 ## Public API
 
+                                                                 *insx#expand()*
 insx#expand(char): return~
-- `char`: string
-  - The character for insert-mode mapping (it isn't a form of keycodes).
-- `return`: string
-  - Expanded keycodes.
 
+  Create keys sequence that can be feed via |nvim_feedkeys|.
+
+  - `char`: string
+    - The character for insert-mode mapping (it isn't a form of keycodes).
+  - `return`: string
+    - Expanded keycodes.
+
+                                                                    *insx.add()*
 require('insx').add(char, recipe)~
-- `char`: string
-  - The character for insert-mode mapping.
-- `recipe`: insx.RecipeSource
-  - The action is invoked if enabled returns the true.
-  - The `insx.Context` and `insx.ActionContext` is described in |insx-typings|.
 
+  Add recipe for specific char.
 
-require('insx').with(recipe, override)~
-- `recipe`: insx.RecipeSource
-  - The recipe to override.
-- `override`: insx.Override
-  - The `enabled`, `action` or both can be specified as override object.
+  - `char`: string
+    - The character for insert-mode mapping.
+  - `recipe`: |insx.RecipeSource|
+    - The recipe that can be contained `action` / `enabled` keys.
+    - See |insx.Enabled|, |insx.Action|.
 
->lua
+                                                                *insx.compose()*
+require('insx').compose(recipe_sources): return~
+
+  Compose multiple recipe as one recipe.
+
+  - `recipe_sources`: |insx.RecipeSource|[]
+    - The list of |insx.RecipeSource|.
+  - `return`
+    - The composed |insx.RecipeSource|.
+
+                                                                   *insx.with()*
+require('insx').with(recipe_source, overrides): return~
+
+  Enhance existing recipe with override object that can enhance `action` or `enabled`.
+
+  - `recipe`: |insx.RecipeSource|
+    - The recipe to override.
+  - `overrides`: |insx.Override|[]
+    - The `enabled`, `action` or both can be specified as override object.
+  - `return`
+    - The enhanced |insx.RecipeSource|.
+
+  ----- >lua
   local insx = require('insx')
-
-  -- Setup `auto_pair` recipe.
-  -- Disable for string or comment syntax.
-  insx.add('(', insx.with(require('insx.preset.auto_pair')(), {
-    enabled = function(enabled, ctx)
-      return enabled(ctx) and not insx.helper.syntax.in_string_or_comment()
-    end
+  insx.add('(', insx.with(require('insx.preset.auto_pair')({
+    open = '(',
+    close = ')'
+  }), {
+    insx.with.filetype({ 'html', 'markdown' }),
+    insx.with.in_string(false),
+    insx.with.in_comment(false),
+    insx.with.undopoint(),
   }))
-<
-
+<  -----
+                                                                  *insx.clear()*
 require('insx').clear()~
   Clear all managed mappings.
   NOTE: If mapping was hijacked, it wouldn't cleared.
 
-
+                                                                 *insx.expand()*
 require('insx').expand(char): return~
-- `char`: string
-  - The character for insert-mode mapping.
-- `return`: string?
-  - Return the sendable key notation. (this is applied the replace_termcodes).
 
+  Create keys sequence that can be feed via |nvim_feedkeys|.
 
-
-## Helper API (universal)
-
-require('insx').helper.regex.match(str, pattern): return~
-- `str`: string
-  - The string to match the pattern.
-- `pattern`: string
-  - The vim regex to match the string.
-- `return`: string?
-  - Return string if the specified pattern is matched.
-
-
-require('insx').helper.regex.esc(str): return~
-- `str`: string
-  - The vim regex string to escape.
-- `return`: string
-  - Return string if the specified pattern is matched.
-
-
-require('insx').helper.position.gt(pos1, pos2): return~
-- `pos1`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `pos2`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `return`: boolean
-  - `pos1` < `pos2`
-
-
-require('insx').helper.position.gte(pos1, pos2): return~
-- `pos1`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `pos2`: { [1]: integer, [2]: integer }
-  - position to be compared.
-- `return`: boolean
-  - `pos1` <= `pos2`
-
-
-
-## Helper API (insert-mode only)
-
-
-require('insx').helper.search.Tag~
-- `require('insx').helper.search.Tag.Open`: string
-  - The HTML open tag regex
-- `require('insx').helper.search.Tag.Close`: string
-  - The HTML open tag regex
-
-The enum value that reprecents the regex for HTML Tag elements.
-
-
-require('insx').helper.search.get_next(pattern): return~
-- `pattern`: string
-  - The vim regex to matche the next element.
-- `return`: { [1]: integer, [2]: integer }
-  - Return regex matched position of open element.
-  - The position is 0-origin utf8 byte indicies.
-
-
-require('insx').helper.search.get_pair_open(open, close): return~
-- `open`: string
-  - The vim regex to matche the open element.
-- `close`: string
-  - The vim regex to matche the close element.
-- `return`: { [1]: integer, [2]: integer }
-  - Return regex matched position of open element.
-  - The position is 0-origin utf8 byte indicies.
-
-
-require('insx').helper.search.get_pair_close(open, close): return~
-- `open`: string
-  - The vim regex to matche the open element.
-- `close`: string
-  - The vim regex to matche the close element.
-- `return`: { [1]: integer, [2]: integer }
-  - Return regex matched position of close element.
-  - The position is 0-origin utf8 byte indicies.
-
-
-require('insx').helper.syntax.in_string_or_comment(): return~
-- `return`: boolean
-  - Return the cursor position is string or comment.
-
-
-require('insx').helper.syntax.in_string_or_comment_at_pos(cursor): return~
-- `cursor`: { [1]: integer, [2]: integer }
-  - The position is 0-origin utf8 byte indicies.
-- `return`: boolean
-  - Return the specified position is string or comment.
-
-
-require('insx').helper.syntax.in_string_at_pos(cursor): return~
-- `cursor`: { [1]: integer, [2]: integer }
-  - The position is 0-origin utf8 byte indicies.
-- `return`: boolean
-  - Return the specified position is string.
-
-
-require('insx').helper.syntax.in_comment_at_pos(cursor): return~
-- `cursor`: { [1]: integer, [2]: integer }
-  - The position is 0-origin utf8 byte indicies.
-- `return`: boolean
-  - Return the specified position is string.
-
-
-require('insx').helper.indent.get_one_indent(): return~
-- `return`: string
-  - Return the current buffer's one indent string.
-
-
-require('insx').helper.indent.get_current_indent(): return~
-- `return`: string
-  - Return the current line's indent string.
-
-
-require('insx').helper.indent.make_adjust_keys(param): return~
-- `param.current`: string
-  - curr indentation string.
-- `param.expected`: string
-  - next indentation string.
-- `return`: string
-  - Return the key-sequence to modify the indentation `f` to `t` .
+  - `char`: string
+    - The character for insert-mode mapping.
+  - `return`: string?
+    - Return the sendable key notation. (this is applied the replace_termcodes).
 
 
 
 ==============================================================================
 TYPINGS                                                           *insx-typings*
 
+*insx.Enabled*
+*insx.Action*
+*insx.RecipeSource*
+*insx.Recipe*
+*insx.Context*
+*insx.Override*
+*insx.preset.standard.Config*
 >lua
-  ---@alias insx.Enabled fun(ctx: insx.Context): any
+  ---@alias insx.Enabled fun(ctx: insx.Context): nil
   ---@alias insx.Action fun(ctx: insx.Context): nil
 
   ---@class insx.RecipeSource
@@ -255,8 +165,10 @@ TYPINGS                                                           *insx-typings*
   ---@field public after fun(): string
   ---@field public before fun(): string
   ---@field public match fun(pattern: string): boolean
+  ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
   ---@field public move fun(row: integer, col: integer): nil
+  ---@field public next fun(): nil
 
   ---@class insx.Override
   ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
@@ -273,34 +185,37 @@ TYPINGS                                                           *insx-typings*
 ==============================================================================
 CUSTOM RECIPE                                               *insx-custom-recipe*
 
-The recipe is typed as `insx.RecipeSource`.
-I recommend to define as just `function` that returns `insx.RecipeSource` like this.
+The recipe is `insx.RecipeSource`.
 
->lua
-  -- The example recipe (it is not useful).
+----- >lua
+  -- The example recipe.
   local function your_recipe(option)
     return {
-      ---@param ctx insx.ActionContext
+      ---@param ctx insx.Context
       action = function(ctx)
+        -- Memoizing cursor position.
         local row, col = ctx.row(), ctx.col()
+
         -- You can feed key-sequence via `ctx.send(...)`
         ctx.send('<CR>') -- The `ctx.send` is look like a `synchronous` function.
 
-        -- If the line after `<CR>` was sent is indented, remove it.
-        if ctx.text()match('^%s+') then
+        -- Remove indent if need.
+        if ctx.text():match('^%s+') then
           ctx.send('<C-w>')
         end
 
+        -- Move to memoized cursor position.
         ctx.move(row, col)
       end,
 
       ---@param ctx insx.Context
       enabled = function(ctx)
+        -- This recipe works only if the cursor is EOL.
         return ctx.after() == ''
       end
     }
   end
-<
+<  -----
 
 
 ==============================================================================
@@ -309,76 +224,76 @@ BUILT-IN RECIPE                                           *insx-built_in-recipe*
 The built-in modules provides the pre-defined recipe.
 
 The recipe is
-  - It typed as `insx.RecipeSource`
-  - It can be registered to `require('insx').add(char, insx.RecipeSource)`
+  - It typed as |insx.RecipeSource|
+  - It can be registered via `require('insx').add(char, insx.RecipeSource)`
 
 
                                                          *insx-recipe-auto_pair*
 require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
+
   This recipe provides the basic auto-pairs feature.
+  NOTE: This recipe exports the preset for `strings`.
 
   - `option.open`: string
     - The open token of balanced pair like `(` .
   - `option.close`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string|string[]
-    - The pattern to decide the auto-pair should enabled or not.
-    - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
->lua
+
+  ----- >lua
   require('insx').add('(', require('insx.recipe.auto_pair')({
     open = '(',
     close = ')'
   }))
-<
-  Example: >lua
-    `|` + `(` = `(|)`
-<
+  require('insx').add('(', require('insx.recipe.auto_pair').strings({
+    open = [[']],
+    close = [[']],
+  }) -- preset for strings.
+<  -----
 
                                                        *insx-recipe-delete_pair*
 require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
+
   This recipe provides the basic delete-pairs feature.
-  NOTE: This recipe supports deleting the oneline separated pair.
+  NOTE: This recipe exports the preset for `strings`.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string|string[]
-    - The pattern to decide the delete-pair should enabled or not.
-    - The `ignore_pat = [[\\"\%#]]` will be useful for string delete-pair.
->lua
+
+  ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<BS>', require('insx.recipe.auto_pair')({
     open_pat = esc('('),
-    open_pat = esc(')')
+    close_pat = esc(')')
   }))
-<
-  Example: >lua
-    `(|)` + `<BS>` = `|`
-    `(|foo)` + `<BS>` = `|foo`
-<
+  require('insx').add('<BS>', require('insx.recipe.auto_pair').strings({
+    open_pat = esc([[']]),
+    close_pat = esc([[']])
+  }) -- preset for strings.
+<  -----
 
                                                          *insx-recipe-jump_next*
 require('insx.recipe.jump_next'): fun(option): insx.RecipeSource~
+
   This recipe provides cursor movement feature for the next pattern.
 
   - `option.jump_pat`: string|string[]
     - The jump patterns of string or string array.
     - You can use this recipe to achieve `exit pair feature` .
->lua
+
+----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add(')', require('insx.recipe.jump_next')({
     jump_pat = {
       [[\%#]] .. esc(')') .. [[\zs]]
     }
   }))
-<
-  Example: >lua
-    `(|)` + `)` = `()|`
-<
+<  -----
 
                                                         *insx-recipe-fast_break*
 require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
+
   This recipe provides pair break feature.
 
   - `option.open_pat`: string
@@ -387,29 +302,18 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     - The close token of balanced pair like `)` .
   - `option.split`: boolean
     - Specify enables or not the splitjoin.vim like behavior.
->lua
+  ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<CR>', require('insx.recipe.fast_break')({
     open_pat = esc('('),
-    open_pat = esc(')')
+    close_pat = esc(')')
     split = true,
   }))
-<
-  Example: >lua
-    `(|)` + `<CR>` = `(
-      |
-    )`
-    `(|"string")` + `<CR>` = `(
-      |"string"
-    )`
-    `foo(|bar, baz)` + `<CR>` = `(
-      |bar,
-      baz
-    )`
-<
+<  -----
 
                                                          *insx-recipe-fast_wrap*
 require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
+
   This recipe provides the ability to wrap the next token on the fly.
   NOTE: highly recommend using this recipe along with vim-matchup.
 
@@ -423,133 +327,64 @@ require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
     - The pattern array for deciding to use `%` or not.
   - `option.next_pat`: string|string[]
     - The pattern array for fallback.
->lua
-  local esc = require('insx').helper.regex.esc
+  ----- >lua
   require('insx').add('<C-;>', require('insx.recipe.fast_wrap')({
     close = ')'
   }))
-<
-  Example: >lua
-    `(|)foo` + `<C-;>` = `(foo|)`
-    `(|)"string"` + `<C-;>` = `("string"|)`
-<
+<  -----
 
                                              *insx-recipe-pair_spacing.increase*
 require('insx.recipe.pair_spacing').increase: fun(option): insx.RecipeSource~
+
   This recipe provides the feature that increase&adjust white-space between pairs.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
->lua
+  ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<Space>', require('insx.recipe.pair_spacing').increase({
     open_pat = esc('('),
     close_pat = esc(')')
   }))
-<
-  Example: >lua
-    `(|)` + ` ` = `( | )`
-    `(| )` + ` ` = `( | )`
-    `( |)` + ` ` = `(  |  )`
-<
+<  -----
 
                                              *insx-recipe-pair_spacing.decrease*
 require('insx.recipe.pair_spacing').decrease: fun(option): insx.RecipeSource~
+
   This recipe provides the feature that decrease&adjust white-space between pairs.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
->lua
+  ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<BS>', require('insx.recipe.pair_spacing').decrease({
     open_pat = esc('('),
     close_pat = esc(')')
   }))
-<
-  Example: >lua
-    `( | )` + `<BS>` = `(|)`
-    `(  | )` + `<BS>` = `( | )`
-    `( |  )` + `<BS>` = `(|)`
-<
+<  -----
 
-                                                 *insx-recipe-cmdline.auto_pair*
-require('insx.recipe.universal.auto_pair'): fun(option): insx.RecipeSource~
-  This recipe provides the basic auto-pairs feature.
-
-  - `option.open`: string
-    - The open token of balanced pair like `(` .
-  - `option.close`: string
-    - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string|string[]
-    - The pattern to decide the auto-pair should enabled or not.
-    - The `ignore_pat = [[\\\%#]]` will be useful for string auto-pair.
->lua
-  require('insx').add('(', require('insx.recipe.universal.auto_pair')({
-    open = '(',
-    close = ')',
-    ignore_pat = [[\\\%#]],
-  }), { mode = 'c' })
-<
-
-                                               *insx-recipe-cmdline.delete_pair*
-require('insx.recipe.universal.delete_pair'): fun(option): insx.RecipeSource~
-  This recipe provides the basic delete-pairs feature.
-
-  - `option.open`: string
-    - The open token of balanced pair like `(` .
-  - `option.close`: string
-    - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string|string[]
-    - The pattern to decide the delete-pair should enabled or not.
-    - The `ignore_pat = [[\\"\%#]]` will be useful for string delete-pair.
->lua
-  require('insx').add('<BS>', require('insx.recipe.universal.delete_pair')({
-    open = '(',
-    close = ')',
-  }), { mode = 'c' })
-<
-
-
-                                                  *insx-recipe-cmdline.jump_out*
-require('insx.recipe.universal.jump_out'): fun(option): insx.RecipeSource~
-  This recipe provides the feature that jump out the from inner pair.
-
-  - `option.close`: string
-    - The close token of balanced pair like `)` .
-  - `option.ignore_pat`: string|string[]
-    - The pattern to decide the jump-out should enabled or not.
-    - The `ignore_pat = [[\\\%#]]` will be useful for string delete-pair.
->lua
-  require('insx').add(')', require('insx.recipe.universal.jump_out')({
-    close = ')',
-    ignore_pat = [[\\\%#]],
-  }), { mode = 'c' })
-<
 
 
 ==============================================================================
 TIPS                                                                 *insx-tips*
 
-How to add the undo point?~
+How to add the undopoint?~
 
   You can enhance built-in recipe.
 
->lua
+  ----- >lua
   require('insx').add(
     insx.with(require('insx.recipe.fast_wrap')({
       ...
     }), {
-      action = function(action, ctx)
-        vim.o.undolevels = vim.o.undolevels
-        return action(ctx)
-      end
-    }
+      insx.with.undopoint(false)
+    })
   ))
-<
+<  -----
 
 
 

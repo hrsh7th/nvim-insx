@@ -1,6 +1,8 @@
+local insx = require('insx')
 local spec = require('insx.spec')
 
 describe('insx.preset.standard', function()
+  before_each(insx.clear)
   for _, mode in ipairs({ 'i', 'c' }) do
     local option = { mode = mode }
     it(('should work (%s)'):format(mode), function()
@@ -20,14 +22,6 @@ describe('insx.preset.standard', function()
         if quote == [[']] then
           -- autopairs (auto `'` is disabled if previous char is alphabet).
           spec.assert('I|', quote, ("I'|"):format(quote), option)
-        end
-        -- autopairs (disabled in string or comment).
-        if mode == 'i' then
-          if quote == '"' then
-            spec.assert("local _ = '|'", quote, ("local _ = '%s|'"):format(quote), option)
-          else
-            spec.assert('local _ = "|"', quote, ('local _ = "%s|"'):format(quote), option)
-          end
         end
         -- jumpout.
         spec.assert(('%s|%s'):format(quote, quote), quote, ('%s%s|'):format(quote, quote), option)
