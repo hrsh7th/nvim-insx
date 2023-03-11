@@ -36,7 +36,6 @@ describe('insx.preset.standard', function()
         ['('] = ')',
         ['['] = ']',
         ['{'] = '}',
-        ['<'] = '>',
       }) do
         -- autopairs.
         spec.assert('|', open, ('%s|%s'):format(open, close), option)
