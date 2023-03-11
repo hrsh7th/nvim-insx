@@ -43,7 +43,6 @@ function standard.setup_insert_mode(config)
     ['('] = ')',
     ['['] = ']',
     ['{'] = '}',
-    ['<'] = '>',
   }) do
     -- jump_out
     insx.add(close, require('insx.recipe.jump_next')({
