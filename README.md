@@ -67,7 +67,7 @@ foo(
 
 ### Status
 
-development stage.
+The API is stable except helper related APIs.
 
 bug report & feature request are welcome.
 
