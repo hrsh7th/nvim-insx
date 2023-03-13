@@ -4,10 +4,12 @@ local Session = require('insx.kit.Thread.Server.Session')
 ---Return current executing file directory.
 ---@return string
 local function dirname()
-  return debug.getinfo(2, 'S').source:sub(2):match('(.*)/')
+  return debug.getinfo(2, "S").source:sub(2):match("(.*)/")
 end
 
 ---@class insx.kit.Thread.Server
+---@field public on_request table<string, fun(params: table): any>
+---@field public on_notification table<string, fun(params: table): any>
 ---@field private stdin uv.uv_pipe_t
 ---@field private stdout uv.uv_pipe_t
 ---@field private stderr uv.uv_pipe_t
@@ -28,6 +30,8 @@ function Server.new(dispatcher)
   self.dispatcher = dispatcher
   self.process = nil
   self.session = nil
+  self.on_request = {}
+  self.on_notification = {}
   return self
 end
 
@@ -41,13 +45,23 @@ function Server:connect()
       '--noplugin',
       '-l',
       ('%s/_bootstrap.lua'):format(dirname()),
-      vim.o.runtimepath,
+      vim.o.runtimepath
     },
-    stdio = { self.stdin, self.stdout, self.stderr },
+    stdio = { self.stdin, self.stdout, self.stderr }
   })
+
   self.session = Session.new(self.stdout, self.stdin)
+  for k, v in pairs(self.on_request) do
+    self.session.on_request[k] = v
+  end
+  for k, v in pairs(self.on_notification) do
+    self.session.on_notification[k] = v
+  end
+  self.on_request = self.session.on_request
+  self.on_notification = self.session.on_notification
+
   return self.session:request('connect', {
-    dispatcher = string.dump(self.dispatcher),
+    dispatcher = string.dump(self.dispatcher)
   })
 end
 

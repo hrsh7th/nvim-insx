@@ -4,66 +4,64 @@ Flexible key mapping manager.
 
 <video src="https://user-images.githubusercontent.com/629908/212733495-f8e5486c-215c-4c01-b53c-b720b9779c3f.mov" width="100%"></video>
 
-### Warning
+## Warning
 
-- This plugin does not support `dot-repeat`.
-  - The macro have the highest priority.
+- The *basic* recipes supports dot-repeat
+  - However, advanced recipes don't support dot-repeat.
 - This plugin is *usually* works as expected.
   - Does not aim to support to always work as expected because this plugin uses RegExp 😅
 - It is more convenient when used with vim-matchup.
   - The demo image uses with vim-matchup. 👍
-- This plugin provides cmdline pairwise features.
-  - But it's limited support. Not all public APIs provided by this plugin support cmdline mode.
+- This plugin provides *basic* cmdline-mode pairwise features.
+  - The advanced recipes aren't support cmdline-mode.
 
-### Usage
+## Usage
 
 This plugin does not provide any default mappings.
-
 You should define mapping by yourself like this.
+
+#### Use preset.
 
 ```lua
 require('insx.preset.standard').setup()
 ```
 
-The standard preset enables some of the advanced features.
+#### Use recipe.
 
-#### 1. The `<CR>` behaves like a splitjoin
+```lua
+local insx = require('insx')
 
-```ts
-foo(|arg1, arg2, [1, 2, 3])
-```
-
-```
-<CR>
-```
-
-↓↓↓
-
-```ts
-foo(
-  |arg1,
-  arg2,
-  [1, 2, 3]
+insx.add(
+  "'",
+  insx.with(require('insx.recipe.auto_pair')({
+    open = "'",
+    close = "'"
+  }), {
+    insx.with.in_string(false),
+    insx.with.in_comment(false),
+    insx.with.nomatch([[\\\%#]]),
+    insx.with.nomatch([[\a\%#]])
+  })
 )
 ```
 
-#### 2. The `<C-]>` behaves fast wrapping.
+## Create your own recipe.
 
-```ts
-(|)foo(arg1, arg2, [1, 2, 3])
+```lua
+-- Simple pair deletion recipe.
+local function your_recipe(option)
+  return {
+    action = function(ctx)
+      ctx.send('<BS><Right><BS>')
+    end,
+    enabled = function(ctx)
+      return ctx.match([[(\%#)]])
+    end
+  }
+end
 ```
 
-```
-<C-]>
-````
-
-↓↓↓
-
-```ts
-(foo(arg1, arg2, [1, 2, 3])|)
-```
-
-
+The standard preset enables some of the advanced features.
 
 ### Status
 
