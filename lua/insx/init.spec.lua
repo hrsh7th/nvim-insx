@@ -104,8 +104,8 @@ describe('insx', function()
     end)
   end)
 
-  describe('ctx.backspace', function ()
-    it('should remove before text', function ()
+  describe('ctx.backspace', function()
+    it('should remove before text', function()
       insx.add('<CR>', {
         action = function(ctx)
           ctx.backspace([[\W*]])
@@ -115,8 +115,8 @@ describe('insx', function()
     end)
   end)
 
-  describe('ctx.delete', function ()
-    it('should remove after text', function ()
+  describe('ctx.delete', function()
+    it('should remove after text', function()
       insx.add('<CR>', {
         action = function(ctx)
           ctx.delete([[\W*]])
