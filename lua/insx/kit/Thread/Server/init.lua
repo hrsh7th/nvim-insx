@@ -5,7 +5,7 @@ local Session = require('insx.kit.Thread.Server.Session')
 ---Return current executing file directory.
 ---@return string
 local function dirname()
-  return debug.getinfo(2, 'S').source:sub(2):match('(.*)/')
+  return debug.getinfo(2, "S").source:sub(2):match("(.*)/")
 end
 
 ---@class insx.kit.Thread.Server
@@ -32,17 +32,22 @@ end
 ---Connect to server.
 ---@return insx.kit.Async.AsyncTask
 function Server:connect()
-  self.process = uv.spawn('nvim', {
-    cwd = uv.cwd(),
-    args = {
-      '--headless',
-      '--noplugin',
-      '-l',
-      ('%s/_bootstrap.lua'):format(dirname()),
-      vim.o.runtimepath,
-    },
-    stdio = { self.stdin, self.stdout, self.stderr },
-  })
+  return Async.run(function()
+    Async.schedule():await()
+    local stdin = uv.new_pipe()
+    local stdout = uv.new_pipe()
+    local stderr = uv.new_pipe()
+    self.process = uv.spawn('nvim', {
+      cwd = uv.cwd(),
+      args = {
+        '--headless',
+        '--noplugin',
+        '-l',
+        ('%s/_bootstrap.lua'):format(dirname()),
+        vim.o.runtimepath
+      },
+      stdio = { stdin, stdout, stderr }
+    })
 
     stderr:read_start(function(err, data)
       if err then
@@ -51,9 +56,25 @@ function Server:connect()
       print(data)
     end)
 
-  return self.session:request('connect', {
-    dispatcher = string.dump(self.dispatcher),
-  })
+    self.session:connect(stdout, stdin)
+    return self.session:request('connect', {
+      dispatcher = string.dump(self.dispatcher)
+    }):await()
+  end)
+end
+
+---Add request handler.
+---@param method string
+---@param callback fun(params: table): any
+function Server:on_request(method, callback)
+  self.session:on_request(method, callback)
+end
+
+---Add notification handler.
+---@param method string
+---@param callback fun(params: table)
+function Server:on_notification(method, callback)
+  self.session:on_notification(method, callback)
 end
 
 --- Send request.
