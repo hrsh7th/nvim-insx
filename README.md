@@ -20,13 +20,13 @@ Flexible key mapping manager.
 This plugin does not provide any default mappings.
 You should define mapping by yourself like this.
 
-#### Use preset.
+#### Use preset
 
 ```lua
 require('insx.preset.standard').setup()
 ```
 
-#### Use recipe.
+#### Use recipe
 
 ```lua
 local insx = require('insx')
@@ -45,16 +45,23 @@ insx.add(
 )
 ```
 
-## Create your own recipe.
+## Create your own recipe
 
 ```lua
 -- Simple pair deletion recipe.
 local function your_recipe(option)
   return {
     action = function(ctx)
+      if option.allow_space then
+        ctx.backspace([[\s*]])
+        ctx.delete([[\s*]])
+      end
       ctx.send('<BS><Right><BS>')
     end,
     enabled = function(ctx)
+      if option.allow_space then
+        return ctx.match([[(\s*\%#\s*)]])
+      end
       return ctx.match([[(\%#)]])
     end
   }

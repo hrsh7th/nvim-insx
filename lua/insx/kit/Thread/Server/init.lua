@@ -1,4 +1,5 @@
 local uv = require('luv')
+local Async = require('insx.kit.Async')
 local Session = require('insx.kit.Thread.Server.Session')
 
 ---Return current executing file directory.
@@ -8,8 +9,6 @@ local function dirname()
 end
 
 ---@class insx.kit.Thread.Server
----@field public on_request table<string, fun(params: table): any>
----@field public on_notification table<string, fun(params: table): any>
 ---@field private stdin uv.uv_pipe_t
 ---@field private stdout uv.uv_pipe_t
 ---@field private stderr uv.uv_pipe_t
@@ -24,14 +23,9 @@ Server.__index = Server
 ---@return insx.kit.Thread.Server
 function Server.new(dispatcher)
   local self = setmetatable({}, Server)
-  self.stdin = uv.new_pipe()
-  self.stdout = uv.new_pipe()
-  self.stderr = uv.new_pipe()
   self.dispatcher = dispatcher
+  self.session = Session.new()
   self.process = nil
-  self.session = nil
-  self.on_request = {}
-  self.on_notification = {}
   return self
 end
 
@@ -50,15 +44,12 @@ function Server:connect()
     stdio = { self.stdin, self.stdout, self.stderr },
   })
 
-  self.session = Session.new(self.stdout, self.stdin)
-  for k, v in pairs(self.on_request) do
-    self.session.on_request[k] = v
-  end
-  for k, v in pairs(self.on_notification) do
-    self.session.on_notification[k] = v
-  end
-  self.on_request = self.session.on_request
-  self.on_notification = self.session.on_notification
+    stderr:read_start(function(err, data)
+      if err then
+        error(err)
+      end
+      print(data)
+    end)
 
   return self.session:request('connect', {
     dispatcher = string.dump(self.dispatcher),

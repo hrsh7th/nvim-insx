@@ -111,6 +111,20 @@ require('insx').with(recipe_source, overrides): return~
     insx.with.undopoint(),
   }))
 <  -----
+
+  This method also provides built-in override helpers.
+
+  - `insx.with.match(pattern)`
+  - `insx.with.nomatch(pattern)`
+    - Enhance enabled function with vim regex pattern.
+  - `insx.with.filetype(filetype|filetype[])`
+    - Enhance enabled function with filetype.
+  - `insx.with.in_string(boolean)`
+  - `insx.with.in_comment(boolean)`
+    - Enhance enabled function with syntax or not.
+  - `insx.with.undopoint()`
+    - Enhance action function with undopoint.
+
                                                                   *insx.clear()*
 require('insx').clear()~
   Clear all managed mappings.
@@ -167,6 +181,8 @@ TYPINGS                                                           *insx-typings*
   ---@field public match fun(pattern: string): boolean
   ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
+  ---@field public delete fun(pattern: string): string
+  ---@field public backspace fun(pattern: string): string
   ---@field public move fun(row: integer, col: integer): nil
   ---@field public next fun(): nil
 

@@ -104,6 +104,28 @@ describe('insx', function()
     end)
   end)
 
+  describe('ctx.backspace', function ()
+    it('should remove before text', function ()
+      insx.add('<CR>', {
+        action = function(ctx)
+          ctx.backspace([[\W*]])
+        end,
+      })
+      spec.assert('-=|a', '<CR>', '|a')
+    end)
+  end)
+
+  describe('ctx.delete', function ()
+    it('should remove after text', function ()
+      insx.add('<CR>', {
+        action = function(ctx)
+          ctx.delete([[\W*]])
+        end,
+      })
+      spec.assert('a|-=', '<CR>', 'a|')
+    end)
+  end)
+
   describe('ctx.match', function()
     it('should match cursor before text', function()
       insx.add('<CR>', {
@@ -173,7 +195,7 @@ describe('insx', function()
           spec.assert(case.setup, '<CR>', case.setup, {
             mode = mode,
           })
-          vim.pretty_print({ case.setup, case.pattern })
+          vim.print({ case.setup, case.pattern })
           assert.are.same(case.expected, actual)
         end
       end

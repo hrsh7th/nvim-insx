@@ -37,6 +37,8 @@ local right = Keymap.termcodes('<Right>')
 ---@field public match fun(pattern: string): boolean
 ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
+---@field public delete fun(pattern: string): string
+---@field public backspace fun(pattern: string): string
 ---@field public move fun(row: integer, col: integer): nil
 ---@field public next fun(): nil
 
@@ -175,6 +177,24 @@ local function create_context(char)
         end
         return key_specifier
       end, kit.to_array(key_specifiers))):await()
+    end,
+    delete = function(pattern)
+      local _, e = vim.regex('^' .. pattern):match_str(ctx.after())
+      if e then
+        local text = ctx.text():sub(ctx.col() + 1, ctx.col() + e)
+        if text then
+          ctx.send(('<Del>'):rep(vim.fn.strchars(text, true)))
+        end
+      end
+    end,
+    backspace = function(pattern)
+      local s = vim.regex(pattern .. '$'):match_str(ctx.before())
+      if s then
+        local text = ctx.text():sub(s + 1, ctx.col())
+        if text then
+          ctx.send(('<Left><Del>'):rep(vim.fn.strchars(text, true)))
+        end
+      end
     end,
     move = function(row, col)
       if ctx.row() ~= row then
