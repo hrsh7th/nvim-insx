@@ -21,7 +21,7 @@ local function fast_break(option)
       local open_indent = helper.indent.get_current_indent()
 
       -- Open side.
-      ctx.send(ctx.char)
+      ctx.send('<CR>')
       ctx.send(helper.indent.make_ajudst_keys({
         current = helper.indent.get_current_indent(),
         expected = open_indent .. helper.indent.get_one_indent(),
@@ -32,7 +32,7 @@ local function fast_break(option)
       local close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
       assert(close_pos)
       ctx.move(close_pos[1], close_pos[2])
-      ctx.send(ctx.char)
+      ctx.send('<CR>')
       ctx.send(helper.indent.make_ajudst_keys({
         current = helper.indent.get_current_indent(),
         expected = open_indent,
@@ -45,7 +45,7 @@ local function fast_break(option)
 
         local main_close_pos = helper.search.get_pair_close(option.open_pat, option.close_pat)
         while true do
-          local comma_pos = helper.search.get_next([[,\s*\zs]])
+          local comma_pos = ctx.search([[\%#.\{-},\s*\zs]])
           if not comma_pos or comma_pos[1] ~= ctx.row() then
             break
           end
@@ -60,10 +60,8 @@ local function fast_break(option)
             end
           end
           if not inner then
-            if ctx.before():match('%s+$') then
-              ctx.send(('<Left><Del>'):rep(vim.fn.strchars(ctx.before():match('%s+$'), true)))
-            end
-            ctx.send(ctx.char)
+            ctx.backspace([[\s*]])
+            ctx.send('<CR>')
             ctx.send(helper.indent.make_ajudst_keys({
               current = helper.indent.get_current_indent(),
               expected = open_indent .. helper.indent.get_one_indent(),
@@ -79,11 +77,11 @@ local function fast_break(option)
       if helper.syntax.in_string_or_comment() then
         return false
       end
-      if not helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]]) then
+      if not ctx.match(option.open_pat .. [[\s*\%#]]) then
         return false
       end
       if not (option and option.split) then
-        if not helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat) then
+        if not ctx.match([[\%#\s*]] .. option.close_pat) then
           return false
         end
       end
