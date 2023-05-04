@@ -43,6 +43,7 @@ local right = Keymap.termcodes('<Right>')
 ---@field public next fun(): nil
 
 ---@class insx.Override
+---@field public priority? number
 ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
 ---@field public action? fun(action: insx.Action, ctx: insx.Context): nil
 
@@ -392,6 +393,13 @@ insx.with = setmetatable({
       end,
     }
   end,
+  ---Set priority.
+  ---@param priority number
+  priority = function(priority)
+    return {
+      priority = priority,
+    }
+  end,
 }, {
   ---Enhance existing recipe with overrides.
   ---@param recipe insx.RecipeSource
@@ -407,6 +415,10 @@ insx.with = setmetatable({
     for _, override_ in ipairs(kit.reverse(overrides)) do
       new_recipe = (function(override, prev_recipe)
         local next_recipe = kit.merge({}, prev_recipe)
+
+        if type(override.priority) == 'number' then
+          next_recipe.priority = override.priority
+        end
 
         -- enhance action.
         if override.action then

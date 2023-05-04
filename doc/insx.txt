@@ -105,6 +105,7 @@ require('insx').with(recipe_source, overrides): return~
     open = '(',
     close = ')'
   }), {
+    insx.with.priority(10),
     insx.with.filetype({ 'html', 'markdown' }),
     insx.with.in_string(false),
     insx.with.in_comment(false),
@@ -114,16 +115,18 @@ require('insx').with(recipe_source, overrides): return~
 
   This method also provides built-in override helpers.
 
-  - `insx.with.match(pattern)`
-  - `insx.with.nomatch(pattern)`
+  - `insx.with.match(pattern: string)`
+  - `insx.with.nomatch(pattern: string)`
     - Enhance enabled function with vim regex pattern.
-  - `insx.with.filetype(filetype|filetype[])`
+  - `insx.with.filetype(filetypes: filetype|filetype[])`
     - Enhance enabled function with filetype.
-  - `insx.with.in_string(boolean)`
-  - `insx.with.in_comment(boolean)`
+  - `insx.with.in_string(in_or_out: boolean)`
+  - `insx.with.in_comment(in_or_out: boolean)`
     - Enhance enabled function with syntax or not.
-  - `insx.with.undopoint()`
+  - `insx.with.undopoint(pre_or_post?: boolean)`
     - Enhance action function with undopoint.
+  - `insx.with.priority(priority: number)`
+    - Enhance priority value.
 
                                                                   *insx.clear()*
 require('insx').clear()~
@@ -344,7 +347,7 @@ require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
   - `option.next_pat`: string|string[]
     - The pattern array for fallback.
   ----- >lua
-  require('insx').add('<C-;>', require('insx.recipe.fast_wrap')({
+  require('insx').add('<C-]>', require('insx.recipe.fast_wrap')({
     close = ')'
   }))
 <  -----
