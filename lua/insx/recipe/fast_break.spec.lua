@@ -130,16 +130,13 @@ describe('insx.recipe.fast_break', function()
       '<CR>',
       require('insx.recipe.fast_break')({
         open_pat = [[```\w*]],
-        close_pat = [[```]]
+        close_pat = [[```]],
       })
     )
-    spec.assert({ '```bash|```' },
-      '<CR>',
-      {
-        '```bash',
-        '  |',
-        '```'
-      }
-    )
+    spec.assert({ '```bash|```' }, '<CR>', {
+      '```bash',
+      '  |',
+      '```',
+    })
   end)
 end)

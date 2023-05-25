@@ -32,7 +32,7 @@ describe('insx.helper.search', function()
       assert.are.same({ 0, 2 }, insx.helper.search.get_pair_open('"', '"'))
       assert.are.same({ 0, 5 }, insx.helper.search.get_pair_close('"', '"'))
     end)
-    assert_check("```bash|```", function()
+    assert_check('```bash|```', function()
       assert.are.same({ 0, 7 }, insx.helper.search.get_pair_open([[```\w*]], '```'))
       assert.are.same({ 0, 7 }, insx.helper.search.get_pair_close([[```\w*]], '```'))
     end, {
