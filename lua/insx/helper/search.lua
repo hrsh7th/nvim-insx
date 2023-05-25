@@ -1,4 +1,5 @@
 local syntax = require('insx.helper.syntax')
+local RegExp = require('insx.kit.Vim.RegExp')
 
 ---@param open string
 ---@param close string
@@ -24,6 +25,12 @@ search.Tag = {
 ---@param close string
 ---@return { [1]: integer, [2]: integer }?
 function search.get_pair_open(open, close)
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local text_before = vim.api.nvim_get_current_line():sub(1, cursor[2])
+  if RegExp.get(open .. [[\m$]]):match_str(text_before) then
+    return { cursor[1] - 1, cursor[2] }
+  end
+
   local open_pos = get_pair(open .. [[\zs]], close, 'Wbnzc')
   if open_pos[1] ~= 0 then
     return { open_pos[1] - 1, open_pos[2] - 1 }
@@ -38,6 +45,12 @@ function search.get_pair_close(open, close)
   if open == close then
     -- hack for string search... add test-case if met the problem.
     return search.get_next([[\\\@<!]] .. open)
+  end
+
+  local cursor = vim.api.nvim_win_get_cursor(0)
+  local text_after = vim.api.nvim_get_current_line():sub(cursor[2] + 1)
+  if RegExp.get([[^]] .. close):match_str(text_after) then
+    return { cursor[1] - 1, cursor[2] }
   end
 
   local pos = get_pair(open, close, 'Wnzc')

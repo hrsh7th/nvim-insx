@@ -124,5 +124,22 @@ describe('insx.recipe.fast_break', function()
         tabstop = 4,
       }
     )
+
+    insx.clear()
+    insx.add(
+      '<CR>',
+      require('insx.recipe.fast_break')({
+        open_pat = [[```\w*]],
+        close_pat = [[```]]
+      })
+    )
+    spec.assert({ '```bash|```' },
+      '<CR>',
+      {
+        '```bash',
+        '  |',
+        '```'
+      }
+    )
   end)
 end)
