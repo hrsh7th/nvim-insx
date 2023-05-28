@@ -37,8 +37,9 @@ local right = Keymap.termcodes('<Right>')
 ---@field public match fun(pattern: string): boolean
 ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
----@field public delete fun(pattern: string): string
----@field public backspace fun(pattern: string): string
+---@field public delete fun(pattern: string): nil
+---@field public backspace fun(pattern: string): nil
+---@field public remove fun(pattern: string): nil
 ---@field public move fun(row: integer, col: integer): nil
 ---@field public next fun(): nil
 
@@ -180,26 +181,45 @@ local function create_context(char)
       end, kit.to_array(key_specifiers))):await()
     end,
     delete = function(pattern)
-      local _, e = vim.regex('^' .. pattern):match_str(ctx.after())
-      if e then
-        local text = ctx.text():sub(ctx.col() + 1, ctx.col() + e)
-        if text then
-          ctx.send(('<Del>'):rep(vim.fn.strchars(text, true)))
-        end
-      end
+      ctx.remove([[\%#]] .. pattern)
     end,
     backspace = function(pattern)
-      local s = vim.regex(pattern .. '$'):match_str(ctx.before())
-      if s then
-        local text = ctx.text():sub(s + 1, ctx.col())
-        if text then
-          ctx.send(('<Left><Del>'):rep(vim.fn.strchars(text, true)))
+      ctx.remove(pattern .. [[\%#]])
+    end,
+    remove = function(pattern)
+      local pos = pattern:find([[\%#]], 1, true)
+      if not pos then
+        error('pattern must contain cursor position (\\%#)')
+      end
+
+      local keys = ''
+
+      local before_pat = pattern:sub(1, pos - 1)
+      if before_pat then
+        local before_s = vim.regex(before_pat .. '$'):match_str(ctx.before())
+        if before_s then
+          local text = ctx.text():sub(before_s + 1, ctx.col())
+          if text then
+            keys = keys .. ('<Left><Del>'):rep(vim.fn.strchars(text, true))
+          end
         end
       end
+
+      local after_pat = pattern:sub(pos + 3)
+      if after_pat then
+        local _, after_e = vim.regex('^' .. after_pat):match_str(ctx.after())
+        if after_e then
+          local text = ctx.text():sub(ctx.col() + 1, ctx.col() + after_e)
+          if text then
+            keys = keys .. ('<Del>'):rep(vim.fn.strchars(text, true))
+          end
+        end
+      end
+      ctx.send(keys)
     end,
     move = function(row, col)
       if ctx.row() ~= row then
-        vim.api.nvim_win_set_cursor(0, { row + 1, col })
+      vim.api.nvim_win_set_cursor(0, { row + 1, col })
       else
         local diff = col - ctx.col()
         if diff > 0 then
