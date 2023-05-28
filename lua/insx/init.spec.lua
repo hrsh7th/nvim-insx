@@ -126,6 +126,17 @@ describe('insx', function()
     end)
   end)
 
+  describe('ctx.remove', function()
+    it('should remove cursor around text', function()
+      insx.add('<CR>', {
+        action = function(ctx)
+          ctx.remove([[.\%#.]])
+        end,
+      })
+      spec.assert('a-|=', '<CR>', 'a|')
+    end)
+  end)
+
   describe('ctx.match', function()
     it('should match cursor before text', function()
       insx.add('<CR>', {

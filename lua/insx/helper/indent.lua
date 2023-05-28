@@ -18,7 +18,7 @@ end
 ---Return key sequence to ajudst indentation between from and to.
 ---@param param { current: string, expected: string }
 ---@return string
-function indent.make_ajudst_keys(param)
+function indent.adjust(param)
   local one_indent = indent.get_one_indent()
   local c_count = #param.current:gsub(vim.pesc(one_indent), '\t'):gsub(' ', '')
   local e_count = #param.expected:gsub(vim.pesc(one_indent), '\t'):gsub(' ', '')
