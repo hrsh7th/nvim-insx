@@ -1,6 +1,6 @@
 local helper = require('insx.helper')
 
-local ATTR_OPEN = [=[[[:alpha:]:]\+\%(=\)\?]=]
+local ATTR_OPEN = [=[[[:alpha:]:-]\+\%(=\)\?]=]
 
 ---@param option {}
 return function(option)
