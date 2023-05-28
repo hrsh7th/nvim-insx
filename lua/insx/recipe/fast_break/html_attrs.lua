@@ -66,6 +66,6 @@ return function(option)
         return false
       end
       return ctx.match([[<\w\+\s*\%#[^>]\+>]])
-    end
+    end,
   }
 end

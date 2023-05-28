@@ -52,4 +52,3 @@ describe('insx.recipe.fast_break.arguments', function()
     )
   end)
 end)
-

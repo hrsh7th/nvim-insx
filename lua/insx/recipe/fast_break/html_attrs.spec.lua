@@ -69,4 +69,3 @@ describe('insx.recipe.fast_break.html_attrs', function()
     )
   end)
 end)
-

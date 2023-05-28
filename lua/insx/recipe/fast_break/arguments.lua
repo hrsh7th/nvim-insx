@@ -61,6 +61,6 @@ return function(option)
         return false
       end
       return true
-    end
+    end,
   }
 end

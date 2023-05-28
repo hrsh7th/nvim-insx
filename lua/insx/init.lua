@@ -219,7 +219,7 @@ local function create_context(char)
     end,
     move = function(row, col)
       if ctx.row() ~= row then
-      vim.api.nvim_win_set_cursor(0, { row + 1, col })
+        vim.api.nvim_win_set_cursor(0, { row + 1, col })
       else
         local diff = col - ctx.col()
         if diff > 0 then
