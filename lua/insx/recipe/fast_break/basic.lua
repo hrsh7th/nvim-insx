@@ -7,8 +7,7 @@ local function basic(option)
     ---@param ctx insx.Context
     action = function(ctx)
       -- Remove spaces.
-      ctx.backspace([[\s*\%#]])
-      ctx.delete([[\%#\s*]])
+      ctx.remove([[\s*\%#\s*]])
 
       -- Open side.
       local open_indent = helper.indent.get_current_indent()

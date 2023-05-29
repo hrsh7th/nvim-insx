@@ -53,8 +53,7 @@ local function your_recipe(option)
   return {
     action = function(ctx)
       if option.allow_space then
-        ctx.backspace([[\s*]])
-        ctx.delete([[\s*]])
+        ctx.remove([[\s*\%#\s*]])
       end
       ctx.send('<BS><Right><BS>')
     end,
