@@ -167,6 +167,9 @@ local function create_context(char)
       error('ctx.next` can only be called in `recipe.action`.')
     end,
     send = function(key_specifiers)
+      if key_specifiers == '' then
+        return
+      end
       Keymap.send(vim.tbl_map(function(key_specifier)
         if type(key_specifier) == 'string' then
           key_specifier = { keys = key_specifier, remap = false }
@@ -215,6 +218,7 @@ local function create_context(char)
           end
         end
       end
+
       ctx.send(keys)
     end,
     move = function(row, col)
