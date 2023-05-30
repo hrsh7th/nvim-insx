@@ -51,7 +51,7 @@ local right = Keymap.termcodes('<Right>')
 ---@class insx.preset.standard.Config
 ---@field public cmdline? { enabled?: boolean }
 ---@field public spacing? { enabled?: boolean }
----@field public fast_break? { enabled?: boolean, split?: boolean }
+---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, arguments?: boolean }
 ---@field public fast_wrap? { enabled?: boolean }
 
 ---@type table<string, table<string, insx.RecipeSource[]>>

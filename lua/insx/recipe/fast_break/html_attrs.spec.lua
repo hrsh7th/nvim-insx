@@ -10,7 +10,8 @@ describe('insx.recipe.fast_break.html_attrs', function()
       require('insx.recipe.fast_break')({
         open_pat = insx.helper.regex.esc('('),
         close_pat = insx.helper.regex.esc(')'),
-        split = true,
+        html_attrs = true,
+        arguments = true,
       })
     )
     spec.assert(

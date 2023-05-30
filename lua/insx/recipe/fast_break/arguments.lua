@@ -1,5 +1,4 @@
 local helper = require('insx.helper')
-local basic = require('insx.recipe.fast_break.basic')
 
 local PAIRS_MAP = {
   ['('] = ')',
@@ -8,15 +7,37 @@ local PAIRS_MAP = {
   ['<'] = '>',
 }
 
----@param option insx.recipe.fast_break.Option
-return function(option)
+---@class insx.recipe.fast_break.arguments.Option
+---@field public open_pat string
+---@field public close_pat string
+
+---@param option insx.recipe.fast_break.arguments.Option
+---@return insx.RecipeSource
+local function arguments(option)
   return {
     ---@param ctx insx.Context
     action = function(ctx)
-      local open_indent = helper.indent.get_current_indent()
+      -- Remove spaces.
+      ctx.remove([[\s*\%#\s*]])
 
-      -- Invoke basic action.
-      basic(option).action(ctx)
+      -- Open side.
+      local open_indent = helper.indent.get_current_indent()
+      ctx.send('<CR>')
+      ctx.send(helper.indent.adjust({
+        current = helper.indent.get_current_indent(),
+        expected = open_indent .. helper.indent.get_one_indent(),
+      }))
+
+      -- Close side.
+      local row, col = ctx.row(), ctx.col()
+      local close_pos = assert(helper.search.get_pair_close(option.open_pat, option.close_pat))
+      ctx.move(close_pos[1], close_pos[2])
+      ctx.send('<CR>')
+      ctx.send(helper.indent.adjust({
+        current = helper.indent.get_current_indent(),
+        expected = open_indent,
+      }))
+      ctx.move(row, col)
 
       -- Split behavior.
       local memo_row, memo_col = ctx.row(), ctx.col()
@@ -50,9 +71,6 @@ return function(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      if not option.split then
-        return false
-      end
       if not ctx.match(option.open_pat .. [[\s*\%#]]) then
         return false
       end
@@ -64,3 +82,5 @@ return function(option)
     end,
   }
 end
+
+return arguments

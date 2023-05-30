@@ -103,7 +103,9 @@ function standard.setup_insert_mode(config)
         require('insx.recipe.fast_break')({
           open_pat = esc(open),
           close_pat = esc(close),
-          split = kit.get(config, { 'fast_break', 'split' }, true),
+          split = kit.get(config, { 'fast_break', 'split' }, nil),
+          html_attrs = kit.get(config, { 'fast_break', 'html_attrs' }, true),
+          arguments = kit.get(config, { 'fast_break', 'arguments' }, true),
         })
       )
     end

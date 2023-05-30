@@ -1,8 +1,14 @@
 local helper = require('insx.helper')
 
----@param option insx.recipe.fast_break.Option
+---@class insx.recipe.fast_break.basic.Option
+---@field public open_pat string
+---@field public close_pat string
+---@field public indent? number # default=1
+
+---@param option insx.recipe.fast_break.basic.Option
 ---@return insx.RecipeSource
 local function basic(option)
+  local indent = option.indent or 1
   return {
     ---@param ctx insx.Context
     action = function(ctx)
@@ -14,7 +20,7 @@ local function basic(option)
       ctx.send('<CR>')
       ctx.send(helper.indent.adjust({
         current = helper.indent.get_current_indent(),
-        expected = open_indent .. helper.indent.get_one_indent(),
+        expected = open_indent .. helper.indent.get_one_indent():rep(indent),
       }))
 
       -- Close side.

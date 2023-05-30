@@ -10,7 +10,6 @@ describe('insx.recipe.fast_break.basic', function()
       require('insx.recipe.fast_break')({
         open_pat = insx.helper.regex.esc('('),
         close_pat = insx.helper.regex.esc(')'),
-        split = false,
       })
     )
     spec.assert(
@@ -69,7 +68,6 @@ describe('insx.recipe.fast_break.basic', function()
       require('insx.recipe.fast_break')({
         open_pat = [[```\w*]],
         close_pat = [[```]],
-        split = false,
       })
     )
     spec.assert({ '```bash|```' }, '<CR>', {

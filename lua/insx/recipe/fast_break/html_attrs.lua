@@ -2,8 +2,11 @@ local helper = require('insx.helper')
 
 local ATTR_OPEN = [=[[[:alpha:]:-]\+\%(=\)\?]=]
 
----@param option {}
-return function(option)
+---@class insx.recipe.fast_break.html_attrs.Option
+
+---@param _ insx.recipe.fast_break.html_attrs.Option
+---@return insx.RecipeSource
+local function html_attrs(_)
   return {
     ---@param ctx insx.Context
     action = function(ctx)
@@ -62,10 +65,9 @@ return function(option)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      if not option.split then
-        return false
-      end
       return ctx.match([[<\w\+\s*\%#[^>]\+>]])
     end,
   }
 end
+
+return html_attrs
