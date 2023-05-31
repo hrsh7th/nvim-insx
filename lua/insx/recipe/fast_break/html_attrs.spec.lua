@@ -42,29 +42,29 @@ describe('insx.recipe.fast_break.html_attrs', function()
     )
     spec.assert(
       {
-        '<div |id="foo" title={<Title id="foo-title" baz />} class="bar" button>',
+        '<div |id="foo" title={<Title id="foo-title" baz />} button class="bar">',
       },
       '<CR>',
       {
         '<div',
         '  |id="foo"',
         '  title={<Title id="foo-title" baz />}',
-        '  class="bar"',
         '  button',
+        '  class="bar"',
         '>',
       }
     )
     spec.assert(
       {
-        '<div |id="foo" title={<Title id="foo-title" baz />} class="bar" button />',
+        '<div |id="foo" title={<Title id="foo-title" baz />} button class="bar" />',
       },
       '<CR>',
       {
         '<div',
         '  |id="foo"',
         '  title={<Title id="foo-title" baz />}',
-        '  class="bar"',
         '  button',
+        '  class="bar"',
         '/>',
       }
     )

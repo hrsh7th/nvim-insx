@@ -24,12 +24,14 @@ local function html_attrs(_)
       -- Recursive html attrs.
       local memo_row, memo_col = ctx.row(), ctx.col()
       while true do
-        -- Move to ATTR_OPEN and remove unnecessary spaces.
+        -- Move to ATTR_OPEN.
         local attr_end_pos = ctx.search([[\%#\s*]] .. ATTR_OPEN .. [[\s*\zs]])
         if not attr_end_pos then
           break
         end
         ctx.move(attr_end_pos[1], attr_end_pos[2])
+
+        local is_flag_attribute = not ctx.match([[=\%#]])
 
         -- Search ATTR_CLOSE.
         for open_pat, close_pat in pairs({
@@ -48,7 +50,11 @@ local function html_attrs(_)
           ctx.send('<CR>')
           break
         end
-        ctx.send('<Right>')
+
+        if not is_flag_attribute then
+          ctx.send('<Right>')
+        end
+        ctx.delete([[\s*]])
 
         -- Split line.
         ctx.send('<CR>')
