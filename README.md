@@ -2,7 +2,7 @@
 
 Flexible key mapping manager.
 
-<video src="https://user-images.githubusercontent.com/629908/212733495-f8e5486c-215c-4c01-b53c-b720b9779c3f.mov" width="100%"></video>
+<video src="https://github.com/hrsh7th/nvim-insx/assets/629908/ad878d95-c541-4d6c-b135-139d511602b8" width="100%"></video>
 
 ## Warning
 
