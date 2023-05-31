@@ -1,5 +1,4 @@
 local insx = require('insx')
-local kit = require('insx.kit')
 
 ---@class insx.recipe.fast_break.Option: insx.recipe.fast_break.html_attrs.Option, insx.recipe.fast_break.arguments.Option, insx.recipe.fast_break.basic.Option
 ---@field split? boolean # deprecated
