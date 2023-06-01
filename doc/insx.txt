@@ -90,7 +90,7 @@ require('insx').compose(recipe_sources): return~
                                                                    *insx.with()*
 require('insx').with(recipe_source, overrides): return~
 
-  Enhance existing recipe with override object that can enhance `action` or `enabled`.
+  Enhance existing recipe with override object that can enhance `priority`, `action` or `enabled`.
 
   - `recipe`: |insx.RecipeSource|
     - The recipe to override.
@@ -184,19 +184,21 @@ TYPINGS                                                           *insx-typings*
   ---@field public match fun(pattern: string): boolean
   ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
-  ---@field public delete fun(pattern: string): string
-  ---@field public backspace fun(pattern: string): string
+  ---@field public delete fun(pattern: string): nil
+  ---@field public backspace fun(pattern: string): nil
+  ---@field public remove fun(pattern: string): nil
   ---@field public move fun(row: integer, col: integer): nil
   ---@field public next fun(): nil
 
   ---@class insx.Override
+  ---@field public priority? number
   ---@field public enabled? fun(enabled: insx.Enabled, ctx: insx.Context): boolean?
   ---@field public action? fun(action: insx.Action, ctx: insx.Context): nil
 
   ---@class insx.preset.standard.Config
   ---@field public cmdline? { enabled?: boolean }
   ---@field public spacing? { enabled?: boolean }
-  ---@field public fast_break? { enabled?: boolean, split?: boolean }
+  ---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, arguments?: boolean }
   ---@field public fast_wrap? { enabled?: boolean }
 <
 
@@ -319,16 +321,28 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     - The open token of balanced pair like `(` .
   - `option.close_pat`: string
     - The close token of balanced pair like `)` .
-  - `option.split`: boolean
-    - Specify enables or not the splitjoin.vim like behavior.
+  - `option.arguments`: boolean
+    - Specify enables or not the splitjoin.vim like behavior for arguments.
+  - `option.html_attrs`: boolean
+    - Specify enables or not the splitjoin.vim like behavior for HTML attributes.
   ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<CR>', require('insx.recipe.fast_break')({
     open_pat = esc('('),
     close_pat = esc(')')
-    split = true,
+    arguments = true,
+    html_attrs = true,
   }))
 <  -----
+
+  You can use separated recipes
+
+    - basic break
+      - require('insx.recipe.fast_break.basic'): fun(option): insx.RecipeSource~
+    - fast_break.arguments
+      require('insx.recipe.fast_break.arguments'): fun(option): insx.RecipeSource~
+    - fast_break.html_attrs
+      require('insx.recipe.fast_break.html_attrs'): fun(option): insx.RecipeSource~
 
                                                          *insx-recipe-fast_wrap*
 require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
