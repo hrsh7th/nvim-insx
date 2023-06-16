@@ -101,6 +101,9 @@ local function create_context(char)
   ---@type insx.Context
   local ctx
   ctx = {
+    next = function()
+      error('ctx.next` can only be called in `recipe.action`.')
+    end,
     filetype = vim.api.nvim_buf_get_option(0, 'filetype'),
     char = char,
     data = {},
@@ -163,14 +166,15 @@ local function create_context(char)
         return { ctx.row(), ctx.col() }
       end
     end,
-    next = function()
-      error('ctx.next` can only be called in `recipe.action`.')
-    end,
     send = function(key_specifiers)
-      if key_specifiers == '' then
-        return
-      end
-      Keymap.send(vim.tbl_map(function(key_specifier)
+      key_specifiers = kit.to_array(key_specifiers)
+      key_specifiers = vim.tbl_filter(function(key_specifier)
+        if type(key_specifier) == 'string' then
+          key_specifier = { keys = key_specifier, remap = false }
+        end
+        return key_specifier.keys ~= ''
+      end, key_specifiers)
+      key_specifiers = vim.tbl_map(function(key_specifier)
         if type(key_specifier) == 'string' then
           key_specifier = { keys = key_specifier, remap = false }
         end
@@ -181,7 +185,10 @@ local function create_context(char)
           key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
         end
         return key_specifier
-      end, kit.to_array(key_specifiers))):await()
+      end, key_specifiers)
+      if #key_specifiers ~= 0 then
+        Keymap.send(key_specifiers):await()
+      end
     end,
     delete = function(pattern)
       ctx.remove([[\%#]] .. pattern)
@@ -202,7 +209,7 @@ local function create_context(char)
         local before_s = vim.regex(before_pat .. '$'):match_str(ctx.before())
         if before_s then
           local text = ctx.text():sub(before_s + 1, ctx.col())
-          if text then
+          if text ~= '' then
             keys = keys .. ('<Left><Del>'):rep(vim.fn.strchars(text, true))
           end
         end
@@ -213,7 +220,7 @@ local function create_context(char)
         local _, after_e = vim.regex('^' .. after_pat):match_str(ctx.after())
         if after_e then
           local text = ctx.text():sub(ctx.col() + 1, ctx.col() + after_e)
-          if text then
+          if text ~= '' then
             keys = keys .. ('<Del>'):rep(vim.fn.strchars(text, true))
           end
         end
@@ -222,15 +229,10 @@ local function create_context(char)
       ctx.send(keys)
     end,
     move = function(row, col)
-      if ctx.row() ~= row then
-        vim.api.nvim_win_set_cursor(0, { row + 1, col })
+      if ctx.mode() == 'c' then
+        vim.fn.setcmdline(vim.fn.getcmdline(), col + 1)
       else
-        local diff = col - ctx.col()
-        if diff > 0 then
-          ctx.send(('<Right>'):rep(diff))
-        elseif diff < 0 then
-          ctx.send(('<Left>'):rep(math.abs(diff)))
-        end
+        vim.api.nvim_win_set_cursor(0, { row + 1, col })
       end
     end,
   }

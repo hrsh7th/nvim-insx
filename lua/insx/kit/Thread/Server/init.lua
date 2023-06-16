@@ -1,20 +1,21 @@
 local uv = require('luv')
 local Async = require('insx.kit.Async')
 local Session = require('insx.kit.Thread.Server.Session')
+local LineBuffer = require('insx.kit.Thread.Server.LineBuffer')
 
 ---Return current executing file directory.
 ---@return string
 local function dirname()
-  return debug.getinfo(2, 'S').source:sub(2):match('(.*)/')
+  return debug.getinfo(2, "S").source:sub(2):match("(.*)/")
 end
 
 ---@class insx.kit.Thread.Server
+---@field private dispatcher fun(session: insx.kit.Thread.Server.Session): nil
+---@field private session? insx.kit.Thread.Server.Session
 ---@field private stdin uv.uv_pipe_t
 ---@field private stdout uv.uv_pipe_t
 ---@field private stderr uv.uv_pipe_t
----@field private dispatcher fun(session: insx.kit.Thread.Server.Session): nil
 ---@field private process? uv.uv_process_t
----@field private session? insx.kit.Thread.Server.Session
 local Server = {}
 Server.__index = Server
 
@@ -25,6 +26,9 @@ function Server.new(dispatcher)
   local self = setmetatable({}, Server)
   self.dispatcher = dispatcher
   self.session = Session.new()
+  self.stdin = uv.new_pipe()
+  self.stdout = uv.new_pipe()
+  self.stderr = uv.new_pipe()
   self.process = nil
   return self
 end
@@ -34,34 +38,50 @@ end
 function Server:connect()
   return Async.run(function()
     Async.schedule():await()
-    local stdin = uv.new_pipe()
-    local stdout = uv.new_pipe()
-    local stderr = uv.new_pipe()
     self.process = uv.spawn('nvim', {
-      cwd = uv.cwd(),
       args = {
         '--headless',
         '--noplugin',
         '-l',
         ('%s/_bootstrap.lua'):format(dirname()),
-        vim.o.runtimepath,
+        vim.o.runtimepath
       },
-      stdio = { stdin, stdout, stderr },
+      cwd = uv.cwd(),
+      stdio = { self.stdin, self.stdout, self.stderr }
     })
+    self.session:connect(self.stdout, self.stdin)
 
-    stderr:read_start(function(err, data)
-      if err then
-        error(err)
+    local stderr_data_buffer = LineBuffer.new()
+    local stderr_err_buffer = LineBuffer.new()
+    self.stderr:read_start(function(err, data)
+      stderr_data_buffer:append(data or '')
+      for _, line in ipairs(stderr_data_buffer:consume()) do
+        print(line)
       end
-      print(data)
+      stderr_err_buffer:append(err or '')
+      local errmsg = {}
+      for _, line in ipairs(stderr_err_buffer:consume()) do
+        table.insert(errmsg, line)
+      end
+      if #errmsg > 0 then
+        error(table.concat(errmsg, '\n'))
+      end
     end)
 
-    self.session:connect(stdout, stdin)
-    return self.session
-      :request('connect', {
-        dispatcher = string.dump(self.dispatcher),
-      })
-      :await()
+    vim.api.nvim_create_autocmd({ 'VimLeave' }, {
+      desc = 'insx.kit.Thread.Server:on_exit',
+      once = true,
+      callback = function()
+        self:kill()
+      end
+    })
+
+    self.session:on_notification('$/error', function(params)
+      self:notify('$/error', params)
+    end)
+    self.session:request('$/connect', {
+      dispatcher = string.dump(self.dispatcher)
+    }):await()
   end)
 end
 
@@ -102,7 +122,7 @@ end
 ---Kill server process.
 function Server:kill()
   if self.process then
-    local ok, err = self.process:kill('SIGINT')
+    local ok, err = self.process:kill(15)
     if not ok then
       error(err)
     end
