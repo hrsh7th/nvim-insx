@@ -173,7 +173,6 @@ TYPINGS                                                           *insx-typings*
   ---@class insx.Context
   ---@field public filetype string
   ---@field public char string
-  ---@field public data table
   ---@field public mode fun(): string
   ---@field public row fun(): integer 0-origin index
   ---@field public col fun(): integer 0-origin utf8 byte index
