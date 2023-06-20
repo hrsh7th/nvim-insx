@@ -1,5 +1,6 @@
 local insx = require('insx')
 local spec = require('insx.spec')
+local Keymap = require('insx.kit.Vim.Keymap')
 
 describe('insx', function()
   before_each(insx.clear)
@@ -210,6 +211,47 @@ describe('insx', function()
           assert.are.same(case.expected, actual)
         end
       end
+    end)
+  end)
+
+  describe('macro', function()
+    it('should support macro', function()
+      insx.add('(', require('insx.recipe.auto_pair')({
+        open = '(',
+        close = ')'
+      }))
+      insx.add(')', require('insx.recipe.fast_wrap')({
+        close = ')',
+      }))
+      insx.add('<Tab>', require('insx.recipe.jump_next')({
+        jump_pat = {
+          [[\%#\s*]] .. insx.helper.regex.esc(';') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc(')') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc(']') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc('}') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc('>') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc('"') .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc("'") .. [[\zs]],
+          [[\%#\s*]] .. insx.helper.regex.esc('`') .. [[\zs]],
+        }
+      }))
+
+      Keymap.spec(function()
+        spec.setup({
+          "|'foo'",
+          "'foo'",
+        }, {
+          filetype = 'lua',
+        })
+        Keymap.send(Keymap.termcodes('<Esc>qq')):await()
+        Keymap.send({ keys = Keymap.termcodes('i(), aiueo<Tab>(foo<Esc>'), remap = true }):await()
+        vim.fn.setreg('q', Keymap.termcodes('i(), aiueo<Tab>(foo<Esc>'))
+        Keymap.send('2G1|@q'):await()
+        assert.are.same({
+          "('foo', aiueo)(foo)",
+          "('foo', aiueo)(foo)",
+        }, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+      end)
     end)
   end)
 end)

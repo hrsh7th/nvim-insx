@@ -11,10 +11,6 @@ local function jump_next(option)
   return {
     ---@param ctx insx.Context
     action = function(ctx)
-      ctx.move(ctx.data.pos[1], ctx.data.pos[2])
-    end,
-    ---@param ctx insx.Context
-    enabled = function(ctx)
       local curr_pos = { math.huge, math.huge }
       for _, pat in ipairs(jump_pat) do
         local pos = ctx.search(pat)
@@ -25,10 +21,9 @@ local function jump_next(option)
         end
       end
       if curr_pos[1] == math.huge then
-        return false
+        return ctx.next()
       end
-      ctx.data.pos = curr_pos
-      return true
+      ctx.move(unpack(curr_pos))
     end,
   }
 end
