@@ -1,4 +1,5 @@
 ---@diagnostic disable: invisible, redefined-local
+local mpack = require('mpack')
 local Async = require('insx.kit.Async')
 
 ---Encode data to msgpack.
@@ -6,9 +7,9 @@ local Async = require('insx.kit.Async')
 ---@return string
 local function encode(v)
   if v == nil then
-    return vim.mpack.encode(vim.mpack.NIL)
+    return mpack.encode(mpack.NIL)
   end
-  return vim.mpack.encode(v)
+  return mpack.encode(v)
 end
 
 ---@class insx.kit.Thread.Server.Session
@@ -24,7 +25,7 @@ Session.__index = Session
 ---@return insx.kit.Thread.Server.Session
 function Session.new()
   local self = setmetatable({}, Session)
-  self.mpack_session = vim.mpack.Session({ unpack = vim.mpack.Unpacker() })
+  self.mpack_session = mpack.Session({ unpack = mpack.Unpacker() })
   self.stdin = nil
   self.stdout = nil
   self._on_request = {}
@@ -46,48 +47,42 @@ function Session:connect(stdin, stdout)
     if not data then
       return
     end
-    data = data
 
-    local ok, err = pcall(function()
-      local offset = 1
-      local length = #data
-      while offset <= length do
-        local type, id_or_cb, method_or_error, params_or_result, new_offset = self.mpack_session:receive(data, offset)
-        if type == 'request' then
-          local request_id, method, params = id_or_cb, method_or_error, params_or_result
-          Async.resolve():next(function()
-            return Async.run(function()
-              return self._on_request[method](params)
-            end)
-          end):next(function(res)
-            self.stdout:write(self.mpack_session:reply(request_id) .. encode(vim.mpack.NIL) .. encode(res))
-          end):catch(function(err_)
-            self.stdout:write(self.mpack_session:reply(request_id) .. encode(err_) .. encode(vim.mpack.NIL))
+    local offset = 1
+    local length = #data
+    while offset <= length do
+      local type, id_or_cb, method_or_error, params_or_result, new_offset = self.mpack_session:receive(data, offset)
+      if type == 'request' then
+        local request_id, method, params = id_or_cb, method_or_error, params_or_result
+        Async.resolve():next(function()
+          return Async.run(function()
+            return self._on_request[method](params)
           end)
-        elseif type == 'notification' then
-          local method, params = method_or_error, params_or_result
-          Async.run(function()
-            self._on_notification[method](params)
-          end):catch(function(err)
-            self:notify('$/error', { error = err })
-          end)
-        elseif type == 'response' then
-          local callback, err_, res = id_or_cb, method_or_error, params_or_result
-          Async.run(function()
-            if err_ == vim.mpack.NIL then
-              callback(nil, res)
-            else
-              callback(err_, nil)
-            end
-          end):catch(function(err)
-            self:notify('$/error', { error = err })
-          end)
-        end
-        offset = new_offset
+        end):next(function(res)
+          self.stdout:write(self.mpack_session:reply(request_id) .. encode(mpack.NIL) .. encode(res))
+        end):catch(function(err_)
+          self.stdout:write(self.mpack_session:reply(request_id) .. encode(err_) .. encode(mpack.NIL))
+        end)
+      elseif type == 'notification' then
+        local method, params = method_or_error, params_or_result
+        Async.run(function()
+          self._on_notification[method](params)
+        end):catch(function(err)
+          self:notify('$/error', { error = err })
+        end)
+      elseif type == 'response' then
+        local callback, err_, res = id_or_cb, method_or_error, params_or_result
+        Async.run(function()
+          if err_ == mpack.NIL then
+            callback(nil, res)
+          else
+            callback(err_, nil)
+          end
+        end):catch(function(err)
+          self:notify('$/error', { error = err })
+        end)
       end
-    end)
-    if not ok then
-      print(data, err)
+      offset = new_offset
     end
   end)
 end

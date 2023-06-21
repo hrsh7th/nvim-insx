@@ -1,7 +1,6 @@
 local uv = require('luv')
 local Async = require('insx.kit.Async')
 local Session = require('insx.kit.Thread.Server.Session')
-local LineBuffer = require('insx.kit.Thread.Server.LineBuffer')
 
 ---Return current executing file directory.
 ---@return string
@@ -51,21 +50,11 @@ function Server:connect()
     })
     self.session:connect(self.stdout, self.stdin)
 
-    local stderr_data_buffer = LineBuffer.new()
-    local stderr_err_buffer = LineBuffer.new()
     self.stderr:read_start(function(err, data)
-      stderr_data_buffer:append(data or '')
-      for _, line in ipairs(stderr_data_buffer:consume()) do
-        print(line)
+      if err then
+        return self:notify('$/error', { error = err })
       end
-      stderr_err_buffer:append(err or '')
-      local errmsg = {}
-      for _, line in ipairs(stderr_err_buffer:consume()) do
-        table.insert(errmsg, line)
-      end
-      if #errmsg > 0 then
-        error(table.concat(errmsg, '\n'))
-      end
+      print(data)
     end)
 
     vim.api.nvim_create_autocmd({ 'VimLeave' }, {
@@ -76,10 +65,7 @@ function Server:connect()
       end
     })
 
-    self.session:on_notification('$/error', function(params)
-      self:notify('$/error', params)
-    end)
-    self.session:request('$/connect', {
+    self.session:request('connect', {
       dispatcher = string.dump(self.dispatcher)
     }):await()
   end)
