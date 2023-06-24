@@ -139,79 +139,106 @@ describe('insx', function()
   end)
 
   describe('ctx.match', function()
-    it('should match cursor before text', function()
-      insx.add('<CR>', {
-        action = function(ctx)
-          ctx.send(' ok ')
-        end,
-        enabled = function(ctx)
-          return ctx.match([[a\%#]])
-        end,
-      })
-      spec.assert('a|b', '<CR>', 'a ok |b')
-    end)
+    for _, mode in ipairs({ 'i', 'c' }) do
+      describe(('mode=%s'):format(mode), function()
+        it('should match cursor before text', function()
+          insx.add('<CR>', {
+            action = function(ctx)
+              ctx.send(' ok ')
+            end,
+            enabled = function(ctx)
+              return ctx.match([[a\%#]])
+            end,
+          }, {
+            mode = mode,
+          })
+          spec.assert('a|b', '<CR>', 'a ok |b', {
+            mode = mode,
+          })
+        end)
 
-    it('should match cursor after text', function()
-      insx.add('<CR>', {
-        action = function(ctx)
-          ctx.send(' ok ')
-        end,
-        enabled = function(ctx)
-          return ctx.match([[\%#b]])
-        end,
-      })
-      spec.assert('a|b', '<CR>', 'a ok |b')
-    end)
+        it('should match cursor after text', function()
+          insx.add('<CR>', {
+            action = function(ctx)
+              ctx.send(' ok ')
+            end,
+            enabled = function(ctx)
+              return ctx.match([[\%#b]])
+            end,
+          }, {
+            mode = mode,
+          })
+          spec.assert('a|b', '<CR>', 'a ok |b', {
+            mode = mode,
+          })
+        end)
 
-    it('should match cursor before/after text', function()
-      insx.add('<CR>', {
-        action = function(ctx)
-          ctx.send(' ok ')
-        end,
-        enabled = function(ctx)
-          return ctx.match([[a\%#b]])
-        end,
-      })
-      spec.assert('a|b', '<CR>', 'a ok |b')
-    end)
+        it('should match cursor before/after text', function()
+          insx.add('<CR>', {
+            action = function(ctx)
+              ctx.send(' ok ')
+            end,
+            enabled = function(ctx)
+              return ctx.match([[a\%#b]])
+            end,
+          }, {
+            mode = mode,
+          })
+          spec.assert('a|b', '<CR>', 'a ok |b', {
+            mode = mode,
+          })
+        end)
+      end)
+    end
   end)
 
   describe('ctx.search', function()
-    it('should search pattern near the cursor', function()
-      for _, mode in ipairs({ 'i', 'c' }) do
-        for _, case in ipairs({
-          {
-            setup = '|',
-            pattern = [[\\\%#]],
-            expected = nil,
-          },
-          {
-            setup = 'a|b',
-            pattern = [[a\%#]],
-            expected = { 0, 0 },
-          },
-          {
-            setup = '"|"',
-            pattern = [[\\\@<!\%#]] .. insx.helper.regex.esc('"') .. [[\zs]],
-            expected = { 0, 2 },
-          },
-        }) do
-          insx.clear()
+    for _, mode in ipairs({ 'i', 'c' }) do
+      describe(('mode=%s'):format(mode), function()
+        it('should search pattern near the cursor', function()
+          for _, case in ipairs({
+            {
+              setup = '|',
+              pattern = [[\\\%#]],
+              expected = nil,
+            },
+            {
+              setup = 'foo(|',
+              pattern = [[\V(\m\%#\V)\m]],
+              expected = nil,
+            },
+            {
+              setup = 'a|b',
+              pattern = [[a\%#]],
+              expected = { 0, 0 },
+            },
+            {
+              setup = '"|"',
+              pattern = [[\\\@<!\%#]] .. insx.helper.regex.esc('"') .. [[\zs]],
+              expected = { 0, 2 },
+            },
+          }) do
+            insx.clear()
 
-          local actual = nil
-          insx.add('<CR>', {
-            action = function(ctx)
-              actual = ctx.search(case.pattern)
-            end,
-          }, { mode = mode })
-          spec.assert(case.setup, '<CR>', case.setup, {
-            mode = mode,
-          })
-          vim.print({ case.setup, case.pattern })
-          assert.are.same(case.expected, actual)
-        end
-      end
-    end)
+            local actual = nil
+            insx.add('<CR>', {
+              action = function(ctx)
+                actual = ctx.search(case.pattern)
+              end,
+            }, { mode = mode })
+            spec.assert(case.setup, '<CR>', case.setup, {
+              mode = mode,
+            })
+            vim.print({
+              setup = case.setup,
+              pattern = case.pattern,
+              expected = vim.inspect(case.expected)
+            })
+            assert.are.same(case.expected, actual)
+          end
+        end)
+      end)
+    end
   end)
 
   describe('macro', function()

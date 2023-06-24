@@ -152,18 +152,21 @@ local function create_context(char)
 
       local _, before_e = vim.regex([[^.*\ze\\%#]]):match_str(pattern)
       local after_s, _ = vim.regex([[\\%#\zs.*$]]):match_str(pattern)
+
       local before_pat = pattern:sub(1, before_e)
       local after_pat = pattern:sub(after_s + 1)
       local after_has_zs = not not after_pat:find([[\zs]])
-      local before_match_s = before_pat ~= '' and vim.regex(before_pat .. [[$]]):match_str(ctx.before())
-      local after_match_s = after_pat ~= '' and vim.regex([[^]] .. after_pat):match_str(ctx.after())
-      if before_match_s and not after_has_zs then
-        return { ctx.row(), before_match_s }
-      elseif after_match_s then
-        return { ctx.row(), ctx.col() + after_match_s }
-      elseif before_pat == '' and after_pat == '' then
-        return { ctx.row(), ctx.col() }
+      local before_match_s = before_pat == '' and ctx.col() or vim.regex(before_pat .. [[$]]):match_str(ctx.before())
+      local after_match_s = after_pat == '' and ctx.col() or vim.regex([[^]] .. after_pat):match_str(ctx.after())
+
+      if not before_match_s or not after_match_s then
+        return
       end
+
+      if after_has_zs then
+        return { ctx.row(), ctx.col() + after_match_s }
+      end
+      return { ctx.row(), before_match_s }
     end,
     send = function(key_specifiers)
       key_specifiers = kit.to_array(key_specifiers)
