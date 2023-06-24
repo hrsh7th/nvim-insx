@@ -232,7 +232,7 @@ describe('insx', function()
             vim.print({
               setup = case.setup,
               pattern = case.pattern,
-              expected = vim.inspect(case.expected)
+              expected = vim.inspect(case.expected),
             })
             assert.are.same(case.expected, actual)
           end
@@ -243,25 +243,34 @@ describe('insx', function()
 
   describe('macro', function()
     it('should support macro', function()
-      insx.add('(', require('insx.recipe.auto_pair')({
-        open = '(',
-        close = ')'
-      }))
-      insx.add(')', require('insx.recipe.fast_wrap')({
-        close = ')',
-      }))
-      insx.add('<Tab>', require('insx.recipe.jump_next')({
-        jump_pat = {
-          [[\%#\s*]] .. insx.helper.regex.esc(';') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc(')') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc(']') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc('}') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc('>') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc('"') .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc("'") .. [[\zs]],
-          [[\%#\s*]] .. insx.helper.regex.esc('`') .. [[\zs]],
-        }
-      }))
+      insx.add(
+        '(',
+        require('insx.recipe.auto_pair')({
+          open = '(',
+          close = ')',
+        })
+      )
+      insx.add(
+        ')',
+        require('insx.recipe.fast_wrap')({
+          close = ')',
+        })
+      )
+      insx.add(
+        '<Tab>',
+        require('insx.recipe.jump_next')({
+          jump_pat = {
+            [[\%#\s*]] .. insx.helper.regex.esc(';') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc(')') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc(']') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc('}') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc('>') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc('"') .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc("'") .. [[\zs]],
+            [[\%#\s*]] .. insx.helper.regex.esc('`') .. [[\zs]],
+          },
+        })
+      )
 
       Keymap.spec(function()
         spec.setup({
