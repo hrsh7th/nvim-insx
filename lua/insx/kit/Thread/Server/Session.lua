@@ -67,8 +67,8 @@ function Session:connect(stdin, stdout)
         local method, params = method_or_error, params_or_result
         Async.run(function()
           self._on_notification[method](params)
-        end):catch(function(err)
-          self:notify('$/error', { error = err })
+        end):catch(function(e)
+          self:notify('$/error', { error = e })
         end)
       elseif type == 'response' then
         local callback, err_, res = id_or_cb, method_or_error, params_or_result
@@ -78,8 +78,8 @@ function Session:connect(stdin, stdout)
           else
             callback(err_, nil)
           end
-        end):catch(function(err)
-          self:notify('$/error', { error = err })
+        end):catch(function(e)
+          self:notify('$/error', { error = e })
         end)
       end
       offset = new_offset
