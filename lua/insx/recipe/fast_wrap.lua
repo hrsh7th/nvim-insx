@@ -73,8 +73,8 @@ local function fast_wrap(option)
     ---@param ctx insx.Context
     action = function(ctx)
       ctx.send('<Del>')
-
-      ; (function()
+;
+      (function()
         -- (|)"foo" -> ("foo"|)
         if wrap_string(ctx) then
           return
