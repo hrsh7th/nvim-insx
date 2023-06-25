@@ -2,7 +2,7 @@ local kit = require('insx.kit')
 local assert = require('luassert')
 local Keymap = require('insx.kit.Vim.Keymap')
 
----@class minx.spec.Option
+---@class insx.spec.Option
 ---@field public mode? 'i' | 'c'
 ---@field public filetype? string
 ---@field public noexpandtab? boolean
@@ -26,7 +26,7 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
----@param option minx.spec.Option
+---@param option insx.spec.Option
 function spec.setup(lines_, option)
   local filetype = option and option.filetype or 'lua'
   vim.cmd.enew({ bang = true })
@@ -69,7 +69,7 @@ end
 ---@param prev_lines_ string|string[]
 ---@param char string
 ---@param next_lines_ string|string[]
----@param option? minx.spec.Option
+---@param option? insx.spec.Option
 function spec.assert(prev_lines_, char, next_lines_, option)
   option = option or {}
 
