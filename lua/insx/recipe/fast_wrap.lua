@@ -66,38 +66,47 @@ local function fast_wrap(option)
     [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\|do\)]=],
   })
   local next_pat = kit.to_array(option and option.next_pat or {
-    [=[\k\+\%(\%(\.\|->\|::\)\k\+\)*\zs]=],
+    [=[\s*[^[:blank:]]\+]=],
+    [=[\k\+\%(\%(\.\|->\|::\)\k\+\)*]=],
   })
   return {
     ---@param ctx insx.Context
     action = function(ctx)
       ctx.send('<Del>')
-      if not wrap_string(ctx) then
-        local done_in_pair = false
+
+      ; (function()
+        -- (|)"foo" -> ("foo"|)
+        if wrap_string(ctx) then
+          return
+        end
+
+        -- (|)feedkeys("foo") -> (feedkeys("foo")|)
         if is_pairwise(pairwise_pat) then
           local prev_pos = { ctx.row(), ctx.col() }
           ctx.send({ '<C-o>', { keys = '%', remap = true } })
           ctx.send('<Ignore>')
           if prev_pos[1] ~= ctx.row() or prev_pos[2] ~= ctx.col() then
             ctx.send('<Right>')
-            done_in_pair = true
+            return
           end
         end
-        if not done_in_pair then
-          local pos = { math.huge, math.huge }
-          for _, pat in ipairs(next_pat) do
-            local new_pos = helper.search.get_next(pat)
-            if new_pos then
-              if helper.position.gt(new_pos, pos) then
-                pos = new_pos
-              end
+
+        -- (|)foo.bar.baz -> (foo.bar.baz|)
+        local pos = { math.huge, math.huge }
+        for _, pat in ipairs(next_pat) do
+          local new_pos = helper.search.get_next(pat)
+          if new_pos and new_pos[1] == ctx.row() then
+            if helper.position.lt(new_pos, pos) then
+              pos = assert(helper.search.get_next(pat .. [[\zs]]))
             end
           end
-          if pos[1] ~= math.huge then
-            ctx.move(pos[1], pos[2])
-          end
         end
-      end
+        if pos[1] ~= math.huge then
+          ctx.move(pos[1], pos[2])
+          return
+        end
+      end)()
+
       ctx.send(option.close .. '<Left>')
     end,
     ---@param ctx insx.Context

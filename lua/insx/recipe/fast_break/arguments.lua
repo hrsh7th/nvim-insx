@@ -52,7 +52,7 @@ local function arguments(option)
         local inner = false
         for open, close in pairs(PAIRS_MAP) do
           local curr_close_pos = helper.search.get_pair_close(helper.regex.esc(open), helper.regex.esc(close))
-          if main_close_pos and curr_close_pos and helper.position.gt(curr_close_pos, main_close_pos) then
+          if main_close_pos and curr_close_pos and helper.position.lt(curr_close_pos, main_close_pos) then
             inner = true
             break
           end
