@@ -298,8 +298,7 @@ function insx.expand(char)
   do
     local recipes = kit.concat(get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})), {
       {
-        ---@param ctx insx.Context
-        action = function(ctx)
+        action = function()
           ctx.send(ctx.char)
         end,
       },
@@ -313,8 +312,11 @@ function insx.expand(char)
     Async.run(function()
       local lazyredraw = vim.o.lazyredraw
       vim.o.lazyredraw = true
+      local virtualedit = vim.o.virtualedit
+      vim.o.virtualedit = 'onemore'
       ctx.next()
       vim.o.lazyredraw = lazyredraw
+      vim.o.virtualedit = virtualedit
     end)
   end)
 end
