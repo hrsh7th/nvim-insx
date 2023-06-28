@@ -16,8 +16,8 @@ local search = {}
 
 ---@type table<string, string>
 search.Tag = {
-  Open = [=[<\(\w\+\)\%(\s\+.\{-}\)\?>]=],
-  Close = [=[</\w\+>]=],
+  Open = [=[<\(\%(\w\|\.\)\+\)\=\%(\s\+.\{-}\)\?>]=],
+  Close = [=[</\(\%(\w\|\.\)\+\)\=>]=],
 }
 
 ---Return most nearest wrapped pair's open position.
