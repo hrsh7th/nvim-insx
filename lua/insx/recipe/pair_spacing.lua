@@ -28,8 +28,8 @@ local function increase(option)
     action = function(ctx)
       ctx.send(' ')
 
-      local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]])
-      local after_match = helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat)
+      local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\zs\s*$]])
+      local after_match = helper.regex.match(ctx.after(), [[^\s*\ze]] .. option.close_pat)
       if before_match and after_match then
         -- Logic for pairs & white only.
         local diff = #before_match - #after_match
@@ -63,8 +63,8 @@ local function decrease(option)
     action = function(ctx)
       ctx.send('<Left><Del>')
 
-      local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\s*$]])
-      local after_match = helper.regex.match(ctx.after(), [[^\s*]] .. option.close_pat)
+      local before_match = helper.regex.match(ctx.before(), option.open_pat .. [[\zs\s*$]])
+      local after_match = helper.regex.match(ctx.after(), [[^\s*\ze]] .. option.close_pat)
       if before_match and after_match then
         -- Logic for pairs & white only.
         local diff = #before_match - #after_match

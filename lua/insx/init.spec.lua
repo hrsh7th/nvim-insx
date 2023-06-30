@@ -241,6 +241,38 @@ describe('insx', function()
     end
   end)
 
+  describe('ctx.substr', function()
+    it('should work', function()
+      local ctx ---@type insx.Context
+      insx.add('<CR>', {
+        action = function(ctx_)
+          ctx = ctx_
+        end,
+      })
+      vim.api.nvim_feedkeys(Keymap.termcodes('i<CR>'), 'x', true)
+
+      local chars = { '1', '🗿', '2', '🗿', '3', '🗿', '4', '🗿', '5', '🗿', '6' }
+      for s = -12, 12 do
+        for e = -12, 12 do
+          local len = #chars + 1
+          local s_ = (len + s) % len
+          local e_ = (len + e) % len
+          local expected = ''
+          for i = s_, e_ do
+            expected = expected .. (chars[i] or '')
+          end
+          vim.print({ s = s, e = e, expected = expected })
+          assert.are.same(ctx.substr('1🗿2🗿3🗿4🗿5🗿6', s, e), expected)
+        end
+      end
+
+      assert.are.same(ctx.substr('123', 1, 1), '1')
+      assert.are.same(ctx.substr('123', 1, -1), '123')
+      assert.are.same(ctx.substr('123', -2, -1), '23')
+      assert.are.same(ctx.substr('123', -3, -1), '123')
+    end)
+  end)
+
   describe('macro', function()
     it('should support macro', function()
       insx.add(

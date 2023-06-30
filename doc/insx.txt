@@ -187,6 +187,7 @@ TYPINGS                                                           *insx-typings*
   ---@field public backspace fun(pattern: string): nil
   ---@field public remove fun(pattern: string): nil
   ---@field public move fun(row: integer, col: integer): nil
+  ---@field public substr fun(str: string, i: integer, j: integer): string # char base substr function.
   ---@field public next fun(): nil
 
   ---@class insx.Override

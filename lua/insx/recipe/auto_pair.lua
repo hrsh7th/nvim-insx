@@ -9,8 +9,15 @@ local insx = require('insx')
 local function auto_pair(option)
   return {
     ---@param ctx insx.Context
+    enabled = function(ctx)
+      return ctx.match(ctx.substr(option.open, 1, -2) .. [[\%#]])
+    end,
+    ---@param ctx insx.Context
     action = function(ctx)
-      ctx.send(option.open .. option.close .. '<Left>')
+      if #option.open > 1 then
+        ctx.remove(ctx.substr(option.open, 1, -2) .. [[\%#]])
+      end
+      ctx.send(option.open .. option.close .. ('<Left>'):rep(vim.fn.strchars(option.close, true)))
     end,
   }
 end

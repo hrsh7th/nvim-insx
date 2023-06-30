@@ -1,5 +1,6 @@
 local insx = require('insx')
 local spec = require('insx.spec')
+local esc = require('insx.helper.regex').esc
 
 describe('insx.recipe.delete_pair', function()
   before_each(insx.clear)
@@ -10,8 +11,8 @@ describe('insx.recipe.delete_pair', function()
         insx.add(
           '<BS>',
           require('insx.recipe.delete_pair')({
-            open_pat = insx.helper.regex.esc('('),
-            close_pat = insx.helper.regex.esc(')'),
+            open_pat = esc('('),
+            close_pat = esc(')'),
           }),
           {
             mode = mode,
@@ -21,11 +22,11 @@ describe('insx.recipe.delete_pair', function()
           '<BS>',
           insx.with(
             require('insx.recipe.delete_pair')({
-              open_pat = insx.helper.regex.esc('"'),
-              close_pat = insx.helper.regex.esc('"'),
+              open_pat = esc('"'),
+              close_pat = esc('"'),
             }),
             {
-              insx.with.nomatch([[\\]] .. insx.helper.regex.esc('"') .. [[\%#]]),
+              insx.with.nomatch([[\\]] .. esc('"') .. [[\%#]]),
             }
           ),
           {
@@ -44,6 +45,14 @@ describe('insx.recipe.delete_pair', function()
         spec.assert('"\\"|"', '<BS>', '"\\|"', {
           mode = mode,
         })
+      end)
+
+      it('should work with multichar', function()
+        insx.add('<BS>', require('insx.recipe.delete_pair')({
+          open_pat = esc('<!--'),
+          close_pat = '-->',
+        }))
+        spec.assert('<!--|-->', '<BS>', '|')
       end)
     end)
   end

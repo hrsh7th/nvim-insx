@@ -10,7 +10,7 @@ local function delete_pair(option)
   return {
     ---@param ctx insx.Context
     action = function(ctx)
-      ctx.send('<BS><Del>')
+      ctx.remove(option.open_pat .. [[\%#]] .. option.close_pat)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)

@@ -40,6 +40,7 @@ local right = Keymap.termcodes('<Right>')
 ---@field public backspace fun(pattern: string): nil
 ---@field public remove fun(pattern: string): nil
 ---@field public move fun(row: integer, col: integer): nil
+---@field public substr fun(str: string, i: integer, j: integer): string # char base substr function.
 ---@field public next fun(): nil
 
 ---@class insx.Override
@@ -236,6 +237,12 @@ local function create_context(char)
       else
         vim.api.nvim_win_set_cursor(0, { row + 1, col })
       end
+    end,
+    substr = function(str, i, j)
+      local len = vim.fn.strchars(str, true) + 1
+      i = (len + i) % len
+      j = (len + j) % len
+      return vim.fn.strcharpart(str, i - 1, j - i + 1)
     end,
   }
   return ctx
