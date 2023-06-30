@@ -21,10 +21,13 @@ describe('insx.recipe.auto_pair', function()
   end)
 
   it('should work with multichar', function()
-    insx.add('-', require('insx.recipe.auto_pair')({
-      open = '<!--',
-      close = '-->',
-    }))
+    insx.add(
+      '-',
+      require('insx.recipe.auto_pair')({
+        open = '<!--',
+        close = '-->',
+      })
+    )
     spec.assert('<!-|', '-', '<!--|-->')
   end)
 end)

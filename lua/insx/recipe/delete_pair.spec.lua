@@ -48,10 +48,13 @@ describe('insx.recipe.delete_pair', function()
       end)
 
       it('should work with multichar', function()
-        insx.add('<BS>', require('insx.recipe.delete_pair')({
-          open_pat = esc('<!--'),
-          close_pat = '-->',
-        }))
+        insx.add(
+          '<BS>',
+          require('insx.recipe.delete_pair')({
+            open_pat = esc('<!--'),
+            close_pat = '-->',
+          })
+        )
         spec.assert('<!--|-->', '<BS>', '|')
       end)
     end)
