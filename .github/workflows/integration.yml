@@ -64,7 +64,7 @@ jobs:
           npm run check
 
       - name: Auto commit if needed
-        if: ${{ github.ref_name }} == 'main'
+        if: ${{ github.ref_name == 'main' && github.event_name != 'pull_request' }}
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           file_pattern: 'lua/**/*'
