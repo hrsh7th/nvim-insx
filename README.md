@@ -15,6 +15,8 @@ https://github.com/hrsh7th/nvim-insx/assets/629908/ad878d95-c541-4d6c-b135-139d5
   - The demo image uses with vim-matchup. 👍
 - This plugin provides *basic* cmdline-mode pairwise features.
   - The advanced recipes aren't support cmdline-mode.
+- The `preset` change is not treat as `breakin change`
+  - if you hope to fix preset behavior, please write your own mapping definitions in your vimrc. 😢
 
 ## Usage
 
