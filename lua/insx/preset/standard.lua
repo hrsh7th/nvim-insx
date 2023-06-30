@@ -20,13 +20,16 @@ function standard.setup_insert_mode()
     action = function(ctx)
       ctx.send('``<Left>')
       ctx.send('``<Left>')
-    end
+    end,
   })
-  insx.add('<CR>', require('insx.recipe.fast_break')({
-    open_pat = [[```\w*]],
-    close_pat = '```',
-    indent = 0,
-  }))
+  insx.add(
+    '<CR>',
+    require('insx.recipe.fast_break')({
+      open_pat = [[```\w*]],
+      close_pat = '```',
+      indent = 0,
+    })
+  )
 
   -- html tag like.
   insx.add(
@@ -77,26 +80,47 @@ end
 ---@param withs? insx.Override[]
 function standard.set_quote(mode, quote, withs)
   withs = withs or {}
-  local option = { mode = mode, }
+  local option = { mode = mode }
 
   -- jump_out
-  insx.add(quote, insx.with(require('insx.recipe.jump_next')({
-    jump_pat = {
-      [[\\\@<!\%#]] .. esc(quote) .. [[\zs]],
-    },
-  }), withs), option)
+  insx.add(
+    quote,
+    insx.with(
+      require('insx.recipe.jump_next')({
+        jump_pat = {
+          [[\\\@<!\%#]] .. esc(quote) .. [[\zs]],
+        },
+      }),
+      withs
+    ),
+    option
+  )
 
   -- auto_pair
-  insx.add(quote, insx.with(require('insx.recipe.auto_pair').strings({
-    open = quote,
-    close = quote,
-  }), withs), option)
+  insx.add(
+    quote,
+    insx.with(
+      require('insx.recipe.auto_pair').strings({
+        open = quote,
+        close = quote,
+      }),
+      withs
+    ),
+    option
+  )
 
   -- delete_pair
-  insx.add('<BS>', insx.with(require('insx.recipe.delete_pair').strings({
-    open_pat = esc(quote),
-    close_pat = esc(quote),
-  }), withs), option)
+  insx.add(
+    '<BS>',
+    insx.with(
+      require('insx.recipe.delete_pair').strings({
+        open_pat = esc(quote),
+        close_pat = esc(quote),
+      }),
+      withs
+    ),
+    option
+  )
 end
 
 ---@param mode string
@@ -105,58 +129,107 @@ end
 ---@param withs? insx.Override[]
 function standard.set_pair(mode, open, close, withs)
   withs = withs or {}
-  local option = { mode = mode, }
+  local option = { mode = mode }
 
   -- jump_out
-  insx.add(close, insx.with(require('insx.recipe.jump_next')({
-    jump_pat = {
-      [[\%#]] .. esc(close) .. [[\zs]],
-    },
-  }), withs), option)
+  insx.add(
+    close,
+    insx.with(
+      require('insx.recipe.jump_next')({
+        jump_pat = {
+          [[\%#]] .. esc(close) .. [[\zs]],
+        },
+      }),
+      withs
+    ),
+    option
+  )
 
   -- auto_pair
-  insx.add(open, insx.with(require('insx.recipe.auto_pair')({
-    open = open,
-    close = close,
-  }), withs), option)
+  insx.add(
+    open,
+    insx.with(
+      require('insx.recipe.auto_pair')({
+        open = open,
+        close = close,
+      }),
+      withs
+    ),
+    option
+  )
 
   -- delete_pair
-  insx.add('<BS>', insx.with(require('insx.recipe.delete_pair')({
-    open_pat = esc(open),
-    close_pat = esc(close),
-  }), withs), option)
+  insx.add(
+    '<BS>',
+    insx.with(
+      require('insx.recipe.delete_pair')({
+        open_pat = esc(open),
+        close_pat = esc(close),
+      }),
+      withs
+    ),
+    option
+  )
 
   -- spacing
   if kit.get(standard.config, { 'spacing', 'enabled' }, true) then
-    insx.add('<Space>', insx.with(require('insx.recipe.pair_spacing').increase({
-      open_pat = esc(open),
-      close_pat = esc(close),
-    }), withs), option)
+    insx.add(
+      '<Space>',
+      insx.with(
+        require('insx.recipe.pair_spacing').increase({
+          open_pat = esc(open),
+          close_pat = esc(close),
+        }),
+        withs
+      ),
+      option
+    )
 
-    insx.add('<BS>', insx.with(require('insx.recipe.pair_spacing').decrease({
-      open_pat = esc(open),
-      close_pat = esc(close),
-    }), withs), option)
+    insx.add(
+      '<BS>',
+      insx.with(
+        require('insx.recipe.pair_spacing').decrease({
+          open_pat = esc(open),
+          close_pat = esc(close),
+        }),
+        withs
+      ),
+      option
+    )
   end
 
   -- insert mode only.
   if option.mode == 'i' then
     -- fast_break
     if kit.get(standard.config, { 'fast_break', 'enabled' }, true) then
-      insx.add('<CR>', insx.with(require('insx.recipe.fast_break')({
-        open_pat = esc(open),
-        close_pat = esc(close),
-        split = kit.get(standard.config, { 'fast_break', 'split' }, nil),
-        html_attrs = kit.get(standard.config, { 'fast_break', 'html_attrs' }, true),
-        arguments = kit.get(standard.config, { 'fast_break', 'arguments' }, true),
-      }), withs), option)
+      insx.add(
+        '<CR>',
+        insx.with(
+          require('insx.recipe.fast_break')({
+            open_pat = esc(open),
+            close_pat = esc(close),
+            split = kit.get(standard.config, { 'fast_break', 'split' }, nil),
+            html_attrs = kit.get(standard.config, { 'fast_break', 'html_attrs' }, true),
+            arguments = kit.get(standard.config, { 'fast_break', 'arguments' }, true),
+          }),
+          withs
+        ),
+        option
+      )
     end
 
     -- fast_wrap
     if kit.get(standard.config, { 'fast_wrap', 'enabled' }, true) then
-      insx.add('<C-]>', insx.with(require('insx.recipe.fast_wrap')({
-        close = close,
-      }), withs), option)
+      insx.add(
+        '<C-]>',
+        insx.with(
+          require('insx.recipe.fast_wrap')({
+            close = close,
+          }),
+          withs
+        ),
+        option
+      )
     end
   end
 end

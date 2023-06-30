@@ -104,9 +104,11 @@ IO.fs_realpath = Async.promisify(uv.fs_realpath)
 function IO.is_directory(path)
   path = IO.normalize(path)
   return Async.run(function()
-    return IO.fs_stat(path):catch(function()
-      return {}
-    end):await().type == 'directory'
+    return IO.fs_stat(path)
+      :catch(function()
+        return {}
+      end)
+      :await().type == 'directory'
   end)
 end
 
