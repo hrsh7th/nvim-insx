@@ -8,7 +8,7 @@ Flexible key mapping manager.
 CONTENTS                                                         *insx-contents*
 
 INTRO                                                               |insx-intro|
-CMDLINE SUPPORT                                           |insx-cmdline-support|
+MODE SUPPORT                                                 |insx-mode-support|
 FUNCTION                                                         |insx-function|
 TYPINGS                                                           |insx-typings|
 CUSTOM RECIPE                                               |insx-custom-recipe|
@@ -43,12 +43,18 @@ You can find it in |insx-typings| section. Checkout.
 
 
 ==============================================================================
-CMDLINE-SUPPORT                                           *insx-cmdline-support*
+MODE-SUPPORT                                                 *insx-mode-support*
 
-This plugin provides *basic* command line recipes.
+This plugin is made for complex key mapping in insert mode.
+However, it can be used in other modes as well.
 
-However, all recipes provided by this plugin doesn't support cmdline mode.
+Each mode has some caveats.
 
+- cmdline
+  - The built-in complex recipe such as `fast_wrap` / `fast_break` will not work.
+- normal
+  - THe build-in recipes will not work.
+  - You can just use nvim-insx's mapping mechanism.
 
 
 ==============================================================================
@@ -62,7 +68,7 @@ insx#expand(char): return~
   Create keys sequence that can be feed via |nvim_feedkeys|.
 
   - `char`: string
-    - The character for insert-mode mapping (it isn't a form of keycodes).
+    - The character for mapping (it isn't a form of keycodes).
   - `return`: string
     - Expanded keycodes.
 
@@ -72,7 +78,7 @@ require('insx').add(char, recipe)~
   Add recipe for specific char.
 
   - `char`: string
-    - The character for insert-mode mapping.
+    - The character for mapping.
   - `recipe`: |insx.RecipeSource|
     - The recipe that can be contained `action` / `enabled` keys.
     - See |insx.Enabled|, |insx.Action|.
@@ -139,7 +145,7 @@ require('insx').expand(char): return~
   Create keys sequence that can be feed via |nvim_feedkeys|.
 
   - `char`: string
-    - The character for insert-mode mapping.
+    - The character for mapping.
   - `return`: string?
     - Return the sendable key notation. (this is applied the replace_termcodes).
 

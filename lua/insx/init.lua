@@ -147,7 +147,7 @@ local function create_context(char)
       if not pattern:find([[\%#]], 1, true) then
         error('pattern must contain cursor position (\\%#)')
       end
-      if ctx.mode() == 'i' then
+      if ctx.mode() ~= 'c' then
         return search.get_next(pattern)
       end
 
@@ -182,7 +182,7 @@ local function create_context(char)
           key_specifier = { keys = key_specifier, remap = false }
         end
         key_specifier.keys = Keymap.termcodes(key_specifier.keys)
-        if ctx.mode() == 'i' then
+        if ctx.mode() ~= 'c' then
           key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
           key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
           key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
@@ -255,7 +255,7 @@ insx.helper = require('insx.helper')
 ---Add new mapping recipe for specific mapping.
 ---@param char string
 ---@param recipe_source insx.RecipeSource
----@param option? { mode?: 'i' | 'c' }
+---@param option? { mode?: 'i' | 'c' | 'n' }
 function insx.add(char, recipe_source, option)
   char = normalize(char)
 
