@@ -11,6 +11,7 @@ https://github.com/hrsh7th/nvim-insx/assets/629908/ad878d95-c541-4d6c-b135-139d5
   - However, advanced recipes don't support dot-repeat.
 - This plugin is *usually* works as expected.
   - Does not aim to support to always work as expected because this plugin uses RegExp 😅
+  - Not based on tree-sitter is intentional. I think regular expressions are great for control during editing.
 - It is more convenient when used with vim-matchup.
   - The demo image uses with vim-matchup. 👍
 - This plugin provides *basic* cmdline-mode pairwise features.
