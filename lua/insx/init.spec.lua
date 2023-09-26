@@ -273,6 +273,23 @@ describe('insx', function()
     end)
   end)
 
+  describe('ctx.mode', function()
+    it('ctx.mode: () => "i"', function()
+      local ctx ---@type insx.Context
+      insx.add('<CR>', {
+        action = function(ctx_)
+          ctx = ctx_
+        end,
+      })
+      Keymap.spec(function()
+        Keymap.send(Keymap.termcodes('i')):await()
+        Keymap.send({ keys = Keymap.termcodes('<CR>'), remap = true }):await()
+        vim.fn.complete(1, {})
+        assert.are.same(ctx.mode(), 'i')
+      end)
+    end)
+  end)
+
   describe('macro', function()
     it('should support macro', function()
       insx.add(
