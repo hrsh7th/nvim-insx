@@ -108,7 +108,9 @@ local function create_context(char)
     char = char,
     data = {},
     mode = function()
-      return vim.api.nvim_get_mode().mode
+      -- i|ic|ix → i & c|cx → c
+      -- see `:h mode()`
+      return vim.api.nvim_get_mode().mode:sub(1, 1)
     end,
     row = function()
       if ctx.mode() == 'c' then
