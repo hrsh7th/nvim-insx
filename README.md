@@ -1,36 +1,38 @@
 # nvim-insx
 
-Flexible key mapping manager.
+nvim-insx is a flexible key mapping manager.
 
 https://github.com/hrsh7th/nvim-insx/assets/629908/ad878d95-c541-4d6c-b135-139d511602b8
 
 
-## Warning
+## Limitations and Warnings
 
-- The *basic* recipes supports dot-repeat
-  - However, advanced recipes don't support dot-repeat.
-- This plugin is *usually* works as expected.
-  - Does not aim to support to always work as expected because this plugin uses RegExp 😅
-  - Not based on tree-sitter is intentional. I think regular expressions are great for control during editing.
+- Dot-repeat is supported by only *basic* recipes.
+  - Note that dot-repeat may not work with the complicated recipes.
+- This plugin *usually* works as expected.
+  - It may fire the accidential action,
+    because the regular expression does not caputure the structure of whole text.
+  - We do not intend to integrate with tree-sitter
+    as control over the regular expression is more convenient and sufficient.
 - It is more convenient when used with vim-matchup.
-  - The demo image uses with vim-matchup. 👍
+  - A demonstration of vim-match usage can be referred to above.
 - This plugin provides *basic* cmdline-mode pairwise features.
-  - The advanced recipes aren't support cmdline-mode.
-- The `preset` change is not treat as `breakin change`
-  - if you hope to fix preset behavior, please write your own mapping definitions in your vimrc. 😢
+  - The advanced recipes do not support cmdline-mode.
+- We can not accept the proposal for `preset` if it incorporates `breaking changes`.
+  - Please write your own mapping definitions in your vimrc. 😢
 
 ## Usage
 
-This plugin does not provide any default mappings.
-You should define mapping by yourself like this.
+This plugin provides no default mappings.
+You need to define your custom mappings as follows.
 
-#### Use preset
+#### Preset
 
 ```lua
 require('insx.preset.standard').setup()
 ```
 
-#### Use recipe
+#### Recipe
 
 ```lua
 local insx = require('insx')
@@ -49,7 +51,7 @@ insx.add(
 )
 ```
 
-## Create your own recipe
+## Custom recipe
 
 ```lua
 -- Simple pair deletion recipe.
@@ -71,11 +73,11 @@ local function your_recipe(option)
 end
 ```
 
-The standard preset enables some of the advanced features.
+The standard preset enables some advanced features.
 
 ### Status
 
-The API is stable except helper related APIs.
+The API is stable except for the helper-related APIs.
 
-bug report & feature request are welcome.
+Bug report & feature request are welcome.
 
