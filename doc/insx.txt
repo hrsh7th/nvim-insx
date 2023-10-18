@@ -7,7 +7,7 @@ Flexible key mapping manager.
 ==============================================================================
 CONTENTS                                                         *insx-contents*
 
-INTRO                                                               |insx-intro|
+INTRODUCTION                                                        |insx-intro|
 MODE SUPPORT                                                 |insx-mode-support|
 FUNCTION                                                         |insx-function|
 TYPINGS                                                           |insx-typings|
@@ -18,17 +18,17 @@ TIPS                                                                 |insx-tips|
 
 
 ==============================================================================
-INTRO                                                               *insx-intro*
+INTRODUCTION                                                       *insx-intro*
 
 This plugin makes it easy to define & manage complex mappings.
 
-The concepts are...
+The concept is the following features:
 
-- Does not support dot-repeat
-- Aims for advanced functionality
+- Absence of support for dot-repeat
+- Focus on the advaned functionality
 
 
-This plugin provides default preset by built-in.
+This plugin comes with a built-in preset.
 You can define general pairwise functionality like this.
 
 >lua
@@ -38,22 +38,23 @@ You can define general pairwise functionality like this.
 <
 
 The standard preset has configuration options.
-You can find it in |insx-typings| section. Checkout.
+You can see it in |insx-typings| section. Please check it out.
 
 
 
 ==============================================================================
 MODE-SUPPORT                                                 *insx-mode-support*
 
-This plugin is made for complex key mapping in insert mode.
-However, it can be used in other modes as well.
+This plugin is designed to handle complex key mappings in insert mode.
+However, it could be used in other modes as well.
 
 Each mode has some caveats.
 
 - cmdline
-  - The built-in complex recipe such as `fast_wrap` / `fast_break` will not work.
+  - The built-in complex recipes such as `fast_wrap` / `fast_break` may not
+    work as well.
 - normal
-  - THe build-in recipes will not work.
+  - The build-in recipes may not work.
   - You can just use nvim-insx's mapping mechanism.
 
 
@@ -65,28 +66,28 @@ FUNCTION                                                         *insx-function*
                                                                  *insx#expand()*
 insx#expand(char): return~
 
-  Create keys sequence that can be feed via |nvim_feedkeys|.
+  Create sequence of keys that can be feed using |nvim_feedkeys|.
 
   - `char`: string
-    - The character for mapping (it isn't a form of keycodes).
+    - The character for the mapping (it is not a form of keycodes).
   - `return`: string
     - Expanded keycodes.
 
                                                                     *insx.add()*
 require('insx').add(char, recipe)~
 
-  Add recipe for specific char.
+  Add a recipe for a specific char.
 
   - `char`: string
-    - The character for mapping.
+    - The character for the mapping.
   - `recipe`: |insx.RecipeSource|
-    - The recipe that can be contained `action` / `enabled` keys.
+    - The recipe that could be contained `action` / `enabled` keys.
     - See |insx.Enabled|, |insx.Action|.
 
                                                                 *insx.compose()*
 require('insx').compose(recipe_sources): return~
 
-  Compose multiple recipe as one recipe.
+  Compose multiple recipes into a single recipe.
 
   - `recipe_sources`: |insx.RecipeSource|[]
     - The list of |insx.RecipeSource|.
@@ -94,9 +95,10 @@ require('insx').compose(recipe_sources): return~
     - The composed |insx.RecipeSource|.
 
                                                                    *insx.with()*
-require('insx').with(recipe_source, overrides): return~
+require('insx').with(recipe, overrides): return~
 
-  Enhance existing recipe with override object that can enhance `priority`, `action` or `enabled`.
+  Refine the present recipe by integrating an override object,
+  which provides the ability to enhance `priority`, `action`, or `enabled` elements.
 
   - `recipe`: |insx.RecipeSource|
     - The recipe to override.
@@ -137,12 +139,12 @@ require('insx').with(recipe_source, overrides): return~
                                                                   *insx.clear()*
 require('insx').clear()~
   Clear all managed mappings.
-  NOTE: If mapping was hijacked, it wouldn't cleared.
+  NOTE: If mapping was hijacked, it would not be cleared.
 
                                                                  *insx.expand()*
 require('insx').expand(char): return~
 
-  Create keys sequence that can be feed via |nvim_feedkeys|.
+  Create sequence of keys that can be feed using |nvim_feedkeys|.
 
   - `char`: string
     - The character for mapping.
@@ -248,17 +250,17 @@ The recipe is `insx.RecipeSource`.
 ==============================================================================
 BUILT-IN RECIPE                                           *insx-built_in-recipe*
 
-The built-in modules provides the pre-defined recipe.
+The built-in modules provide pre-defined recipes.
 
-The recipe is
-  - It typed as |insx.RecipeSource|
-  - It can be registered via `require('insx').add(char, insx.RecipeSource)`
+The recipes are:
+  - typed as |insx.RecipeSource|
+  - able to be registered via `require('insx').add(char, insx.RecipeSource)`
 
 
                                                          *insx-recipe-auto_pair*
 require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
 
-  This recipe provides the basic auto-pairs feature.
+  This recipe provides a basic auto-pairs feature.
   NOTE: This recipe exports the preset for `strings`.
 
   - `option.open`: string
@@ -280,7 +282,7 @@ require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
                                                        *insx-recipe-delete_pair*
 require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
 
-  This recipe provides the basic delete-pairs feature.
+  This recipe provides a basic delete-pairs feature.
   NOTE: This recipe exports the preset for `strings`.
 
   - `option.open_pat`: string
@@ -303,7 +305,7 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
                                                          *insx-recipe-jump_next*
 require('insx.recipe.jump_next'): fun(option): insx.RecipeSource~
 
-  This recipe provides cursor movement feature for the next pattern.
+  This recipe provides a cursor movement feature for the next pattern.
 
   - `option.jump_pat`: string|string[]
     - The jump patterns of string or string array.
@@ -321,7 +323,7 @@ require('insx.recipe.jump_next'): fun(option): insx.RecipeSource~
                                                         *insx-recipe-fast_break*
 require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
 
-  This recipe provides pair break feature.
+  This recipe provides a pair break feature.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
@@ -341,7 +343,7 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
   }))
 <  -----
 
-  You can use separated recipes
+  You can use the following recipes.
 
     - basic break
       - require('insx.recipe.fast_break.basic'): fun(option): insx.RecipeSource~
@@ -354,18 +356,19 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
 require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
 
   This recipe provides the ability to wrap the next token on the fly.
-  NOTE: highly recommend using this recipe along with vim-matchup.
+  NOTE: We strongly suggest utilizing this recipe
+        in conjunction with vim-matchup for an enhanced experience.
 
     1. Check the next token is `string`.
     2. Check the next token is matched to the pairwise_pat.
-    3. Jump nearest next_pat token.
+    3. Jump the nearest next_pat token.
 
   - `option.close`: string
     - The close token like `)` .
   - `option.pairwise_pat`: string|string[]
-    - The pattern array for deciding to use `%` or not.
+    - The pattern is an array for deciding to use `%` or not.
   - `option.next_pat`: string|string[]
-    - The pattern array for fallback.
+    - The pattern is an array for fallback.
   ----- >lua
   require('insx').add('<C-]>', require('insx.recipe.fast_wrap')({
     close = ')'
@@ -375,7 +378,8 @@ require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~
                                              *insx-recipe-pair_spacing.increase*
 require('insx.recipe.pair_spacing').increase: fun(option): insx.RecipeSource~
 
-  This recipe provides the feature that increase&adjust white-space between pairs.
+  This recipe provides the feature that increases and adjusts whitespaces
+  between pairs.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
@@ -392,7 +396,8 @@ require('insx.recipe.pair_spacing').increase: fun(option): insx.RecipeSource~
                                              *insx-recipe-pair_spacing.decrease*
 require('insx.recipe.pair_spacing').decrease: fun(option): insx.RecipeSource~
 
-  This recipe provides the feature that decrease&adjust white-space between pairs.
+  This recipe provides the feature that decreases and adjusts whitespaces
+  between pairs.
 
   - `option.open_pat`: string
     - The open token of balanced pair like `(` .
@@ -413,7 +418,7 @@ TIPS                                                                 *insx-tips*
 
 How to add the undopoint?~
 
-  You can enhance built-in recipe.
+  You can enhance built-in recipe as follows.
 
   ----- >lua
   require('insx').add(
