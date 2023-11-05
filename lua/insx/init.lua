@@ -33,8 +33,8 @@ local right = Keymap.termcodes('<Right>')
 ---@field public text fun(): string
 ---@field public after fun(): string
 ---@field public before fun(): string
----@field public match fun(pattern: string): boolean
----@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
+---@field public match fun(pattern: string): string[]?
+---@field public search fun(pattern: string): { [1]: integer, [2]: integer, matches: string[] }?
 ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
 ---@field public delete fun(pattern: string): nil
 ---@field public backspace fun(pattern: string): nil
@@ -143,16 +143,15 @@ local function create_context(char)
       return ctx.text():sub(ctx.col() + 1)
     end,
     match = function(pattern)
-      return ctx.search(pattern) ~= nil
+      local pos = ctx.search(pattern)
+      if pos then
+        return pos.matches
+      end
     end,
     search = function(pattern)
       if not pattern:find([[\%#]], 1, true) then
         error('pattern must contain cursor position (\\%#)')
       end
-      if ctx.mode() ~= 'c' then
-        return search.get_next(pattern)
-      end
-
       local _, before_e = vim.regex([[^.*\ze\\%#]]):match_str(pattern)
       local after_s, _ = vim.regex([[\\%#\zs.*$]]):match_str(pattern)
 
@@ -167,9 +166,23 @@ local function create_context(char)
       end
 
       if after_has_zs then
-        return { ctx.row(), ctx.col() + after_match_s }
+        return {
+          ctx.row(),
+          ctx.col() + after_match_s,
+          matches = vim.fn.matchlist(
+            ctx.text():sub(before_match_s + 1, ctx.col() + after_match_s),
+            before_pat .. after_pat
+          )
+        }
       end
-      return { ctx.row(), before_match_s }
+      return {
+        ctx.row(),
+        before_match_s,
+        matches = vim.fn.matchlist(
+          ctx.text():sub(before_match_s + 1),
+          before_pat .. after_pat
+        )
+      }
     end,
     send = function(key_specifiers)
       key_specifiers = kit.to_array(key_specifiers)
@@ -285,11 +298,9 @@ end
 
 ---Remove mappings.
 function insx.clear()
-  for _, mode in ipairs({ 'i', 'c' }) do
-    for _, keymap in ipairs(vim.api.nvim_get_keymap(mode)) do
-      if keymap.desc == 'insx' then
-        vim.api.nvim_del_keymap(mode, keymap.lhs)
-      end
+  for mode, keys in pairs(mode_map) do
+    for key in pairs(keys) do
+      vim.api.nvim_del_keymap(mode, key)
     end
   end
   mode_map = {}

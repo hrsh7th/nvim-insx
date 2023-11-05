@@ -188,6 +188,23 @@ describe('insx', function()
             mode = mode,
           })
         end)
+
+        it('should capture matches', function()
+          insx.add('<CR>', {
+            action = function(ctx)
+              assert.are.same(ctx.search([[\(a\)\(b\)\%#\(c\)\(d\)]]), {
+                0,
+                0,
+                matches = { 'abcd', 'a', 'b', 'c', 'd', '', '', '', '', '' }
+              })
+            end,
+          }, {
+            mode = mode,
+          })
+          spec.assert('ab|cd', '<CR>', 'ab|cd', {
+            mode = mode,
+          })
+        end)
       end)
     end
   end)
@@ -210,12 +227,12 @@ describe('insx', function()
             {
               setup = 'a|b',
               pattern = [[a\%#]],
-              expected = { 0, 0 },
+              expected = { 0, 0, matches = { 'a', '', '', '', '', '', '', '', '', '' } },
             },
             {
               setup = '"|"',
               pattern = [[\\\@<!\%#]] .. insx.helper.regex.esc('"') .. [[\zs]],
-              expected = { 0, 2 },
+              expected = { 0, 2, matches = { '', '', '', '', '', '', '', '', '', '' } },
             },
           }) do
             insx.clear()
@@ -261,7 +278,7 @@ describe('insx', function()
           for i = s_, e_ do
             expected = expected .. (chars[i] or '')
           end
-          vim.print({ s = s, e = e, expected = expected })
+          -- vim.print({ s = s, e = e, expected = expected })
           assert.are.same(ctx.substr('1🗿2🗿3🗿4🗿5🗿6', s, e), expected)
         end
       end

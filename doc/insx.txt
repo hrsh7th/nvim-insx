@@ -257,6 +257,28 @@ The recipes are:
   - able to be registered via `require('insx').add(char, insx.RecipeSource)`
 
 
+                                                        *insx-recipe-substitute*
+require('insx.recipe.substitute'): fun(option): insx.RecipeSource~
+
+  This recipe helps you create simple snippets like extensions in userland.
+
+  - `option.pattern`: string
+    - The vim regex pattern to determine expand or not.
+  - `option.replace`: string
+    - The replacement text.
+
+  ----- >lua
+  -- auto html tags.
+  require('insx').add('>', require('insx.recipe.substitute')({
+    pattern = [[<\(\w\+\).\{-}\%#>]],
+    replace = [[\0\%#</\1>]]
+  }))
+  -- delete html tags.
+  require('insx').add('<BS>', require('insx.recipe.substitute')({
+    pattern = [[<\(\w\+\).\{-}>\%#</.\{-}>]],
+    replace = [[\%#]]
+  }))
+<  -----
                                                          *insx-recipe-auto_pair*
 require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
 
