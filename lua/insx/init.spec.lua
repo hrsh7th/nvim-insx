@@ -138,6 +138,18 @@ describe('insx', function()
     end)
   end)
 
+  describe('ctx.move', function()
+    it('should move with multibyte chars', function()
+      insx.add('<CR>', {
+        action = function(ctx)
+          local search = assert(ctx.search([[\%#.*\zs]]))
+          ctx.move(search[1], search[2])
+        end,
+      })
+      spec.assert('|あいうえお', '<CR>', 'あいうえお|')
+    end)
+  end)
+
   describe('ctx.match', function()
     for _, mode in ipairs({ 'i', 'c' }) do
       describe(('mode=%s'):format(mode), function()
