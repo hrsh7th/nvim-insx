@@ -39,4 +39,3 @@ local function html_tags(_)
 end
 
 return html_tags
-

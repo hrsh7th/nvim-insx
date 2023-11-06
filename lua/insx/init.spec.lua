@@ -207,7 +207,7 @@ describe('insx', function()
               assert.are.same(ctx.search([[\(a\)\(b\)\%#\(c\)\(d\)]]), {
                 0,
                 0,
-                matches = { 'abcd', 'a', 'b', 'c', 'd', '', '', '', '', '' }
+                matches = { 'abcd', 'a', 'b', 'c', 'd', '', '', '', '', '' },
               })
             end,
           }, {

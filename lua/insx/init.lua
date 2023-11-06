@@ -168,19 +168,13 @@ local function create_context(char)
         return {
           ctx.row(),
           ctx.col() + after_match_s,
-          matches = vim.fn.matchlist(
-            ctx.text():sub(before_match_s + 1, ctx.col() + after_match_s),
-            before_pat .. after_pat
-          )
+          matches = vim.fn.matchlist(ctx.text():sub(before_match_s + 1, ctx.col() + after_match_s), before_pat .. after_pat),
         }
       end
       return {
         ctx.row(),
         before_match_s,
-        matches = vim.fn.matchlist(
-          ctx.text():sub(before_match_s + 1),
-          before_pat .. after_pat
-        )
+        matches = vim.fn.matchlist(ctx.text():sub(before_match_s + 1), before_pat .. after_pat),
       }
     end,
     send = function(key_specifiers)
