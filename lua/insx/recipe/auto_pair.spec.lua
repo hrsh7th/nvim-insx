@@ -32,6 +32,14 @@ describe('insx.recipe.auto_pair', function()
     spec.assert('<!-|', '-', '<!--|-->')
   end)
 
+  it('should support backslash', function()
+    insx.add('(', require('insx.recipe.auto_pair')({
+      open = [[\(]],
+      close = [[\)]]
+    }))
+    spec.assert([[\|]], '(', [[\(|\)]])
+  end)
+
   it('should work with dot-repeat', function()
     insx.add(
       '(',

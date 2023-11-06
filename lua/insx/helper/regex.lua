@@ -3,7 +3,7 @@ local regex = {}
 ---@param s string
 ---@return string
 function regex.esc(s)
-  return [[\V]] .. s .. [[\m]]
+  return [[\V]] .. vim.fn.escape(s, [[\]]) .. [[\m]]
 end
 
 ---@param text string

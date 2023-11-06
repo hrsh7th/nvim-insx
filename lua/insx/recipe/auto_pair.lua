@@ -1,4 +1,5 @@
 local insx = require('insx')
+local regex = require('insx.helper.regex')
 
 ---@class insx.recipe.auto_pair.Option
 ---@field public open string
@@ -10,12 +11,12 @@ local function auto_pair(option)
   return {
     ---@param ctx insx.Context
     enabled = function(ctx)
-      return ctx.match(ctx.substr(option.open, 1, -2) .. [[\%#]])
+      return ctx.match(regex.esc(ctx.substr(option.open, 1, -2)) .. [[\%#]])
     end,
     ---@param ctx insx.Context
     action = function(ctx)
       if #option.open > 1 then
-        ctx.remove(ctx.substr(option.open, 1, -2) .. [[\%#]])
+        ctx.remove(regex.esc(ctx.substr(option.open, 1, -2)) .. [[\%#]])
       end
       ctx.send(option.open .. option.close .. ('<Left>'):rep(vim.fn.strchars(option.close, true)))
     end,
