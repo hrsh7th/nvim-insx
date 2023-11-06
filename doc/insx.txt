@@ -270,8 +270,8 @@ require('insx.recipe.substitute'): fun(option): insx.RecipeSource~
   ----- >lua
   -- auto html tags.
   require('insx').add('>', require('insx.recipe.substitute')({
-    pattern = [[<\(\w\+\).\{-}\%#>]],
-    replace = [[\0\%#</\1>]]
+    pattern = [[<\(\w\+\).\{-}\%#]],
+    replace = [[\0>\%#</\1>]]
   }))
   -- delete html tags.
   require('insx').add('<BS>', require('insx.recipe.substitute')({
