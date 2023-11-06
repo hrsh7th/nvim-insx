@@ -1,8 +1,9 @@
 local insx = require('insx')
 
----@class insx.recipe.fast_break.Option: insx.recipe.fast_break.html_attrs.Option, insx.recipe.fast_break.arguments.Option, insx.recipe.fast_break.basic.Option
+---@class insx.recipe.fast_break.Option: insx.recipe.fast_break.html_attrs.Option, insx.recipe.fast_break.html_tags.Option, insx.recipe.fast_break.arguments.Option, insx.recipe.fast_break.basic.Option
 ---@field split? boolean # deprecated
 ---@field html_attrs? boolean
+---@field html_tags? boolean
 ---@field arguments? boolean
 
 ---@param option insx.recipe.fast_break.Option
@@ -23,10 +24,17 @@ local function fast_break(option)
     })
   )
 
+  --- html_attrs
   if option.split or option.html_attrs then
     table.insert(recipes, require('insx.recipe.fast_break.html_attrs')({}))
   end
 
+  --- html_tags
+  if option.split or option.html_tags then
+    table.insert(recipes, require('insx.recipe.fast_break.html_tags')({}))
+  end
+
+  --- arguments
   if option.split or option.arguments then
     table.insert(
       recipes,

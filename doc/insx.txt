@@ -206,7 +206,7 @@ TYPINGS                                                           *insx-typings*
   ---@class insx.preset.standard.Config
   ---@field public cmdline? { enabled?: boolean }
   ---@field public spacing? { enabled?: boolean }
-  ---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, arguments?: boolean }
+  ---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, html_tags?: boolean, arguments?: boolean }
   ---@field public fast_wrap? { enabled?: boolean }
 <
 
@@ -355,6 +355,8 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     - Specify enables or not the splitjoin.vim like behavior for arguments.
   - `option.html_attrs`: boolean
     - Specify enables or not the splitjoin.vim like behavior for HTML attributes.
+  - `option.html_tags`: boolean
+    - Specify enables or not the splitjoin.vim like behavior for HTML tags.
   ----- >lua
   local esc = require('insx').helper.regex.esc
   require('insx').add('<CR>', require('insx.recipe.fast_break')({
@@ -362,6 +364,7 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
     close_pat = esc(')')
     arguments = true,
     html_attrs = true,
+    html_tags = true,
   }))
 <  -----
 
@@ -373,6 +376,8 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
       require('insx.recipe.fast_break.arguments'): fun(option): insx.RecipeSource~
     - fast_break.html_attrs
       require('insx.recipe.fast_break.html_attrs'): fun(option): insx.RecipeSource~
+    - fast_break.html_tags
+      require('insx.recipe.fast_break.html_tags'): fun(option): insx.RecipeSource~
 
                                                          *insx-recipe-fast_wrap*
 require('insx.recipe.fast_wrap'): fun(option): insx.RecipeSource~

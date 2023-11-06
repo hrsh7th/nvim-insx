@@ -210,6 +210,7 @@ function standard.set_pair(mode, open, close, withs)
             close_pat = esc(close),
             split = kit.get(standard.config, { 'fast_break', 'split' }, nil),
             html_attrs = kit.get(standard.config, { 'fast_break', 'html_attrs' }, true),
+            html_tags = kit.get(standard.config, { 'fast_break', 'html_tags' }, true),
             arguments = kit.get(standard.config, { 'fast_break', 'arguments' }, true),
           }),
           withs
