@@ -62,9 +62,9 @@ describe('insx.preset.standard', function()
 
       -- tags.
       if option.mode == 'i' then
-        spec.assert('<div>|</div>', '<CR>', {
+        spec.assert('<div>|aiueo</div>', '<CR>', {
           '<div>',
-          '  |',
+          '  |aiueo',
           '</div>',
         }, option)
       end

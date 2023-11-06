@@ -14,7 +14,6 @@ end
 
 local search = {}
 
----@type table<string, string>
 search.Tag = {
   Open = [=[<\(\%(\w\|\.\)\+\)\=\%(\s\+[^>]\{-}\)\?>]=],
   Close = [=[</\(\%(\w\|\.\)\+\)\=>]=],
