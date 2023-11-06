@@ -66,18 +66,18 @@ function spec.setup(lines_, option)
   vim.treesitter.get_parser(0, filetype):parse()
 end
 
----@param prev_lines_ string|string[]
+---@param prev string|string[]
 ---@param char string
----@param next_lines_ string|string[]
+---@param next string|string[]
 ---@param option? insx.spec.Option
-function spec.assert(prev_lines_, char, next_lines_, option)
+function spec.assert(prev, char, next, option)
   option = option or {}
 
   local ok, err = pcall(function()
     Keymap.spec(function()
-      spec.setup(prev_lines_, option)
+      spec.setup(prev, option)
       Keymap.send({ keys = Keymap.termcodes(char), remap = true }):await()
-      local next_lines, next_cursor = parse(next_lines_)
+      local next_lines, next_cursor = parse(next)
       if option.mode == 'c' then
         assert.are.same(next_lines, { vim.fn.getcmdline() })
         assert.are.same(next_cursor, { 1, vim.fn.getcmdpos() - 1 })
@@ -93,6 +93,19 @@ function spec.assert(prev_lines_, char, next_lines_, option)
     end
     ---@diagnostic disable-next-line: need-check-nil
     error(err.message, 2)
+  end
+end
+
+---@param next string|string[]
+---@param option? { mode: 'i'|'c' }
+function spec.expect(next, option)
+  local next_lines, next_cursor = parse(next)
+  if option and option.mode == 'c' then
+    assert.are.same(next_lines, { vim.fn.getcmdline() })
+    assert.are.same(next_cursor, { 1, vim.fn.getcmdpos() - 1 })
+  else
+    assert.are.same(next_lines, vim.api.nvim_buf_get_lines(0, 0, -1, false))
+    assert.are.same(next_cursor, vim.api.nvim_win_get_cursor(0))
   end
 end
 

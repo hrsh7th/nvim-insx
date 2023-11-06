@@ -2,7 +2,6 @@ local kit = require('insx.kit')
 local Async = require('insx.kit.Async')
 local Keymap = require('insx.kit.Vim.Keymap')
 local RegExp = require('insx.kit.Vim.RegExp')
-local search = require('insx.helper.search')
 
 local undobreak = Keymap.termcodes('<C-g>u')
 local undojoin = Keymap.termcodes('<C-g>U')
@@ -250,7 +249,18 @@ local function create_context(char)
       if ctx.mode() == 'c' then
         vim.fn.setcmdline(vim.fn.getcmdline(), col + 1)
       else
-        vim.api.nvim_win_set_cursor(0, { row + 1, col })
+        if ctx.row() == row then
+          local diff = ctx.col() - col
+          if diff > 0 then
+            local text = ctx.text():sub(col + 1, ctx.col())
+            ctx.send(('<Left>'):rep(vim.fn.strchars(text, true)))
+          else
+            local text = ctx.text():sub(ctx.col() + 1, col)
+            ctx.send(('<Right>'):rep(vim.fn.strchars(text, true)))
+          end
+        else
+          vim.api.nvim_win_set_cursor(0, { row + 1, col })
+        end
       end
     end,
     substr = function(str, i, j)
