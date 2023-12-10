@@ -203,6 +203,9 @@ function kit.get(value, path, default)
       return default
     end
   end
+  if result == false then
+    return false
+  end
   return result or default
 end
 
