@@ -203,7 +203,10 @@ function kit.get(value, path, default)
       return default
     end
   end
-  return result or default
+  if result == nil then
+    return default
+  end
+  return result
 end
 
 return kit
