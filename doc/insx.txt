@@ -166,6 +166,7 @@ TYPINGS                                                           *insx-typings*
 >lua
   ---@alias insx.Enabled fun(ctx: insx.Context): nil
   ---@alias insx.Action fun(ctx: insx.Context): nil
+  ---@alias insx.kit.Vim.Keymap.KeysSpecifier string|{ keys: string, remap: boolean }
 
   ---@class insx.RecipeSource
   ---@field public priority? integer
@@ -298,7 +299,7 @@ require('insx.recipe.auto_pair'): fun(option): insx.RecipeSource~
   require('insx').add('(', require('insx.recipe.auto_pair').strings({
     open = [[']],
     close = [[']],
-  }) -- preset for strings.
+  })) -- preset for strings.
 <  -----
 
                                                        *insx-recipe-delete_pair*
@@ -321,7 +322,7 @@ require('insx.recipe.delete_pair'): fun(option): insx.RecipeSource~
   require('insx').add('<BS>', require('insx.recipe.auto_pair').strings({
     open_pat = esc([[']]),
     close_pat = esc([[']])
-  }) -- preset for strings.
+  })) -- preset for strings.
 <  -----
 
                                                          *insx-recipe-jump_next*
@@ -361,7 +362,7 @@ require('insx.recipe.fast_break'): fun(option): insx.RecipeSource~
   local esc = require('insx').helper.regex.esc
   require('insx').add('<CR>', require('insx.recipe.fast_break')({
     open_pat = esc('('),
-    close_pat = esc(')')
+    close_pat = esc(')'),
     arguments = true,
     html_attrs = true,
     html_tags = true,
@@ -448,13 +449,14 @@ How to add the undopoint?~
   You can enhance built-in recipe as follows.
 
   ----- >lua
-  require('insx').add(
+  local insx = require('insx')
+  insx.add(
     insx.with(require('insx.recipe.fast_wrap')({
       ...
     }), {
       insx.with.undopoint(false)
     })
-  ))
+  )
 <  -----
 
 
