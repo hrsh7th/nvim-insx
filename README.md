@@ -10,8 +10,8 @@ https://github.com/hrsh7th/nvim-insx/assets/629908/ad878d95-c541-4d6c-b135-139d5
 - Dot-repeat is supported by only *basic* recipes.
   - Note that dot-repeat may not work with the complicated recipes.
 - This plugin *usually* works as expected.
-  - It may fire the accidential action,
-    because the regular expression does not caputure the structure of whole text.
+  - It may fire the accidental action,
+    because the regular expression does not capture the structure of whole text.
   - We do not intend to integrate with tree-sitter
     as control over the regular expression is more convenient and sufficient.
 - It is more convenient when used with vim-matchup.

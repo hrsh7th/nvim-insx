@@ -2,7 +2,7 @@ local kit = {}
 
 local is_thread = vim.is_thread()
 
----Create gabage collection detector.
+---Create garbage collection detector.
 ---@param callback fun(...: any): any
 ---@return userdata
 function kit.gc(callback)
