@@ -25,7 +25,7 @@ This plugin makes it easy to define & manage complex mappings.
 The concept is the following features:
 
 - Absence of support for dot-repeat
-- Focus on the advaned functionality
+- Focus on the advanced functionality
 
 
 This plugin comes with a built-in preset.
