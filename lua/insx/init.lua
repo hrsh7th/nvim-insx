@@ -56,12 +56,6 @@ local right = Keymap.termcodes('<Right>')
 ---@type table<string, table<string, insx.RecipeSource[]>>
 local mode_map = {}
 
----@param key string
----@return string
-local function normalize(key)
-  return vim.fn.keytrans(Keymap.termcodes(key))
-end
-
 ---Get sorted/normalized entries for specific mapping.
 ---@param ctx insx.Context
 ---@param recipe_sources insx.RecipeSource[]
@@ -300,7 +294,7 @@ insx.helper = require('insx.helper')
 ---@param recipe_source insx.RecipeSource
 ---@param option? { mode?: 'x' | 'i' | 'c' | 'n' }
 function insx.add(char, recipe_source, option)
-  char = normalize(char)
+  char = Keymap.normalize(char)
 
   -- ensure tables.
   local mode = option and option.mode or 'i'
@@ -338,7 +332,7 @@ end
 ---@param char string
 ---@return string
 function insx.expand(char)
-  char = normalize(char)
+  char = Keymap.normalize(char)
 
   local ctx = create_context(char)
 
@@ -347,13 +341,8 @@ function insx.expand(char)
     local recipes = kit.concat(get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})), {
       {
         action = function()
-          local code = Keymap.termcodes(ctx.char)
-          local expand_abbr = code:len() == 1 and (RegExp.get('^\\k$'):match_str(code)) == nil
-          if expand_abbr then
-            ctx.send({ '<C-]>', ctx.char })
-          else
-            ctx.send(ctx.char)
-          end
+          local codes = RegExp.gsub(Keymap.termcodes(ctx.char), [=[.\{-}\zs\ze[^[:keyword:]]]=], Keymap.termcodes('<C-]>'))
+          ctx.send(vim.fn.keytrans(codes))
         end,
       },
     })
@@ -426,7 +415,7 @@ insx.with = setmetatable({
   ---@param filetypes string|string[]
   ---@return insx.Override
   filetype = function(filetypes)
-    filetypes = kit.to_array(filetypes) --[=[@as string[]]=]
+    filetypes = kit.to_array(filetypes) --[=[@as string[]]]=]
     return {
       ---@param enabled insx.Enabled
       ---@param ctx insx.Context

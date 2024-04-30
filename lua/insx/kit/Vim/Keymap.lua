@@ -1,8 +1,8 @@
 local kit = require('insx.kit')
 local Async = require('insx.kit.Async')
 
----@alias insx.kit.Vim.Keymap.Keys { keys: string, remap: boolean }
----@alias insx.kit.Vim.Keymap.KeysSpecifier string|{ keys: string, remap: boolean }
+---@alias insx.kit.Vim.Keymap.Keys { keys: string, remap?: boolean }
+---@alias insx.kit.Vim.Keymap.KeysSpecifier string|insx.kit.Vim.Keymap.Keys
 
 ---@param keys insx.kit.Vim.Keymap.KeysSpecifier
 ---@return insx.kit.Vim.Keymap.Keys
