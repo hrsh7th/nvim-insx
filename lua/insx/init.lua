@@ -115,26 +115,26 @@ local function create_context(char)
       end
       return mode:sub(1, 1)
     end,
-    region = function()
-      local mode = vim.api.nvim_get_mode().mode --[[@as string]]
-      if not vim.tbl_contains({ 'v', 'V', '' }, mode) then
-        error('mode is not visual')
-      end
-      ctx.send('<Esc>gv')
-      if vim.tbl_contains({ 'v', '' }, mode) then
-        local s = vim.fn.getpos("'<")
-        local e = vim.fn.getpos("'>")
-        return {
-          s = { s[2] - 1, s[3] - 1 },
-          e = { e[2] - 1, e[3] },
-        }
-      elseif mode == 'V' then
-        return {
-          s = { ctx.row(), 0 },
-          e = { ctx.row(), #ctx.text() },
-        }
-      end
-    end,
+    -- region = function()
+    --   local mode = vim.api.nvim_get_mode().mode --[[@as string]]
+    --   if not vim.tbl_contains({ 'v', 'V', '' }, mode) then
+    --     error('mode is not visual')
+    --   end
+    --   ctx.send('<Esc>gv')
+    --   if vim.tbl_contains({ 'v', '' }, mode) then
+    --     local s = vim.fn.getpos("'<")
+    --     local e = vim.fn.getpos("'>")
+    --     return {
+    --       s = { s[2] - 1, s[3] - 1 },
+    --       e = { e[2] - 1, e[3] },
+    --     }
+    --   elseif mode == 'V' then
+    --     return {
+    --       s = { ctx.row(), 0 },
+    --       e = { ctx.row(), #ctx.text() },
+    --     }
+    --   end
+    -- end,
     row = function()
       if ctx.mode() == 'c' then
         return 0

@@ -61,7 +61,7 @@ end
 local function fast_wrap(option)
   local pairwise_pat = kit.to_array(option and option.pairwise_pat or {
     helper.search.Tag.Open,
-    [=[[^[:blank:][[({]*\s*[[<({]]=], -- function() or setup {} or Vec![]
+    [=[[^[:blank:][[({]*\s*[[({]]=], -- function() or setup {} or Vec![]
     [=[\%(\<function\>\|\<func\>\|\<fn\>\)]=],
     [=[\%(\<if\>\|\<switch\>\|\<match\>\|\<for\>\|\<while\>\|do\)]=],
   })

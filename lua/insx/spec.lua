@@ -78,7 +78,7 @@ function spec.assert(prev, char, next, option)
   local ok, err = pcall(function()
     Keymap.spec(function()
       spec.setup(prev, option)
-      Keymap.send({ keys = Keymap.termcodes(char), remap = true, user = true }):await()
+      Keymap.send({ keys = Keymap.termcodes(char), remap = true }):await()
       local next_lines, next_cursor = parse(next)
       if option.mode == 'c' then
         assert.are.same(next_lines, { vim.fn.getcmdline() })
