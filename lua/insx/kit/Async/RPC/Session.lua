@@ -3,16 +3,6 @@ local kit = require('insx.kit')
 local mpack = require('mpack')
 local Async = require('insx.kit.Async')
 
----Encode data to msgpack.
----@param v any
----@return string
-local function encode(v)
-  if v == nil then
-    return mpack.encode(mpack.NIL)
-  end
-  return mpack.encode(v)
-end
-
 ---@class insx.kit.Async.RPC.Session
 ---@field private mpack_session any
 ---@field private stdin uv.uv_pipe_t

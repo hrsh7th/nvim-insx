@@ -1,4 +1,5 @@
 ---@diagnostic disable: redefined-local
+
 local uv = require('luv')
 local Session = require('insx.kit.Async.RPC.Session')
 
@@ -9,8 +10,8 @@ local Thread = {}
 Thread.__index = Thread
 
 ---Create new thread.
----@param dispatcher fun(session: insx.kit.Async.RPC.Session)
-function Thread.new(dispatcher)
+---@param dispatcher_ fun(session: insx.kit.Async.RPC.Session)
+function Thread.new(dispatcher_)
   local self = setmetatable({}, Thread)
 
   -- prepare server connections.
@@ -34,7 +35,7 @@ function Thread.new(dispatcher)
     while running do
       uv.run('once')
     end
-  end, string.dump(dispatcher), client2server_fds[2], server2client_fds[1])
+  end, string.dump(dispatcher_), client2server_fds[2], server2client_fds[1])
 
   -- prepare client connections.
   local client2server_write = uv.new_tcp()
