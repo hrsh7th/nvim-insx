@@ -327,7 +327,7 @@ describe('insx', function()
         end,
         action = function(ctx)
           ctx.send('  <Left>')
-        end
+        end,
       })
 
       vim.keymap.set('ia', 'foo', 'foobarbaz')
