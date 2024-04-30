@@ -26,8 +26,10 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
----@param option insx.spec.Option
+---@param option? insx.spec.Option
 function spec.setup(lines_, option)
+  option = option or {}
+
   local filetype = option and option.filetype or 'lua'
   vim.cmd.enew({ bang = true })
   vim.cmd([[ set noswapfile ]])

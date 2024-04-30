@@ -1,18 +1,9 @@
 ---@diagnostic disable: invisible, redefined-local
+local kit = require('insx.kit')
 local mpack = require('mpack')
 local Async = require('insx.kit.Async')
 
----Encode data to msgpack.
----@param v any
----@return string
-local function encode(v)
-  if v == nil then
-    return mpack.encode(mpack.NIL)
-  end
-  return mpack.encode(v)
-end
-
----@class insx.kit.Thread.Server.Session
+---@class insx.kit.Async.RPC.Session
 ---@field private mpack_session any
 ---@field private stdin uv.uv_pipe_t
 ---@field private stdout uv.uv_pipe_t
@@ -22,10 +13,10 @@ local Session = {}
 Session.__index = Session
 
 ---Create new session.
----@return insx.kit.Thread.Server.Session
+---@return insx.kit.Async.RPC.Session
 function Session.new()
   local self = setmetatable({}, Session)
-  self.mpack_session = mpack.Session({ unpack = mpack.Unpacker() })
+  self.mpack_session = mpack.Session({ unpack = kit.Unpacker })
   self.stdin = nil
   self.stdout = nil
   self._on_request = {}
@@ -54,40 +45,37 @@ function Session:connect(stdin, stdout)
       local type, id_or_cb, method_or_error, params_or_result, new_offset = self.mpack_session:receive(data, offset)
       if type == 'request' then
         local request_id, method, params = id_or_cb, method_or_error, params_or_result
-        Async.resolve()
-          :next(function()
-            return Async.run(function()
-              return self._on_request[method](params)
-            end)
+        Async.resolve():next(function()
+          return Async.run(function()
+            return self._on_request[method](params)
           end)
-          :next(function(res)
-            self.stdout:write(self.mpack_session:reply(request_id) .. encode(mpack.NIL) .. encode(res))
-          end)
-          :catch(function(err_)
-            self.stdout:write(self.mpack_session:reply(request_id) .. encode(err_) .. encode(mpack.NIL))
-          end)
+        end):next(function(res)
+          self.stdout:write(self.mpack_session:reply(request_id) .. kit.pack(mpack.NIL) .. kit.pack(res))
+        end):catch(function(err_)
+          self.stdout:write(self.mpack_session:reply(request_id) .. kit.pack(err_) .. kit.pack(mpack.NIL))
+        end)
       elseif type == 'notification' then
         local method, params = method_or_error, params_or_result
-        Async.run(function()
-          self._on_notification[method](params)
-        end):catch(function(e)
-          self:notify('$/error', { error = e })
-        end)
+        self._on_notification[method](params)
       elseif type == 'response' then
         local callback, err_, res = id_or_cb, method_or_error, params_or_result
-        Async.run(function()
-          if err_ == mpack.NIL then
-            callback(nil, res)
-          else
-            callback(err_, nil)
-          end
-        end):catch(function(e)
-          self:notify('$/error', { error = e })
-        end)
+        if err_ == mpack.NIL then
+          callback(nil, res)
+        else
+          callback(err_, nil)
+        end
       end
       offset = new_offset
     end
   end)
+end
+
+---Close session.
+function Session:close()
+  self.stdin:close()
+  self.stdout:close()
+  self.stdin = nil
+  self.stdout = nil
 end
 
 ---Add request handler.
@@ -117,7 +105,7 @@ function Session:request(method, params)
         resolve(res)
       end
     end)
-    self.stdout:write(request .. encode(method) .. encode(params))
+    self.stdout:write(request .. kit.pack(method) .. kit.pack(params))
   end)
 end
 
@@ -125,7 +113,7 @@ end
 ---@param method string
 ---@param params table
 function Session:notify(method, params)
-  self.stdout:write(self.mpack_session:notify() .. encode(method) .. encode(params))
+  self.stdout:write(self.mpack_session:notify() .. kit.pack(method) .. kit.pack(params))
 end
 
 return Session

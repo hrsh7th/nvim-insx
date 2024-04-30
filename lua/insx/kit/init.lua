@@ -2,7 +2,7 @@ local kit = {}
 
 local is_thread = vim.is_thread()
 
----Create garbage collection detector.
+---Create gabage collection detector.
 ---@param callback fun(...: any): any
 ---@return userdata
 function kit.gc(callback)
@@ -13,6 +13,58 @@ function kit.gc(callback)
     getmetatable(gc).__gc = vim.schedule_wrap(callback)
   end
   return gc
+end
+
+do
+  local mpack = require('mpack')
+
+  local MpackFunctionType = {}
+  MpackFunctionType.__index = MpackFunctionType
+
+  kit.Packer = mpack.Packer({
+    ext = {
+      [MpackFunctionType] = function(data)
+        return 5, string.dump(data.fn)
+      end
+    }
+  })
+
+  kit.Unpacker = mpack.Unpacker({
+    ext = {
+      [5] = function(_, data)
+        return loadstring(data)
+      end
+    }
+  })
+
+  ---Serialize object like values.
+  ---@param target any
+  ---@return string
+  function kit.pack(target)
+    if type(target) == 'nil' then
+      return kit.Packer(mpack.NIL)
+    end
+    if type(target) == 'table' then
+      local copy = kit.clone(target)
+      kit.traverse(copy, function(v, parent, path)
+        if type(v) == 'function' then
+          if parent == nil then
+            error('The root value cannot be a function.')
+          end
+          kit.set(parent, path, setmetatable({ fn = v }, MpackFunctionType))
+        end
+      end)
+      return kit.Packer(copy)
+    end
+    return kit.Packer(target)
+  end
+
+  ---Deserialize object like values.
+  ---@param target string
+  ---@return any
+  function kit.unpack(target)
+    return kit.Unpacker(target)
+  end
 end
 
 ---Bind arguments for function.
@@ -46,6 +98,22 @@ function kit.safe_schedule_wrap(fn)
   end
 end
 
+---Traverse object tree.
+---@param root_node any
+---@param root_callback fun(v: any, parent: table, path: string[])
+function kit.traverse(root_node, root_callback)
+  local function traverse(node, callback, parent, path)
+    if type(node) == 'table' then
+      for k, v in pairs(node) do
+        traverse(v, callback, node, kit.concat(path, { k }))
+      end
+    else
+      callback(node, parent, path)
+    end
+  end
+  traverse(root_node, root_callback, nil, {})
+end
+
 ---Create unique id.
 ---@return integer
 kit.unique_id = setmetatable({
@@ -57,8 +125,29 @@ kit.unique_id = setmetatable({
   end,
 })
 
----Merge two tables.
+---Clone object.
 ---@generic T
+---@param target T
+---@return T
+function kit.clone(target)
+  if kit.is_array(target) then
+    local new_tbl = {}
+    for k, v in ipairs(target) do
+      new_tbl[k] = kit.clone(v)
+    end
+    return new_tbl
+  elseif kit.is_dict(target) then
+    local new_tbl = {}
+    for k, v in pairs(target) do
+      new_tbl[k] = kit.clone(v)
+    end
+    return new_tbl
+  end
+  return target
+end
+
+---Merge two tables.
+---@generic T: any[]
 ---NOTE: This doesn't merge array-like table.
 ---@param tbl1 T
 ---@param tbl2 T
@@ -94,21 +183,6 @@ function kit.merge(tbl1, tbl2)
   end
 end
 
----Recursive convert value via callback function.
----@param tbl table
----@param callback fun(value: any): any
----@return table
-function kit.convert(tbl, callback)
-  if kit.is_dict(tbl) then
-    local new_tbl = {}
-    for k, v in pairs(tbl) do
-      new_tbl[k] = kit.convert(v, callback)
-    end
-    return new_tbl
-  end
-  return callback(tbl)
-end
-
 ---Map array.
 ---@param array table
 ---@param fn fun(item: unknown, index: integer): unknown
@@ -135,6 +209,36 @@ function kit.concat(tbl1, tbl2)
     table.insert(new_tbl, item)
   end
   return new_tbl
+end
+
+---Return true if v is contained in array.
+---@param array any[]
+---@param v any
+---@return boolean
+function kit.contains(array, v)
+  for _, item in ipairs(array) do
+    if item == v then
+      return true
+    end
+  end
+  return false
+end
+
+---Slice the array.
+---@generic T: any[]
+---@param array T
+---@param s integer
+---@param e integer
+---@return T
+function kit.slice(array, s, e)
+  if not kit.is_array(array) then
+    error('[kit] specified value is not an array.')
+  end
+  local new_array = {}
+  for i = s, e do
+    table.insert(new_array, array[i])
+  end
+  return new_array
 end
 
 ---The value to array.
@@ -207,6 +311,22 @@ function kit.get(value, path, default)
     return default
   end
   return result
+end
+
+---Set object path with new value.
+---@param value table
+---@param path integer|string|(string|integer)[]
+---@param new_value any
+function kit.set(value, path, new_value)
+  local current = value
+  for i = 1, #path - 1 do
+    local key = path[i]
+    if type(current[key]) ~= 'table' then
+      error('The specified path is not a table.')
+    end
+    current = current[key]
+  end
+  current[path[#path]] = new_value
 end
 
 return kit
