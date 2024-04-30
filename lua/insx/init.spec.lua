@@ -319,6 +319,29 @@ describe('insx', function()
     end)
   end)
 
+  describe('abbr', function()
+    it('should work with iabbr', function()
+      insx.add(' ', {
+        enabled = function(ctx)
+          return ctx.match([[(\%#)]])
+        end,
+        action = function(ctx)
+          ctx.send('  <Left>')
+        end
+      })
+
+      vim.keymap.set('ia', 'foo', 'foobarbaz')
+      Keymap.spec(function()
+        spec.setup('|')
+        Keymap.send(Keymap.termcodes('()<Left>')):await()
+        Keymap.send('foo'):await()
+        Keymap.send({ keys = ' ', remap = true }):await()
+        spec.expect('(foobarbaz |)')
+      end)
+      vim.keymap.del('ia', 'foo')
+    end)
+  end)
+
   describe('macro', function()
     it('should support macro', function()
       insx.add(

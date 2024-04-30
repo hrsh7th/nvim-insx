@@ -109,7 +109,31 @@ local function create_context(char)
     mode = function()
       -- i|ic|ix → i & c|cx → c
       -- see `:h mode()`
-      return vim.api.nvim_get_mode().mode:sub(1, 1)
+      local mode = vim.api.nvim_get_mode().mode --[[@as string]]
+      if vim.tbl_contains({ 'v', 'V', '' }, mode) then
+        return 'x'
+      end
+      return mode:sub(1, 1)
+    end,
+    region = function()
+      local mode = vim.api.nvim_get_mode().mode --[[@as string]]
+      if not vim.tbl_contains({ 'v', 'V', '' }, mode) then
+        error('mode is not visual')
+      end
+      ctx.send('<Esc>gv')
+      if vim.tbl_contains({ 'v', '' }, mode) then
+        local s = vim.fn.getpos("'<")
+        local e = vim.fn.getpos("'>")
+        return {
+          s = { s[2] - 1, s[3] - 1 },
+          e = { e[2] - 1, e[3] },
+        }
+      elseif mode == 'V' then
+        return {
+          s = { ctx.row(), 0 },
+          e = { ctx.row(), #ctx.text() },
+        }
+      end
     end,
     row = function()
       if ctx.mode() == 'c' then
@@ -274,7 +298,7 @@ insx.helper = require('insx.helper')
 ---Add new mapping recipe for specific mapping.
 ---@param char string
 ---@param recipe_source insx.RecipeSource
----@param option? { mode?: 'i' | 'c' | 'n' }
+---@param option? { mode?: 'x' | 'i' | 'c' | 'n' }
 function insx.add(char, recipe_source, option)
   char = normalize(char)
 
@@ -323,7 +347,13 @@ function insx.expand(char)
     local recipes = kit.concat(get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})), {
       {
         action = function()
-          ctx.send(ctx.char)
+          local code = Keymap.termcodes(ctx.char)
+          local expand_abbr = code:len() == 1 and (RegExp.get('^\\k$'):match_str(code)) == nil
+          if expand_abbr then
+            ctx.send({ '<C-]>', ctx.char })
+          else
+            ctx.send(ctx.char)
+          end
         end,
       },
     })

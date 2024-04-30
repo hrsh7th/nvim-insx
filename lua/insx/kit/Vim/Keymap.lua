@@ -24,6 +24,11 @@ function Keymap.termcodes(keys)
   return vim.api.nvim_replace_termcodes(keys, true, true, true)
 end
 
+---Normalize keycode.
+function Keymap.normalize(s)
+  return vim.fn.keytrans(vim.keycode(s))
+end
+
 ---Set callback for consuming next typeahead.
 ---@param callback fun()
 ---@return insx.kit.Async.AsyncTask

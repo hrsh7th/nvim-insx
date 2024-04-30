@@ -26,8 +26,10 @@ end
 local spec = {}
 
 ---@param lines_ string|string[]
----@param option insx.spec.Option
+---@param option? insx.spec.Option
 function spec.setup(lines_, option)
+  option = option or {}
+
   local filetype = option and option.filetype or 'lua'
   vim.cmd.enew({ bang = true })
   vim.cmd([[ set noswapfile ]])
@@ -76,7 +78,7 @@ function spec.assert(prev, char, next, option)
   local ok, err = pcall(function()
     Keymap.spec(function()
       spec.setup(prev, option)
-      Keymap.send({ keys = Keymap.termcodes(char), remap = true }):await()
+      Keymap.send({ keys = Keymap.termcodes(char), remap = true, user = true }):await()
       local next_lines, next_cursor = parse(next)
       if option.mode == 'c' then
         assert.are.same(next_lines, { vim.fn.getcmdline() })
