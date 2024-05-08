@@ -26,7 +26,7 @@ end
 
 ---Normalize keycode.
 function Keymap.normalize(s)
-  return vim.fn.keytrans(vim.keycode(s))
+  return vim.fn.keytrans(Keymap.termcodes(s))
 end
 
 ---Set callback for consuming next typeahead.
