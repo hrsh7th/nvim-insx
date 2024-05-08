@@ -341,8 +341,11 @@ function insx.expand(char)
     local recipes = kit.concat(get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})), {
       {
         action = function()
-          local codes = RegExp.gsub(Keymap.termcodes(ctx.char), [=[.\{-}\zs\ze[^[:keyword:]]]=], Keymap.termcodes('<C-]>'))
-          ctx.send(vim.fn.keytrans(codes))
+          if RegExp.get([=[^\k\+$]=]) ~= nil then
+            ctx.send('<C-]>' .. ctx.char)
+          else
+            ctx.send(ctx.char)
+          end
         end,
       },
     })
