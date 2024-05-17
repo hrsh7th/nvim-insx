@@ -71,7 +71,7 @@ local function html_attrs(_)
     end,
     ---@param ctx insx.Context
     enabled = function(ctx)
-      return ctx.match([[<\w\+\s*\%#[^>]\+>]])
+      return ctx.match([[<\%(\w\|\.\)\+\s*\%#[^>]\+>]])
     end,
   }
 end

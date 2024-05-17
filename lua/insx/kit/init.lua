@@ -1,6 +1,7 @@
 local kit = {}
 
-local is_thread = vim.is_thread()
+local islist = vim.islist or vim.tbl_islist
+local isempty = vim.tbl_isempty
 
 ---Create gabage collection detector.
 ---@param callback fun(...: any): any
@@ -81,7 +82,7 @@ end
 ---Safe version of vim.schedule.
 ---@param fn fun(...: any): any
 function kit.safe_schedule(fn)
-  if is_thread then
+  if vim.is_thread() then
     fn()
   else
     vim.schedule(fn)
@@ -91,7 +92,7 @@ end
 ---Safe version of vim.schedule_wrap.
 ---@param fn fun(...: any): any
 function kit.safe_schedule_wrap(fn)
-  if is_thread then
+  if vim.is_thread() then
     return fn
   else
     return vim.schedule_wrap(fn)
@@ -246,7 +247,7 @@ end
 ---@return table
 function kit.to_array(value)
   if type(value) == 'table' then
-    if vim.tbl_islist(value) or vim.tbl_isempty(value) then
+    if islist(value) or isempty(value) then
       return value
     end
   end
@@ -257,14 +258,14 @@ end
 ---@param value any
 ---@return boolean
 function kit.is_array(value)
-  return not not (type(value) == 'table' and (vim.tbl_islist(value) or vim.tbl_isempty(value)))
+  return not not (type(value) == 'table' and (islist(value) or isempty(value)))
 end
 
 ---Check the value is dict.
 ---@param value any
 ---@return boolean
 function kit.is_dict(value)
-  return type(value) == 'table' and (not vim.tbl_islist(value) or vim.tbl_isempty(value))
+  return type(value) == 'table' and (not islist(value) or isempty(value))
 end
 
 ---Reverse the array.
@@ -327,6 +328,22 @@ function kit.set(value, path, new_value)
     current = current[key]
   end
   current[path[#path]] = new_value
+end
+
+---String dedent.
+function kit.dedent(s)
+  local lines = vim.split(s, '\n')
+  if lines[1]:match('^%s*$') then
+    table.remove(lines, 1)
+  end
+  if lines[#lines]:match('^%s*$') then
+    table.remove(lines, #lines)
+  end
+  local base_indent = lines[1]:match('^%s*')
+  for i, line in ipairs(lines) do
+    lines[i] = line:gsub('^' .. base_indent, '')
+  end
+  return table.concat(lines, '\n')
 end
 
 return kit
