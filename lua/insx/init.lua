@@ -97,7 +97,7 @@ local function create_context(char)
     next = function()
       error('ctx.next` can only be called in `recipe.action`.')
     end,
-    filetype = vim.api.nvim_buf_get_option(0, 'filetype'),
+    filetype = vim.api.nvim_get_option_value('filetype', { buf = 0 }),
     char = char,
     data = {},
     mode = function()
