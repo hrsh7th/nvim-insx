@@ -30,8 +30,8 @@ function Spec.setup(buffer, option)
   option = option or {}
 
   vim.cmd.enew({ bang = true })
-  vim.cmd(([[ set noswapfile ]]))
-  vim.cmd(([[ set virtualedit=onemore ]]))
+  vim.cmd([[ set noswapfile ]])
+  vim.cmd([[ set virtualedit=onemore ]])
   vim.cmd(([[ set shiftwidth=%s ]]):format(option.shiftwidth or 2))
   vim.cmd(([[ set tabstop=%s ]]):format(option.tabstop or 2))
   if option.noexpandtab then
@@ -42,7 +42,6 @@ function Spec.setup(buffer, option)
   if option.filetype then
     vim.cmd(([[ set filetype=%s ]]):format(option.filetype))
   end
-
 
   local lines, cursor = parse_buffer(buffer)
   vim.api.nvim_buf_set_lines(0, 0, -1, false, lines)
