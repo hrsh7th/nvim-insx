@@ -66,13 +66,12 @@ FUNCTION                                                         *insx-function*
                                                                  *insx#expand()*
 insx#expand(char): return~
 
-  Create sequence of keys that can be feed using |nvim_feedkeys|.
+  Same as |insx.expand()|.
 
-  - `char`: string
-    - The character for the mapping (it is not a form of keycodes).
-  - `return`: string
-    - Expanded keycodes.
+                                                                 *insx#detect()*
+insx#detect(char): return~
 
+  Same as |insx.detect()|.
                                                                     *insx.add()*
 require('insx').add(char, recipe)~
 
@@ -143,13 +142,23 @@ require('insx').clear()~
 
                                                                  *insx.expand()*
 require('insx').expand(char): return~
-
   Create sequence of keys that can be feed using |nvim_feedkeys|.
 
   - `char`: string
     - The character for mapping.
   - `return`: string?
     - Return the sendable key notation. (this is applied the replace_termcodes).
+
+                                                                 *insx.detect()*
+require('insx').detect(char): return~
+  Return current available recipes.
+  NOTE: If the recipe has no `enabled` key, it is always available. We
+        recommend to implement `enabled` key as much as possible.
+
+  - `char`: string
+    - The character for the mapping (it is not a form of keycodes).
+  - `return`: insx.Recipe[]
+    - Current available recipes.
 
 
 

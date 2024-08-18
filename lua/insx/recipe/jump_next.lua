@@ -10,7 +10,7 @@ local function jump_next(option)
   local jump_pat = kit.to_array(option.jump_pat)
   return {
     ---@param ctx insx.Context
-    action = function(ctx)
+    enabled = function(ctx)
       local curr_pos = { math.huge, math.huge }
       for _, pat in ipairs(jump_pat) do
         local pos = ctx.search(pat)
@@ -20,8 +20,18 @@ local function jump_next(option)
           end
         end
       end
-      if curr_pos[1] == math.huge then
-        return ctx.next()
+      return curr_pos[1] ~= math.huge
+    end,
+    ---@param ctx insx.Context
+    action = function(ctx)
+      local curr_pos = { math.huge, math.huge }
+      for _, pat in ipairs(jump_pat) do
+        local pos = ctx.search(pat)
+        if pos then
+          if helper.position.lt(pos, curr_pos) then
+            curr_pos = pos
+          end
+        end
       end
       ctx.move(unpack(curr_pos))
     end,

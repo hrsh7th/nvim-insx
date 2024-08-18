@@ -54,7 +54,7 @@ local right = Keymap.termcodes('<Right>')
 ---@field public fast_wrap? { enabled?: boolean }
 
 ---@type table<string, table<string, insx.RecipeSource[]>>
-local mode_map = {}
+local mode_recipes_map = {}
 
 ---Get sorted/normalized entries for specific mapping.
 ---@param ctx insx.Context
@@ -298,13 +298,13 @@ function insx.add(char, recipe_source, option)
 
   -- ensure tables.
   local mode = option and option.mode or 'i'
-  if not mode_map[mode] then
-    mode_map[mode] = {}
+  if not mode_recipes_map[mode] then
+    mode_recipes_map[mode] = {}
   end
 
   -- initialize mapping.
-  if not mode_map[mode][char] then
-    mode_map[mode][char] = {}
+  if not mode_recipes_map[mode][char] then
+    mode_recipes_map[mode][char] = {}
 
     vim.keymap.set(mode, char, function()
       return insx.expand(char)
@@ -315,17 +315,17 @@ function insx.add(char, recipe_source, option)
     })
   end
 
-  table.insert(mode_map[mode][char], recipe_source)
+  table.insert(mode_recipes_map[mode][char], recipe_source)
 end
 
 ---Remove mappings.
 function insx.clear()
-  for mode, keys in pairs(mode_map) do
+  for mode, keys in pairs(mode_recipes_map) do
     for key in pairs(keys) do
       vim.api.nvim_del_keymap(mode, key)
     end
   end
-  mode_map = {}
+  mode_recipes_map = {}
 end
 
 ---Expand key mapping as cmd mapping.
@@ -338,7 +338,7 @@ function insx.expand(char)
 
   -- initialize ctx.next function.
   do
-    local recipes = kit.concat(get_recipes(ctx, kit.get(mode_map, { ctx.mode(), char }, {})), {
+    local recipes = kit.concat(get_recipes(ctx, kit.get(mode_recipes_map, { ctx.mode(), char }, {})), {
       {
         action = function()
           if RegExp.get([=[^\k\+$]=]) ~= nil then
@@ -365,6 +365,15 @@ function insx.expand(char)
       vim.o.virtualedit = virtualedit
     end)
   end)
+end
+
+---Return the recipes for specified key in current context (except fallback recipe).
+---@param char string
+---@return insx.Recipe[]
+function insx.detect(char)
+  char = Keymap.normalize(char)
+  local ctx = create_context(char)
+  return get_recipes(ctx, kit.get(mode_recipes_map, { ctx.mode(), char }, {}))
 end
 
 ---Compose multiple recipes as one recipe.
