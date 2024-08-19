@@ -160,6 +160,24 @@ require('insx').detect(char): return~
   - `return`: insx.Recipe[]
     - Current available recipes.
 
+                                                                 *insx.dedent()*
+require('insx').dedent(str): return~
+  Return de-indentation string.
+
+  - `str`: string
+    - The indentation string.
+  - `return`: string
+    - The de-indented string.
+
+                                                                    *insx.esc()*
+require('insx').esc(str): return~
+  Return escaped string for vim-regex.
+
+  - `str`: string
+    - The string to escape.
+  - `return`: string
+    - The escaped string.
+
 
 
 ==============================================================================
@@ -267,6 +285,32 @@ The recipes are:
   - able to be registered via `require('insx').add(char, insx.RecipeSource)`
 
 
+
+                                                          *insx-recipe-snippet*
+require('insx.recipe.snippet'): fun(option): insx.RecipeSource~
+
+  This recipe helps you create automatic snippet expansion.
+
+  - `option.pattern`: string
+    - The vim regex pattern to determine expand or not.
+  - `option.content`: string
+    - The snippet string.
+
+  ----- >lua
+  require('insx.recipe.snippet').expand = function(params)
+    vim.snippet.expand(params.content)
+  end
+
+  local insx = require('insx')
+  insx.add('<Space>', require('insx.recipe.snippet')({
+    pattern = [[^\s*if\%#$]],
+    content = insx.dedent [[
+      if $1 then
+        $0
+      end
+    ]]
+  }))
+<  -----
                                                         *insx-recipe-substitute*
 require('insx.recipe.substitute'): fun(option): insx.RecipeSource~
 

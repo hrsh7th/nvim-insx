@@ -398,6 +398,38 @@ function insx.compose(recipe_sources)
   }
 end
 
+---Escape string for regex.
+---@param s string
+---@return string
+function insx.esc(s)
+  return [[\V]] .. vim.fn.escape(s, [[\]]) .. [[\m]]
+end
+
+---Dedent specified text.
+function insx.dedent(s)
+  s = vim.split(s, '\n', { plain = true })
+  if s[1] == '' then
+    table.remove(s, 1)
+  end
+  if s[#s]:find([[^%s*$]]) then
+    table.remove(s, #s)
+  end
+
+  -- detect base indentation.
+  local base_indent = ''
+  for _, text in ipairs(s) do
+    local indent = text:match([=[^%s*]=])
+    if base_indent == '' or (indent ~= '' and #indent < #base_indent) then
+      base_indent = indent
+    end
+  end
+
+  -- remove all base indentation.
+  return table.concat(vim.tbl_map(function(text)
+    return text:sub(#base_indent + 1)
+  end, s), '\n')
+end
+
 insx.with = setmetatable({
   ---Create pattern match override.
   ---@param pattern string
