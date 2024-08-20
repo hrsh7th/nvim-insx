@@ -26,7 +26,7 @@ snippet = setmetatable({
       ---@param ctx insx.Context
       action = function(ctx)
         local matches = assert(ctx.match(option.pattern))
-        local content = option.content:gsub([[\%d]], function(p)
+        local content = option.content:gsub('\\t', '\t'):gsub([[\%d]], function(p)
           local m = matches[tonumber(p:sub(2)) + 1] or ''
           m = vim.fn.escape(m, [[$\]])
           return m
