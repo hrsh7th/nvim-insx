@@ -425,9 +425,12 @@ function insx.dedent(s)
   end
 
   -- remove all base indentation.
-  return table.concat(vim.tbl_map(function(text)
-    return text:sub(#base_indent + 1)
-  end, s), '\n')
+  return table.concat(
+    vim.tbl_map(function(text)
+      return text:sub(#base_indent + 1)
+    end, s),
+    '\n'
+  )
 end
 
 insx.with = setmetatable({

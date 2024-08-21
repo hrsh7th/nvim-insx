@@ -11,7 +11,7 @@ snippet = setmetatable({
   ---@param _ insx.recipe.snippet.ExpandParams
   expand = function(_)
     error([[You must set `require('insx.recipe.snippet').expand = ...`]])
-  end
+  end,
 }, {
   ---@param option insx.recipe.snippet.Option
   __call = function(_, option)
@@ -36,8 +36,7 @@ snippet = setmetatable({
         snippet.expand({ content = content })
       end,
     }
-  end
+  end,
 })
 
 return snippet
-
