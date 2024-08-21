@@ -8,8 +8,8 @@
 ---Expand text like snippet.
 local snippet
 snippet = setmetatable({
-  ---@param params insx.recipe.snippet.ExpandParams
-  expand = function(params)
+  ---@param _ insx.recipe.snippet.ExpandParams
+  expand = function(_)
     error([[You must set `require('insx.recipe.snippet').expand = ...`]])
   end
 }, {
