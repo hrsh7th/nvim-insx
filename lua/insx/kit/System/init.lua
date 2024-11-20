@@ -1,3 +1,5 @@
+-- luacheck: ignore 212
+--
 local kit = require('insx.kit')
 
 local System = {}

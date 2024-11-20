@@ -1,3 +1,5 @@
+-- luacheck: ignore 512
+
 local kit = {}
 
 ---Create gabage collection detector.
