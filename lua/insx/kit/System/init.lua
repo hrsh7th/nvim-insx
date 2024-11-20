@@ -53,7 +53,7 @@ function System.LineBuffering:create(callback)
           end
         end
       end
-    end
+    end,
   }
 end
 
@@ -85,7 +85,7 @@ function System.RegexBuffering:create(callback)
           callback(text)
         end
       end
-    end
+    end,
   }
 end
 
@@ -103,7 +103,7 @@ function System.RawBuffering:create(callback)
   return {
     write = function(data)
       callback(data)
-    end
+    end,
   }
 end
 
@@ -119,9 +119,12 @@ end
 ---@param params insx.kit.System.SpawnParams
 ---@return fun(signal?: integer)
 function System.spawn(command, params)
-  command = vim.iter(command):filter(function(c)
-    return c ~= nil
-  end):totable()
+  command = vim
+    .iter(command)
+    :filter(function(c)
+      return c ~= nil
+    end)
+    :totable()
 
   local cmd = command[1]
   local args = {}
@@ -171,7 +174,7 @@ function System.spawn(command, params)
       error(err)
     end
     if data then
-      stdout_buffer.write(data);
+      stdout_buffer.write(data)
     end
   end)
 
@@ -185,7 +188,7 @@ function System.spawn(command, params)
       error(err)
     end
     if data then
-      stderr_buffer.write(data);
+      stderr_buffer.write(data)
     end
   end)
 

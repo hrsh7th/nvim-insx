@@ -81,7 +81,7 @@ function kit.throttle(callback, throttle_ms)
           last_time = vim.uv.now()
         end)
       end
-    end
+    end,
   })
 end
 
@@ -110,16 +110,16 @@ do
     ext = {
       [MpackFunctionType] = function(data)
         return 5, string.dump(data.fn)
-      end
-    }
+      end,
+    },
   })
 
   kit.Unpacker = mpack.Unpacker({
     ext = {
       [5] = function(_, data)
         return loadstring(data)
-      end
-    }
+      end,
+    },
   })
 
   ---Serialize object like values.
