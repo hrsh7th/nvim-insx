@@ -5,7 +5,7 @@
     "test": "NODE_ENV=test vusted --output=gtest --pattern=.spec ./lua",
     "lint": "luacheck --codes ./lua",
     "format": "stylua --config-path stylua.toml --glob 'lua/**/*.lua' -- lua",
-    "typecheck": "rm -Rf $(pwd)/tmp/typecheck; lua-language-server --check $(pwd)/lua --configpath=$(pwd)/.luarc.json --logpath=$(pwd)/tmp/typecheck > /dev/null; cat ./tmp/typecheck/check.json 2> /dev/null",
+    "typecheck": "rm -Rf $(pwd)/tmp/typecheck; lua-language-server --check $(pwd)/lua --configpath=$(pwd)/.luarc.typecheck.json --logpath=$(pwd)/tmp/typecheck > /dev/null; cat ./tmp/typecheck/check.json 2> /dev/null",
     "setup": "npm run setup:nvim-treesitter:clone && npm run setup:nvim-treesitter:pull",
     "setup:nvim-treesitter:clone": "git clone https://github.com/nvim-treesitter/nvim-treesitter ./tmp/nvim-treesitter",
     "setup:nvim-treesitter:pull": "git -C ./tmp/nvim-treesitter pull --rebase"

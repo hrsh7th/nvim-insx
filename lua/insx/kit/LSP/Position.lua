@@ -28,7 +28,7 @@ function Position.cursor(encoding)
 end
 
 ---Convert position to buffer position from specified encoding.
----@param bufnr number
+---@param bufnr integer
 ---@param position insx.kit.LSP.Position
 ---@param from_encoding? insx.kit.LSP.PositionEncodingKind
 function Position.to_buf(bufnr, position, from_encoding)
@@ -47,9 +47,7 @@ function Position.to_utf8(text, position, from_encoding)
   if from_encoding == LSP.PositionEncodingKind.UTF8 then
     return position
   end
-  local ok, byteindex = pcall(function()
-    return vim.str_byteindex(text, position.character, from_encoding == LSP.PositionEncodingKind.UTF16)
-  end)
+  local ok, byteindex = pcall(vim.str_byteindex, text, position.character, from_encoding == LSP.PositionEncodingKind.UTF16)
   if ok then
     position = { line = position.line, character = byteindex }
   end
@@ -64,9 +62,7 @@ end
 function Position.to_utf16(text, position, from_encoding)
   local utf8 = Position.to_utf8(text, position, from_encoding)
   for index = utf8.character, 0, -1 do
-    local ok, utf16index = pcall(function()
-      return select(2, vim.str_utfindex(text, index))
-    end)
+    local ok, _, utf16index = pcall(vim.str_utfindex, text, index)
     if ok then
       position = { line = utf8.line, character = utf16index }
       break
@@ -83,9 +79,7 @@ end
 function Position.to_utf32(text, position, from_encoding)
   local utf8 = Position.to_utf8(text, position, from_encoding)
   for index = utf8.character, 0, -1 do
-    local ok, utf32index = pcall(function()
-      return select(1, vim.str_utfindex(text, index))
-    end)
+    local ok, utf32index = pcall(vim.str_utfindex, text, index)
     if ok then
       position = { line = utf8.line, character = utf32index }
       break

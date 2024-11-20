@@ -10,6 +10,9 @@ describe('insx.recipe.fast_break.basic', function()
       require('insx.recipe.fast_break')({
         open_pat = insx.helper.regex.esc('('),
         close_pat = insx.helper.regex.esc(')'),
+        html_attrs = true,
+        html_tags = true,
+        arguments = true,
       })
     )
     spec.assert(
@@ -37,7 +40,8 @@ describe('insx.recipe.fast_break.basic', function()
       {
         'foo(',
         '  bar(',
-        '  |baz)',
+        '    |baz',
+        '  )',
         ')',
       }
     )
@@ -51,7 +55,10 @@ describe('insx.recipe.fast_break.basic', function()
       {
         '\t\t{',
         '\t\t\tfoo::bar(',
-        '\t\t\t|$foo, { $bar, 1 }, $baz)',
+        '\t\t\t\t|$foo,',
+        '\t\t\t\t{ $bar, 1 },',
+        '\t\t\t\t$baz',
+        '\t\t\t)',
         '\t\t}',
       },
       {

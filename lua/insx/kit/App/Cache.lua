@@ -57,12 +57,14 @@ end
 
 ---Ensure cache entry.
 ---@generic T
+---@generic U
 ---@param key string[]|string
----@param callback function(): T
+---@param callback function(...: U): T
+---@param ... U
 ---@return T
-function Cache:ensure(key, callback)
+function Cache:ensure(key, callback, ...)
   if not self:has(key) then
-    self:set(key, callback())
+    self:set(key, callback(...))
   end
   return self:get(key)
 end

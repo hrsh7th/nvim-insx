@@ -2,8 +2,9 @@ local AsyncTask = require('insx.kit.Async.AsyncTask')
 
 local Async = {}
 
----@type table<thread, integer>
-Async.___threads___ = {}
+_G.kit = _G.kit or {}
+_G.kit.Async = _G.kit.Async or {}
+_G.kit.Async.___threads___ = _G.kit.Async.___threads___ or {}
 
 ---Alias of AsyncTask.all.
 ---@param tasks insx.kit.Async.AsyncTask[]
@@ -51,7 +52,7 @@ end
 ---Return current context is async coroutine or not.
 ---@return boolean
 function Async.in_context()
-  return Async.___threads___[coroutine.running()] ~= nil
+  return _G.kit.Async.___threads___[coroutine.running()] ~= nil
 end
 
 ---Create async function.
@@ -64,11 +65,11 @@ function Async.async(runner)
 
     local thread = coroutine.create(runner)
     return AsyncTask.new(function(resolve, reject)
-      Async.___threads___[thread] = 1
+      _G.kit.Async.___threads___[thread] = 1
 
       local function next_step(ok, v)
         if coroutine.status(thread) == 'dead' then
-          Async.___threads___[thread] = nil
+          _G.kit.Async.___threads___[thread] = nil
           if AsyncTask.is(v) then
             v:dispatch(resolve, reject)
           else
@@ -97,7 +98,7 @@ end
 ---@param task insx.kit.Async.AsyncTask
 ---@return any
 function Async.await(task)
-  if not Async.___threads___[coroutine.running()] then
+  if not _G.kit.Async.___threads___[coroutine.running()] then
     error('`Async.await` must be called in async context.')
   end
   if not AsyncTask.is(task) then

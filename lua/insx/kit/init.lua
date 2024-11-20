@@ -1,8 +1,5 @@
 local kit = {}
 
-local islist = vim.islist or vim.tbl_islist
-local isempty = vim.tbl_isempty
-
 ---Create gabage collection detector.
 ---@param callback fun(...: any): any
 ---@return userdata
@@ -16,6 +13,91 @@ function kit.gc(callback)
   return gc
 end
 
+---Find up directory.
+---@param path string
+---@param markers string[]
+function kit.findup(path, markers)
+  path = vim.fs.normalize(path)
+  if vim.fn.filereadable(path) == 1 then
+    path = vim.fs.dirname(path)
+  end
+  while path ~= '/' do
+    for _, marker in ipairs(markers) do
+      local target = vim.fs.joinpath(path, (marker:gsub('/', '')))
+      if marker:match('/$') and vim.fn.isdirectory(target) == 1 then
+        return path
+      elseif vim.fn.filereadable(target) == 1 then
+        return path
+      end
+    end
+    path = vim.fs.dirname(path)
+  end
+end
+
+---Create debounced callback.
+---@generic T: fun(...: any): nil
+---@param callback T
+---@param ms integer
+---@return T
+function kit.debounce(callback, ms)
+  local timer = assert(vim.uv.new_timer())
+  return function(...)
+    local arguments = { ... }
+
+    timer:stop()
+    timer:start(ms, 0, function()
+      timer:stop()
+      callback(unpack(arguments))
+    end)
+  end
+end
+
+---Create throttled callback.
+---@generic T: fun(...: any): nil
+---@param callback T
+---@param throttle_ms integer
+function kit.throttle(callback, throttle_ms)
+  local timer = assert(vim.uv.new_timer())
+  local arguments = nil
+  local last_time = vim.uv.now() - throttle_ms
+  return setmetatable({
+    throttle_ms = throttle_ms,
+  }, {
+    __call = function(self, ...)
+      arguments = { ... }
+
+      local timeout_ms = self.throttle_ms - (vim.uv.now() - last_time)
+      if timeout_ms <= 0 then
+        timer:stop()
+        callback(unpack(arguments))
+        last_time = vim.uv.now()
+      else
+        timer:stop()
+        timer:start(timeout_ms, 0, function()
+          timer:stop()
+          callback(unpack(arguments))
+          last_time = vim.uv.now()
+        end)
+      end
+    end
+  })
+end
+
+---Clear list
+---@generic T
+---@param tbl T[]
+---@return T[]
+function kit.clear(tbl)
+  if not tbl then
+    return {}
+  end
+
+  for k in pairs(tbl) do
+    tbl[k] = nil
+  end
+  return tbl
+end
+
 do
   local mpack = require('mpack')
 
@@ -26,16 +108,16 @@ do
     ext = {
       [MpackFunctionType] = function(data)
         return 5, string.dump(data.fn)
-      end,
-    },
+      end
+    }
   })
 
   kit.Unpacker = mpack.Unpacker({
     ext = {
       [5] = function(_, data)
         return loadstring(data)
-      end,
-    },
+      end
+    }
   })
 
   ---Serialize object like values.
@@ -126,25 +208,44 @@ kit.unique_id = setmetatable({
   end,
 })
 
----Clone object.
----@generic T
----@param target T
----@return T
-function kit.clone(target)
-  if kit.is_array(target) then
-    local new_tbl = {}
-    for k, v in ipairs(target) do
-      new_tbl[k] = kit.clone(v)
+do
+  ---@generic T
+  ---@param target T
+  ---@param seen table<any, any>
+  ---@return T
+  local function do_clone(target, seen)
+    if type(target) ~= 'table' then
+      return target
     end
-    return new_tbl
-  elseif kit.is_dict(target) then
-    local new_tbl = {}
-    for k, v in pairs(target) do
-      new_tbl[k] = kit.clone(v)
+    if seen[target] then
+      return seen[target]
     end
-    return new_tbl
+    if kit.is_array(target) then
+      local new_tbl = {}
+      setmetatable(new_tbl, getmetatable(target))
+      seen[target] = new_tbl
+      for k, v in ipairs(target) do
+        new_tbl[k] = do_clone(v, seen)
+      end
+      return new_tbl
+    else
+      local new_tbl = {}
+      setmetatable(new_tbl, getmetatable(target))
+      seen[target] = new_tbl
+      for k, v in pairs(target) do
+        new_tbl[k] = do_clone(v, seen)
+      end
+      return new_tbl
+    end
   end
-  return target
+
+  ---Clone object.
+  ---@generic T
+  ---@param target T
+  ---@return T
+  function kit.clone(target)
+    return do_clone(target, {})
+  end
 end
 
 ---Merge two tables.
@@ -158,6 +259,8 @@ function kit.merge(tbl1, tbl2)
   local is_dict2 = kit.is_dict(tbl2)
   if is_dict1 and is_dict2 then
     local new_tbl = {}
+    setmetatable(new_tbl, getmetatable(tbl1))
+
     for k, v in pairs(tbl2) do
       if tbl1[k] ~= vim.NIL then
         new_tbl[k] = kit.merge(tbl1[k], v)
@@ -178,9 +281,9 @@ function kit.merge(tbl1, tbl2)
   if tbl1 == vim.NIL then
     return nil
   elseif tbl1 == nil then
-    return kit.merge(tbl2, {})
+    return kit.clone(tbl2)
   else
-    return tbl1
+    return kit.clone(tbl1)
   end
 end
 
@@ -247,7 +350,7 @@ end
 ---@return table
 function kit.to_array(value)
   if type(value) == 'table' then
-    if islist(value) or isempty(value) then
+    if kit.is_array(value) then
       return value
     end
   end
@@ -258,14 +361,38 @@ end
 ---@param value any
 ---@return boolean
 function kit.is_array(value)
-  return not not (type(value) == 'table' and (islist(value) or isempty(value)))
+  if type(value) ~= 'table' then
+    return false
+  end
+  for k, _ in pairs(value) do
+    if type(k) ~= 'number' then
+      return false
+    end
+  end
+  return true
 end
 
 ---Check the value is dict.
 ---@param value any
 ---@return boolean
 function kit.is_dict(value)
-  return type(value) == 'table' and (not islist(value) or isempty(value))
+  return type(value) == 'table' and (not kit.is_array(value) or kit.is_empty(value))
+end
+
+---Check the value is empty.
+---@param value any
+---@return boolean
+function kit.is_empty(value)
+  if type(value) ~= 'table' then
+    return false
+  end
+  if #value == 0 then
+    return true
+  end
+  for _ in pairs(value) do
+    return false
+  end
+  return true
 end
 
 ---Reverse the array.

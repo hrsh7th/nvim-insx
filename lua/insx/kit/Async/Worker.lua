@@ -5,6 +5,7 @@ local AsyncTask = require('insx.kit.Async.AsyncTask')
 ---@field public runtimepath string[]
 
 ---@class insx.kit.Async.Worker
+---@field private runner string
 local Worker = {}
 Worker.__index = Worker
 

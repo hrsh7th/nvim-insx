@@ -45,17 +45,10 @@ You can see it in |insx-typings| section. Please check it out.
 ==============================================================================
 MODE-SUPPORT                                                 *insx-mode-support*
 
-This plugin is designed to handle complex key mappings in insert mode.
-However, it could be used in other modes as well.
+This plugin accept |insx.Mode| as a mode specifier.
 
-Each mode has some caveats.
+But tested only in `i` and `c` mode.
 
-- cmdline
-  - The built-in complex recipes such as `fast_wrap` / `fast_break` may not
-    work as well.
-- normal
-  - The build-in recipes may not work.
-  - You can just use nvim-insx's mapping mechanism.
 
 
 ==============================================================================
@@ -72,34 +65,36 @@ insx#expand(char): return~
 insx#detect(char): return~
 
   Same as |insx.detect()|.
+
                                                                     *insx.add()*
-require('insx').add(char, recipe)~
+require('insx').add(char, recipe_source_like, option)~
 
   Add a recipe for a specific char.
 
   - `char`: string
     - The character for the mapping.
-  - `recipe`: |insx.RecipeSource|
-    - The recipe that could be contained `action` / `enabled` keys.
-    - See |insx.Enabled|, |insx.Action|.
+  - `recipe_source_like`: |insx.RecipeSourceLike|
+    - See |insx.RecipeSourceLike|
+  - `option`: { mode?: |insx.Mode| | |insx.Mode|[] }?
+    - Specify the mode for the mapping.
 
                                                                 *insx.compose()*
-require('insx').compose(recipe_sources): return~
+require('insx').compose(recipe_source_likes): return~
 
   Compose multiple recipes into a single recipe.
 
-  - `recipe_sources`: |insx.RecipeSource|[]
-    - The list of |insx.RecipeSource|.
+  - `recipe_source_likes`: |insx.RecipeSourceLike|[]
+    - The list of |insx.RecipeSourceLike|.
   - `return`
     - The composed |insx.RecipeSource|.
 
                                                                    *insx.with()*
-require('insx').with(recipe, overrides): return~
+require('insx').with(recipe_source_like, overrides): return~
 
   Refine the present recipe by integrating an override object,
   which provides the ability to enhance `priority`, `action`, or `enabled` elements.
 
-  - `recipe`: |insx.RecipeSource|
+  - `recipe_source_like`: |insx.RecipeSourceLike|
     - The recipe to override.
   - `overrides`: |insx.Override|[]
     - The `enabled`, `action` or both can be specified as override object.
@@ -183,22 +178,27 @@ require('insx').esc(str): return~
 ==============================================================================
 TYPINGS                                                           *insx-typings*
 
+*insx.Mode*
 *insx.Enabled*
 *insx.Action*
 *insx.RecipeSource*
+*insx.RecipeSourceLike*
 *insx.Recipe*
 *insx.Context*
 *insx.Override*
 *insx.preset.standard.Config*
 >lua
+  ---@alias insx.Mode 'x' | 'i' | 'c' | 'n' | 'o' | 's'
+
   ---@alias insx.Enabled fun(ctx: insx.Context): nil
   ---@alias insx.Action fun(ctx: insx.Context): nil
-  ---@alias insx.kit.Vim.Keymap.KeysSpecifier string|{ keys: string, remap: boolean }
 
   ---@class insx.RecipeSource
   ---@field public priority? integer
   ---@field public enabled? insx.Enabled
   ---@field public action insx.Action
+
+  ---@alias insx.RecipeSourceLike insx.RecipeSource|insx.Action|string
 
   ---@class insx.Recipe
   ---@field public index integer
@@ -216,8 +216,8 @@ TYPINGS                                                           *insx-typings*
   ---@field public text fun(): string
   ---@field public after fun(): string
   ---@field public before fun(): string
-  ---@field public match fun(pattern: string): boolean
-  ---@field public search fun(pattern: string): { [1]: integer, [2]: integer }?
+  ---@field public match fun(pattern: string): string[]?
+  ---@field public search fun(pattern: string): { [1]: integer, [2]: integer, matches: string[] }?
   ---@field public send fun(keys: insx.kit.Vim.Keymap.KeysSpecifier): nil
   ---@field public delete fun(pattern: string): nil
   ---@field public backspace fun(pattern: string): nil
@@ -234,7 +234,7 @@ TYPINGS                                                           *insx-typings*
   ---@class insx.preset.standard.Config
   ---@field public cmdline? { enabled?: boolean }
   ---@field public spacing? { enabled?: boolean }
-  ---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, html_tags?: boolean, arguments?: boolean }
+  ---@field public fast_break? { enabled?: boolean, split?: boolean, html_attrs?: boolean, arguments?: boolean }
   ---@field public fast_wrap? { enabled?: boolean }
 <
 

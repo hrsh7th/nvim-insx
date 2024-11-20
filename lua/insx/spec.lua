@@ -32,8 +32,9 @@ function spec.setup(lines_, option)
 
   local filetype = option and option.filetype or 'lua'
   vim.cmd.enew({ bang = true })
+  vim.cmd([[ set indentkeys= ]])
   vim.cmd([[ set noswapfile ]])
-  vim.cmd([[ set virtualedit=onemore ]])
+  vim.cmd([[ set virtualedit=all ]])
   vim.api.nvim_buf_set_option(0, 'filetype', filetype)
   vim.cmd(([[ set shiftwidth=%s ]]):format(option and option.shiftwidth or 2))
   vim.cmd(([[ set tabstop=%s ]]):format(option and option.tabstop or 2))

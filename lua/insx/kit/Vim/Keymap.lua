@@ -1,6 +1,8 @@
 local kit = require('insx.kit')
 local Async = require('insx.kit.Async')
 
+local buf = vim.api.nvim_create_buf(false, true)
+
 ---@alias insx.kit.Vim.Keymap.Keys { keys: string, remap?: boolean }
 ---@alias insx.kit.Vim.Keymap.KeysSpecifier string|insx.kit.Vim.Keymap.Keys
 
@@ -26,7 +28,12 @@ end
 
 ---Normalize keycode.
 function Keymap.normalize(s)
-  return vim.fn.keytrans(Keymap.termcodes(s))
+  vim.api.nvim_buf_set_keymap(buf, 'n', '<Plug>(insx.Vim.Keymap.normalize)', s, {})
+  for _, map in ipairs(vim.api.nvim_buf_get_keymap(buf, 'n')) do
+    if map.lhs == '<Plug>(insx.Vim.Keymap.normalize)' then
+      return map.rhs
+    end
+  end
 end
 
 ---Set callback for consuming next typeahead.

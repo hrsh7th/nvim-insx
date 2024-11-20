@@ -8,6 +8,8 @@ local undojoin = Keymap.termcodes('<C-g>U')
 local left = Keymap.termcodes('<Left>')
 local right = Keymap.termcodes('<Right>')
 
+---@alias insx.Mode 'x' | 'i' | 'c' | 'n' | 'o' | 's'
+
 ---@alias insx.Enabled fun(ctx: insx.Context): nil
 ---@alias insx.Action fun(ctx: insx.Context): nil
 
@@ -15,6 +17,8 @@ local right = Keymap.termcodes('<Right>')
 ---@field public priority? integer
 ---@field public enabled? insx.Enabled
 ---@field public action insx.Action
+
+---@alias insx.RecipeSourceLike insx.RecipeSource|insx.Action|string
 
 ---@class insx.Recipe
 ---@field public index integer
@@ -86,6 +90,25 @@ local function get_recipes(ctx, recipe_sources)
   return vim.tbl_filter(function(recipe)
     return recipe.enabled(ctx)
   end, recipes)
+end
+
+---Normalize recipe source like.
+---@param recipe_source_like insx.RecipeSource|insx.Action|string
+---@return insx.RecipeSource
+local function normalize_recipe_source_like(recipe_source_like)
+  if type(recipe_source_like) == 'string' then
+    return {
+      action = function(ctx)
+        ctx.send(recipe_source_like)
+      end,
+    }
+  end
+  if type(recipe_source_like) == 'function' then
+    return {
+      action = recipe_source_like,
+    }
+  end
+  return recipe_source_like
 end
 
 ---@param char string
@@ -291,31 +314,35 @@ insx.helper = require('insx.helper')
 
 ---Add new mapping recipe for specific mapping.
 ---@param char string
----@param recipe_source insx.RecipeSource
----@param option? { mode?: 'x' | 'i' | 'c' | 'n' }
-function insx.add(char, recipe_source, option)
+---@param recipe_source_like insx.RecipeSourceLike
+---@param option? { mode?: insx.Mode|insx.Mode[] }
+function insx.add(char, recipe_source_like, option)
   char = Keymap.normalize(char)
 
+  local recipe_source = normalize_recipe_source_like(recipe_source_like)
+
   -- ensure tables.
-  local mode = option and option.mode or 'i'
-  if not mode_recipes_map[mode] then
-    mode_recipes_map[mode] = {}
+  local modes = kit.to_array(option and option.mode or 'i')
+  for _, mode in ipairs(modes) do
+    if not mode_recipes_map[mode] then
+      mode_recipes_map[mode] = {}
+    end
+
+    -- initialize mapping.
+    if not mode_recipes_map[mode][char] then
+      mode_recipes_map[mode][char] = {}
+
+      vim.keymap.set(mode, char, function()
+        return insx.expand(char)
+      end, {
+        desc = 'insx',
+        expr = true,
+        replace_keycodes = false,
+      })
+    end
+
+    table.insert(mode_recipes_map[mode][char], recipe_source)
   end
-
-  -- initialize mapping.
-  if not mode_recipes_map[mode][char] then
-    mode_recipes_map[mode][char] = {}
-
-    vim.keymap.set(mode, char, function()
-      return insx.expand(char)
-    end, {
-      desc = 'insx',
-      expr = true,
-      replace_keycodes = false,
-    })
-  end
-
-  table.insert(mode_recipes_map[mode][char], recipe_source)
 end
 
 ---Remove mappings.
@@ -359,7 +386,7 @@ function insx.expand(char)
       local lazyredraw = vim.o.lazyredraw
       vim.o.lazyredraw = true
       local virtualedit = vim.o.virtualedit
-      vim.o.virtualedit = 'onemore'
+      vim.o.virtualedit = 'all'
       ctx.next()
       vim.o.lazyredraw = lazyredraw
       vim.o.virtualedit = virtualedit
@@ -377,9 +404,15 @@ function insx.detect(char)
 end
 
 ---Compose multiple recipes as one recipe.
----@param recipe_sources insx.RecipeSource[]
+---@param recipe_source_likes insx.RecipeSourceLike[]
 ---@return insx.RecipeSource
-function insx.compose(recipe_sources)
+function insx.compose(recipe_source_likes)
+  ---@type insx.RecipeSource[]
+  local recipe_sources = {}
+  for _, recipe_source_like in ipairs(recipe_source_likes) do
+    table.insert(recipe_sources, normalize_recipe_source_like(recipe_source_like))
+  end
+
   return {
     ---@param ctx insx.Context
     action = function(ctx)
@@ -522,16 +555,16 @@ insx.with = setmetatable({
   end,
 }, {
   ---Enhance existing recipe with overrides.
-  ---@param recipe insx.RecipeSource
+  ---@param recipe_source_like insx.RecipeSourceLike
   ---@param overrides insx.Override
   ---@return insx.RecipeSource
-  __call = function(_, recipe, overrides, ...)
+  __call = function(_, recipe_source_like, overrides, ...)
     if #{ ... } > 0 then
       vim.deprecate('insx.with(recipe, ...overrides)', 'insx.with(recipe, overrides)', '0', 'nvim-insx', false)
       overrides = kit.concat(kit.to_array(overrides), { ... })
     end
 
-    local new_recipe = recipe
+    local new_recipe = normalize_recipe_source_like(recipe_source_like)
     for _, override_ in ipairs(kit.reverse(overrides)) do
       new_recipe = (function(override, prev_recipe)
         local next_recipe = kit.merge({}, prev_recipe)
