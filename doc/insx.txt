@@ -303,7 +303,7 @@ require('insx.recipe.snippet'): fun(option): insx.RecipeSource~
 
   local insx = require('insx')
   insx.add('<Space>', require('insx.recipe.snippet')({
-    pattern = [[^\s*if\%#$]],
+    pattern = [[^\s*\zsif\%#$]],
     content = insx.dedent [[
       if $1 then
         $0
