@@ -1,5 +1,3 @@
-local kit = require('insx.kit')
-
 local Syntax = {}
 
 ---Return the specified position is in the specified syntax.
@@ -19,7 +17,11 @@ end
 ---@param cursor { [1]: integer, [2]: integer }
 ---@return string[]
 function Syntax.get_syntax_groups(cursor)
-  return kit.concat(Syntax.get_vim_syntax_groups(cursor), Syntax.get_treesitter_syntax_groups(cursor))
+  local treesitter = Syntax.get_vim_syntax_groups(cursor)
+  if #treesitter > 0 then
+    return treesitter
+  end
+  return Syntax.get_treesitter_syntax_groups(cursor) -- it might be heavy.
 end
 
 ---Get vim's syntax groups for specified position.

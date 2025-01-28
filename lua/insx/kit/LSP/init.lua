@@ -25,6 +25,7 @@ LSP.SemanticTokenTypes = {
   regexp = 'regexp',
   operator = 'operator',
   decorator = 'decorator',
+  label = 'label',
 }
 
 ---@enum insx.kit.LSP.SemanticTokenModifiers
@@ -136,6 +137,7 @@ LSP.MessageType = {
   Warning = 2,
   Info = 3,
   Log = 4,
+  Debug = 5,
 }
 
 ---@enum insx.kit.LSP.TextDocumentSyncKind
@@ -212,14 +214,21 @@ LSP.CodeActionKind = {
   Refactor = 'refactor',
   RefactorExtract = 'refactor.extract',
   RefactorInline = 'refactor.inline',
+  RefactorMove = 'refactor.move',
   RefactorRewrite = 'refactor.rewrite',
   Source = 'source',
   SourceOrganizeImports = 'source.organizeImports',
   SourceFixAll = 'source.fixAll',
+  Notebook = 'notebook',
 }
 
----@enum insx.kit.LSP.TraceValues
-LSP.TraceValues = {
+---@enum insx.kit.LSP.CodeActionTag
+LSP.CodeActionTag = {
+  LLMGenerated = 1,
+}
+
+---@enum insx.kit.LSP.TraceValue
+LSP.TraceValue = {
   Off = 'off',
   Messages = 'messages',
   Verbose = 'verbose',
@@ -229,6 +238,77 @@ LSP.TraceValues = {
 LSP.MarkupKind = {
   PlainText = 'plaintext',
   Markdown = 'markdown',
+}
+
+---@enum insx.kit.LSP.LanguageKind
+LSP.LanguageKind = {
+  ABAP = 'abap',
+  WindowsBat = 'bat',
+  BibTeX = 'bibtex',
+  Clojure = 'clojure',
+  Coffeescript = 'coffeescript',
+  C = 'c',
+  CPP = 'cpp',
+  CSharp = 'csharp',
+  CSS = 'css',
+  D = 'd',
+  Delphi = 'pascal',
+  Diff = 'diff',
+  Dart = 'dart',
+  Dockerfile = 'dockerfile',
+  Elixir = 'elixir',
+  Erlang = 'erlang',
+  FSharp = 'fsharp',
+  GitCommit = 'git-commit',
+  GitRebase = 'rebase',
+  Go = 'go',
+  Groovy = 'groovy',
+  Handlebars = 'handlebars',
+  Haskell = 'haskell',
+  HTML = 'html',
+  Ini = 'ini',
+  Java = 'java',
+  JavaScript = 'javascript',
+  JavaScriptReact = 'javascriptreact',
+  JSON = 'json',
+  LaTeX = 'latex',
+  Less = 'less',
+  Lua = 'lua',
+  Makefile = 'makefile',
+  Markdown = 'markdown',
+  ObjectiveC = 'objective-c',
+  ObjectiveCPP = 'objective-cpp',
+  Pascal = 'pascal',
+  Perl = 'perl',
+  Perl6 = 'perl6',
+  PHP = 'php',
+  Powershell = 'powershell',
+  Pug = 'jade',
+  Python = 'python',
+  R = 'r',
+  Razor = 'razor',
+  Ruby = 'ruby',
+  Rust = 'rust',
+  SCSS = 'scss',
+  SASS = 'sass',
+  Scala = 'scala',
+  ShaderLab = 'shaderlab',
+  ShellScript = 'shellscript',
+  SQL = 'sql',
+  Swift = 'swift',
+  TypeScript = 'typescript',
+  TypeScriptReact = 'typescriptreact',
+  TeX = 'tex',
+  VisualBasic = 'vb',
+  XML = 'xml',
+  XSL = 'xsl',
+  YAML = 'yaml',
+}
+
+---@enum insx.kit.LSP.InlineCompletionTriggerKind
+LSP.InlineCompletionTriggerKind = {
+  Invoked = 1,
+  Automatic = 2,
 }
 
 ---@enum insx.kit.LSP.PositionEncodingKind
@@ -345,9 +425,6 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.ConfigurationParams
 ---@field public items insx.kit.LSP.ConfigurationItem[]
 
----@class insx.kit.LSP.PartialResultParams
----@field public partialResultToken? insx.kit.LSP.ProgressToken An optional token that a server can use to report partial results (e.g. streaming) to<br>the client.
-
 ---@class insx.kit.LSP.DocumentColorParams : insx.kit.LSP.WorkDoneProgressParams, insx.kit.LSP.PartialResultParams
 ---@field public textDocument insx.kit.LSP.TextDocumentIdentifier The text document.
 
@@ -364,8 +441,8 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.ColorPresentation
 ---@field public label string The label of this color presentation. It will be shown on the color<br>picker header. By default this is also the text that is inserted when selecting<br>this color presentation.
----@field public textEdit? insx.kit.LSP.TextEdit An [edit](#TextEdit) which is applied to a document when selecting<br>this presentation for the color.  When `falsy` the [label](#ColorPresentation.label)<br>is used.
----@field public additionalTextEdits? insx.kit.LSP.TextEdit[] An optional array of additional [text edits](#TextEdit) that are applied when<br>selecting this color presentation. Edits must not overlap with the main [edit](#ColorPresentation.textEdit) nor with themselves.
+---@field public textEdit? insx.kit.LSP.TextEdit An {@link TextEdit edit} which is applied to a document when selecting<br>this presentation for the color.  When `falsy` the {@link ColorPresentation.label label}<br>is used.
+---@field public additionalTextEdits? insx.kit.LSP.TextEdit[] An optional array of additional {@link TextEdit text edits} that are applied when<br>selecting this color presentation. Edits must not overlap with the main {@link ColorPresentation.textEdit edit} nor with themselves.
 
 ---@class insx.kit.LSP.WorkDoneProgressOptions
 ---@field public workDoneProgress? boolean
@@ -381,7 +458,7 @@ LSP.TokenFormat = {
 ---@field public startCharacter? integer The zero-based character offset from where the folded range starts. If not defined, defaults to the length of the start line.
 ---@field public endLine integer The zero-based end line of the range to fold. The folded area ends with the line's last character.<br>To be valid, the end must be zero or larger and smaller than the number of lines in the document.
 ---@field public endCharacter? integer The zero-based character offset before the folded range ends. If not defined, defaults to the length of the end line.
----@field public kind? insx.kit.LSP.FoldingRangeKind Describes the kind of the folding range such as `comment' or 'region'. The kind<br>is used to categorize folding ranges and used by commands like 'Fold all comments'.<br>See [FoldingRangeKind](#FoldingRangeKind) for an enumeration of standardized kinds.
+---@field public kind? insx.kit.LSP.FoldingRangeKind Describes the kind of the folding range such as 'comment' or 'region'. The kind<br>is used to categorize folding ranges and used by commands like 'Fold all comments'.<br>See {@link FoldingRangeKind} for an enumeration of standardized kinds.
 ---@field public collapsedText? string The text that the client should show when the specified range is<br>collapsed. If not defined or not supported by the client, a default<br>will be chosen by the client.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.FoldingRangeRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.FoldingRangeOptions, insx.kit.LSP.StaticRegistrationOptions
@@ -395,7 +472,7 @@ LSP.TokenFormat = {
 ---@field public positions insx.kit.LSP.Position[] The positions inside the text document.
 
 ---@class insx.kit.LSP.SelectionRange
----@field public range insx.kit.LSP.Range The [range](#Range) of this selection range.
+---@field public range insx.kit.LSP.Range The {@link Range range} of this selection range.
 ---@field public parent? insx.kit.LSP.SelectionRange The parent selection range containing this range. Therefore `parent.range` must contain `this.range`.
 
 ---@class insx.kit.LSP.SelectionRangeRegistrationOptions : insx.kit.LSP.SelectionRangeOptions, insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.StaticRegistrationOptions
@@ -415,7 +492,7 @@ LSP.TokenFormat = {
 ---@field public detail? string More detail for this item, e.g. the signature of a function.
 ---@field public uri string The resource identifier of this item.
 ---@field public range insx.kit.LSP.Range The range enclosing this symbol not including leading/trailing whitespace but everything else, e.g. comments and code.
----@field public selectionRange insx.kit.LSP.Range The range that should be selected and revealed when this symbol is being picked, e.g. the name of a function.<br>Must be contained by the [`range`](#CallHierarchyItem.range).
+---@field public selectionRange insx.kit.LSP.Range The range that should be selected and revealed when this symbol is being picked, e.g. the name of a function.<br>Must be contained by the {@link CallHierarchyItem.range `range`}.
 ---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved between a call hierarchy prepare and<br>incoming calls or outgoing calls requests.
 
 ---@class insx.kit.LSP.CallHierarchyRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.CallHierarchyOptions, insx.kit.LSP.StaticRegistrationOptions
@@ -425,14 +502,14 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.CallHierarchyIncomingCall
 ---@field public from insx.kit.LSP.CallHierarchyItem The item that makes the call.
----@field public fromRanges insx.kit.LSP.Range[] The ranges at which the calls appear. This is relative to the caller<br>denoted by [`this.from`](#CallHierarchyIncomingCall.from).
+---@field public fromRanges insx.kit.LSP.Range[] The ranges at which the calls appear. This is relative to the caller<br>denoted by {@link CallHierarchyIncomingCall.from `this.from`}.
 
 ---@class insx.kit.LSP.CallHierarchyOutgoingCallsParams : insx.kit.LSP.WorkDoneProgressParams, insx.kit.LSP.PartialResultParams
 ---@field public item insx.kit.LSP.CallHierarchyItem
 
 ---@class insx.kit.LSP.CallHierarchyOutgoingCall
 ---@field public to insx.kit.LSP.CallHierarchyItem The item that is called.
----@field public fromRanges insx.kit.LSP.Range[] The range at which this item is called. This is the range relative to the caller, e.g the item<br>passed to [`provideCallHierarchyOutgoingCalls`](#CallHierarchyItemProvider.provideCallHierarchyOutgoingCalls)<br>and not [`this.to`](#CallHierarchyOutgoingCall.to).
+---@field public fromRanges insx.kit.LSP.Range[] The range at which this item is called. This is the range relative to the caller, e.g the item<br>passed to {@link CallHierarchyItemProvider.provideCallHierarchyOutgoingCalls `provideCallHierarchyOutgoingCalls`}<br>and not {@link CallHierarchyOutgoingCall.to `this.to`}.
 
 ---@class insx.kit.LSP.SemanticTokensParams : insx.kit.LSP.WorkDoneProgressParams, insx.kit.LSP.PartialResultParams
 ---@field public textDocument insx.kit.LSP.TextDocumentIdentifier The text document.
@@ -462,8 +539,8 @@ LSP.TokenFormat = {
 ---@field public range insx.kit.LSP.Range The range the semantic tokens are requested for.
 
 ---@class insx.kit.LSP.ShowDocumentParams
----@field public uri string The document uri to show.
----@field public external? boolean Indicates to show the resource in an external program.<br>To show for example `https://code.visualstudio.com/`<br>in the default WEB browser set `external` to `true`.
+---@field public uri string The uri to show.
+---@field public external? boolean Indicates to show the resource in an external program.<br>To show, for example, `https://code.visualstudio.com/`<br>in the default WEB browser set `external` to `true`.
 ---@field public takeFocus? boolean An optional property to indicate whether the editor<br>showing the document should take focus or not.<br>Clients might ignore this property if an external<br>program is started.
 ---@field public selection? insx.kit.LSP.Range An optional selection range if the document is a text<br>document. Clients might ignore the property if an<br>external program is started or the file is not a text<br>file.
 
@@ -514,7 +591,7 @@ LSP.TokenFormat = {
 ---@field public detail? string More detail for this item, e.g. the signature of a function.
 ---@field public uri string The resource identifier of this item.
 ---@field public range insx.kit.LSP.Range The range enclosing this symbol not including leading/trailing whitespace<br>but everything else, e.g. comments and code.
----@field public selectionRange insx.kit.LSP.Range The range that should be selected and revealed when this symbol is being<br>picked, e.g. the name of a function. Must be contained by the<br>[`range`](#TypeHierarchyItem.range).
+---@field public selectionRange insx.kit.LSP.Range The range that should be selected and revealed when this symbol is being<br>picked, e.g. the name of a function. Must be contained by the<br>{@link TypeHierarchyItem.range `range`}.
 ---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved between a type hierarchy prepare and<br>supertypes or subtypes requests. It could also be used to identify the<br>type hierarchy in the server, helping improve the performance on<br>resolving supertypes and subtypes.
 
 ---@class insx.kit.LSP.TypeHierarchyRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.TypeHierarchyOptions, insx.kit.LSP.StaticRegistrationOptions
@@ -537,7 +614,7 @@ LSP.TokenFormat = {
 ---@field public range insx.kit.LSP.Range The document range for which inlay hints should be computed.
 
 ---@class insx.kit.LSP.InlayHint
----@field public position insx.kit.LSP.Position The position of this hint.
+---@field public position insx.kit.LSP.Position The position of this hint.<br><br>If multiple hints have the same position, they will be shown in the order<br>they appear in the response.
 ---@field public label (string | insx.kit.LSP.InlayHintLabelPart[]) The label of this hint. A human readable string or an array of<br>InlayHintLabelPart label parts.<br><br>*Note* that neither the string nor the label part can be empty.
 ---@field public kind? insx.kit.LSP.InlayHintKind The kind of this hint. Can be omitted in which case the client<br>should fall back to a reasonable default.
 ---@field public textEdits? insx.kit.LSP.TextEdit[] Optional text edits that are performed when accepting this inlay hint.<br><br>*Note* that edits are expected to change the document so that the inlay<br>hint (or its nearest variant) is now part of the document and the inlay<br>hint itself is now obsolete.
@@ -575,6 +652,8 @@ LSP.TokenFormat = {
 ---@field public notebookDocument insx.kit.LSP.NotebookDocument The notebook document that got opened.
 ---@field public cellTextDocuments insx.kit.LSP.TextDocumentItem[] The text documents that represent the content<br>of a notebook cell.
 
+---@class insx.kit.LSP.NotebookDocumentSyncRegistrationOptions : insx.kit.LSP.NotebookDocumentSyncOptions, insx.kit.LSP.StaticRegistrationOptions
+
 ---@class insx.kit.LSP.DidChangeNotebookDocumentParams
 ---@field public notebookDocument insx.kit.LSP.VersionedNotebookDocumentIdentifier The notebook document that did change. The version number points<br>to the version after all provided changes have been applied. If<br>only the text document content of a cell changes the notebook version<br>doesn't necessarily have to change.
 ---@field public change insx.kit.LSP.NotebookDocumentChangeEvent The actual changes to the notebook document.<br><br>The changes describe single state changes to the notebook document.<br>So if there are two changes c1 (at array index 0) and c2 (at array<br>index 1) for a notebook in state S then c1 moves the notebook from<br>S to S' and c2 from S' to S''. So c1 is computed on the state S and<br>c2 is computed on the state S'.<br><br>To mirror the content of a notebook using change events use the following approach:<br>- start with the same initial content<br>- apply the 'notebookDocument/didChange' notifications in the order you receive them.<br>- apply the `NotebookChangeEvent`s in a single notification in the order<br>  you receive them.
@@ -586,6 +665,20 @@ LSP.TokenFormat = {
 ---@field public notebookDocument insx.kit.LSP.NotebookDocumentIdentifier The notebook document that got closed.
 ---@field public cellTextDocuments insx.kit.LSP.TextDocumentIdentifier[] The text documents that represent the content<br>of a notebook cell that got closed.
 
+---@class insx.kit.LSP.InlineCompletionParams : insx.kit.LSP.TextDocumentPositionParams, insx.kit.LSP.WorkDoneProgressParams
+---@field public context insx.kit.LSP.InlineCompletionContext Additional information about the context in which inline completions were<br>requested.
+
+---@class insx.kit.LSP.InlineCompletionList
+---@field public items insx.kit.LSP.InlineCompletionItem[] The inline completion items
+
+---@class insx.kit.LSP.InlineCompletionItem
+---@field public insertText (string | insx.kit.LSP.StringValue) The text to replace the range with. Must be set.
+---@field public filterText? string A text that is used to decide if this inline completion should be shown. When `falsy` the {@link InlineCompletionItem.insertText} is used.
+---@field public range? insx.kit.LSP.Range The range to replace. Must begin and end on the same line.
+---@field public command? insx.kit.LSP.Command An optional {@link Command} that is executed *after* inserting this completion.
+
+---@class insx.kit.LSP.InlineCompletionRegistrationOptions : insx.kit.LSP.InlineCompletionOptions, insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.StaticRegistrationOptions
+
 ---@class insx.kit.LSP.RegistrationParams
 ---@field public registrations insx.kit.LSP.Registration[]
 
@@ -596,11 +689,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.InitializeResult
 ---@field public capabilities insx.kit.LSP.ServerCapabilities The capabilities the language server provides.
----@field public serverInfo? insx.kit.LSP.InitializeResult.serverInfo Information about the server.<br><br>@since 3.15.0
-
----@class insx.kit.LSP.InitializeResult.serverInfo
----@field public name string The name of the server as defined by the server.
----@field public version? string The server's version as defined by the server.
+---@field public serverInfo? insx.kit.LSP.ServerInfo Information about the server.<br><br>@since 3.15.0
 
 ---@class insx.kit.LSP.InitializeError
 ---@field public retry boolean Indicates whether the client execute the following retry logic:<br>(1) show the message provided by the ResponseError to the user<br>(2) user selects retry or cancel<br>(3) if user selected retry the initialize method is sent again.
@@ -668,7 +757,7 @@ LSP.TokenFormat = {
 ---@field public diagnostics insx.kit.LSP.Diagnostic[] An array of diagnostic information items.
 
 ---@class insx.kit.LSP.CompletionParams : insx.kit.LSP.TextDocumentPositionParams, insx.kit.LSP.WorkDoneProgressParams, insx.kit.LSP.PartialResultParams
----@field public context? insx.kit.LSP.CompletionContext The completion context. This is only available it the client specifies<br>to send this using the client capability `textDocument.completion.contextSupport === true`
+---@field public context? insx.kit.LSP.CompletionContext The completion context. This is only available if the client specifies<br>to send this using the client capability `textDocument.completion.contextSupport === true`
 
 ---@class insx.kit.LSP.CompletionItem
 ---@field public label string The label of this completion item.<br><br>The label property is also by default the text that<br>is inserted when selecting this completion.<br><br>If label details are provided the label itself should<br>be an unqualified name of the completion item.
@@ -679,29 +768,22 @@ LSP.TokenFormat = {
 ---@field public documentation? (string | insx.kit.LSP.MarkupContent) A human-readable string that represents a doc-comment.
 ---@field public deprecated? boolean Indicates if this item is deprecated.<br>@deprecated Use `tags` instead.
 ---@field public preselect? boolean Select this item when showing.<br><br>*Note* that only one completion item can be selected and that the<br>tool / client decides which item that is. The rule is that the *first*<br>item of those that match best is selected.
----@field public sortText? string A string that should be used when comparing this item<br>with other items. When `falsy` the [label](#CompletionItem.label)<br>is used.
----@field public filterText? string A string that should be used when filtering a set of<br>completion items. When `falsy` the [label](#CompletionItem.label)<br>is used.
----@field public insertText? string A string that should be inserted into a document when selecting<br>this completion. When `falsy` the [label](#CompletionItem.label)<br>is used.<br><br>The `insertText` is subject to interpretation by the client side.<br>Some tools might not take the string literally. For example<br>VS Code when code complete is requested in this example<br>`con<cursor position>` and a completion item with an `insertText` of<br>`console` is provided it will only insert `sole`. Therefore it is<br>recommended to use `textEdit` instead since it avoids additional client<br>side interpretation.
+---@field public sortText? string A string that should be used when comparing this item<br>with other items. When `falsy` the {@link CompletionItem.label label}<br>is used.
+---@field public filterText? string A string that should be used when filtering a set of<br>completion items. When `falsy` the {@link CompletionItem.label label}<br>is used.
+---@field public insertText? string A string that should be inserted into a document when selecting<br>this completion. When `falsy` the {@link CompletionItem.label label}<br>is used.<br><br>The `insertText` is subject to interpretation by the client side.<br>Some tools might not take the string literally. For example<br>VS Code when code complete is requested in this example<br>`con<cursor position>` and a completion item with an `insertText` of<br>`console` is provided it will only insert `sole`. Therefore it is<br>recommended to use `textEdit` instead since it avoids additional client<br>side interpretation.
 ---@field public insertTextFormat? insx.kit.LSP.InsertTextFormat The format of the insert text. The format applies to both the<br>`insertText` property and the `newText` property of a provided<br>`textEdit`. If omitted defaults to `InsertTextFormat.PlainText`.<br><br>Please note that the insertTextFormat doesn't apply to<br>`additionalTextEdits`.
 ---@field public insertTextMode? insx.kit.LSP.InsertTextMode How whitespace and indentation is handled during completion<br>item insertion. If not provided the clients default value depends on<br>the `textDocument.completion.insertTextMode` client capability.<br><br>@since 3.16.0
----@field public textEdit? (insx.kit.LSP.TextEdit | insx.kit.LSP.InsertReplaceEdit) An [edit](#TextEdit) which is applied to a document when selecting<br>this completion. When an edit is provided the value of<br>[insertText](#CompletionItem.insertText) is ignored.<br><br>Most editors support two different operations when accepting a completion<br>item. One is to insert a completion text and the other is to replace an<br>existing text with a completion text. Since this can usually not be<br>predetermined by a server it can report both ranges. Clients need to<br>signal support for `InsertReplaceEdits` via the<br>`textDocument.completion.insertReplaceSupport` client capability<br>property.<br><br>*Note 1:* The text edit's range as well as both ranges from an insert<br>replace edit must be a [single line] and they must contain the position<br>at which completion has been requested.<br>*Note 2:* If an `InsertReplaceEdit` is returned the edit's insert range<br>must be a prefix of the edit's replace range, that means it must be<br>contained and starting at the same position.<br><br>@since 3.16.0 additional type `InsertReplaceEdit`
+---@field public textEdit? (insx.kit.LSP.TextEdit | insx.kit.LSP.InsertReplaceEdit) An {@link TextEdit edit} which is applied to a document when selecting<br>this completion. When an edit is provided the value of<br>{@link CompletionItem.insertText insertText} is ignored.<br><br>Most editors support two different operations when accepting a completion<br>item. One is to insert a completion text and the other is to replace an<br>existing text with a completion text. Since this can usually not be<br>predetermined by a server it can report both ranges. Clients need to<br>signal support for `InsertReplaceEdits` via the<br>`textDocument.completion.insertReplaceSupport` client capability<br>property.<br><br>*Note 1:* The text edit's range as well as both ranges from an insert<br>replace edit must be a [single line] and they must contain the position<br>at which completion has been requested.<br>*Note 2:* If an `InsertReplaceEdit` is returned the edit's insert range<br>must be a prefix of the edit's replace range, that means it must be<br>contained and starting at the same position.<br><br>@since 3.16.0 additional type `InsertReplaceEdit`
 ---@field public textEditText? string The edit text used if the completion item is part of a CompletionList and<br>CompletionList defines an item default for the text edit range.<br><br>Clients will only honor this property if they opt into completion list<br>item defaults using the capability `completionList.itemDefaults`.<br><br>If not provided and a list's default range is provided the label<br>property is used as a text.<br><br>@since 3.17.0
----@field public additionalTextEdits? insx.kit.LSP.TextEdit[] An optional array of additional [text edits](#TextEdit) that are applied when<br>selecting this completion. Edits must not overlap (including the same insert position)<br>with the main [edit](#CompletionItem.textEdit) nor with themselves.<br><br>Additional text edits should be used to change text unrelated to the current cursor position<br>(for example adding an import statement at the top of the file if the completion item will<br>insert an unqualified type).
+---@field public additionalTextEdits? insx.kit.LSP.TextEdit[] An optional array of additional {@link TextEdit text edits} that are applied when<br>selecting this completion. Edits must not overlap (including the same insert position)<br>with the main {@link CompletionItem.textEdit edit} nor with themselves.<br><br>Additional text edits should be used to change text unrelated to the current cursor position<br>(for example adding an import statement at the top of the file if the completion item will<br>insert an unqualified type).
 ---@field public commitCharacters? string[] An optional set of characters that when pressed while this completion is active will accept it first and<br>then type that character. *Note* that all commit characters should have `length=1` and that superfluous<br>characters will be ignored.
----@field public command? insx.kit.LSP.Command An optional [command](#Command) that is executed *after* inserting this completion. *Note* that<br>additional modifications to the current document should be described with the<br>[additionalTextEdits](#CompletionItem.additionalTextEdits)-property.
----@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a completion item between a<br>[CompletionRequest](#CompletionRequest) and a [CompletionResolveRequest](#CompletionResolveRequest).
+---@field public command? insx.kit.LSP.Command An optional {@link Command command} that is executed *after* inserting this completion. *Note* that<br>additional modifications to the current document should be described with the<br>{@link CompletionItem.additionalTextEdits additionalTextEdits}-property.
+---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a completion item between a<br>{@link CompletionRequest} and a {@link CompletionResolveRequest}.
 
 ---@class insx.kit.LSP.CompletionList
 ---@field public isIncomplete boolean This list it not complete. Further typing results in recomputing this list.<br><br>Recomputed lists have all their items replaced (not appended) in the<br>incomplete completion sessions.
----@field public itemDefaults? insx.kit.LSP.CompletionList.itemDefaults In many cases the items of an actual completion result share the same<br>value for properties like `commitCharacters` or the range of a text<br>edit. A completion list can therefore define item defaults which will<br>be used if a completion item itself doesn't specify the value.<br><br>If a completion list specifies a default value and a completion item<br>also specifies a corresponding value the one from the item is used.<br><br>Servers are only allowed to return default values if the client<br>signals support for this via the `completionList.itemDefaults`<br>capability.<br><br>@since 3.17.0
+---@field public itemDefaults? insx.kit.LSP.CompletionItemDefaults In many cases the items of an actual completion result share the same<br>value for properties like `commitCharacters` or the range of a text<br>edit. A completion list can therefore define item defaults which will<br>be used if a completion item itself doesn't specify the value.<br><br>If a completion list specifies a default value and a completion item<br>also specifies a corresponding value the one from the item is used.<br><br>Servers are only allowed to return default values if the client<br>signals support for this via the `completionList.itemDefaults`<br>capability.<br><br>@since 3.17.0
 ---@field public items insx.kit.LSP.CompletionItem[] The completion items.
-
----@class insx.kit.LSP.CompletionList.itemDefaults
----@field public commitCharacters? string[] A default commit character set.<br><br>@since 3.17.0
----@field public editRange? (insx.kit.LSP.Range | { insert: insx.kit.LSP.Range, replace: insx.kit.LSP.Range }) A default edit range.<br><br>@since 3.17.0
----@field public insertTextFormat? insx.kit.LSP.InsertTextFormat A default insert text format.<br><br>@since 3.17.0
----@field public insertTextMode? insx.kit.LSP.InsertTextMode A default insert text mode.<br><br>@since 3.17.0
----@field public data? insx.kit.LSP.LSPAny A default data value.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.CompletionRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.CompletionOptions
 
@@ -719,7 +801,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.SignatureHelp
 ---@field public signatures insx.kit.LSP.SignatureInformation[] One or more signatures.
 ---@field public activeSignature? integer The active signature. If omitted or the value lies outside the<br>range of `signatures` the value defaults to zero or is ignored if<br>the `SignatureHelp` has no signatures.<br><br>Whenever possible implementors should make an active decision about<br>the active signature and shouldn't rely on a default value.<br><br>In future version of the protocol this property might become<br>mandatory to better express this.
----@field public activeParameter? integer The active parameter of the active signature. If omitted or the value<br>lies outside the range of `signatures[activeSignature].parameters`<br>defaults to 0 if the active signature has parameters. If<br>the active signature has no parameters it is ignored.<br>In future version of the protocol this property might become<br>mandatory to better express the active parameter if the<br>active signature does have any.
+---@field public activeParameter? (integer | nil) The active parameter of the active signature.<br><br>If `null`, no parameter of the signature is active (for example a named<br>argument that does not match any declared parameters). This is only valid<br>if the client specifies the client capability<br>`textDocument.signatureHelp.noActiveParameterSupport === true`<br><br>If omitted or the value lies outside the range of<br>`signatures[activeSignature].parameters` defaults to 0 if the active<br>signature has parameters.<br><br>If the active signature has no parameters it is ignored.<br><br>In future version of the protocol this property might become<br>mandatory (but still nullable) to better express the active parameter if<br>the active signature does have any.
 
 ---@class insx.kit.LSP.SignatureHelpRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.SignatureHelpOptions
 
@@ -736,7 +818,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.DocumentHighlight
 ---@field public range insx.kit.LSP.Range The range this highlight applies to.
----@field public kind? insx.kit.LSP.DocumentHighlightKind The highlight kind, default is [text](#DocumentHighlightKind.Text).
+---@field public kind? insx.kit.LSP.DocumentHighlightKind The highlight kind, default is {@link DocumentHighlightKind.Text text}.
 
 ---@class insx.kit.LSP.DocumentHighlightRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.DocumentHighlightOptions
 
@@ -766,6 +848,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.Command
 ---@field public title string Title of the command, like `save`.
+---@field public tooltip? string An optional tooltip.<br><br>@since 3.18.0<br>@proposed
 ---@field public command string The identifier of the actual command handler.
 ---@field public arguments? insx.kit.LSP.LSPAny[] Arguments that the command handler should be<br>invoked with.
 
@@ -774,21 +857,19 @@ LSP.TokenFormat = {
 ---@field public kind? insx.kit.LSP.CodeActionKind The kind of the code action.<br><br>Used to filter code actions.
 ---@field public diagnostics? insx.kit.LSP.Diagnostic[] The diagnostics that this code action resolves.
 ---@field public isPreferred? boolean Marks this as a preferred action. Preferred actions are used by the `auto fix` command and can be targeted<br>by keybindings.<br><br>A quick fix should be marked preferred if it properly addresses the underlying error.<br>A refactoring should be marked preferred if it is the most reasonable choice of actions to take.<br><br>@since 3.15.0
----@field public disabled? insx.kit.LSP.CodeAction.disabled Marks that the code action cannot currently be applied.<br><br>Clients should follow the following guidelines regarding disabled code actions:<br><br>  - Disabled code actions are not shown in automatic [lightbulbs](https://code.visualstudio.com/docs/editor/editingevolved#_code-action)<br>    code action menus.<br><br>  - Disabled actions are shown as faded out in the code action menu when the user requests a more specific type<br>    of code action, such as refactorings.<br><br>  - If the user has a [keybinding](https://code.visualstudio.com/docs/editor/refactoring#_keybindings-for-code-actions)<br>    that auto applies a code action and only disabled code actions are returned, the client should show the user an<br>    error message with `reason` in the editor.<br><br>@since 3.16.0
+---@field public disabled? insx.kit.LSP.CodeActionDisabled Marks that the code action cannot currently be applied.<br><br>Clients should follow the following guidelines regarding disabled code actions:<br><br>  - Disabled code actions are not shown in automatic [lightbulbs](https://code.visualstudio.com/docs/editor/editingevolved#_code-action)<br>    code action menus.<br><br>  - Disabled actions are shown as faded out in the code action menu when the user requests a more specific type<br>    of code action, such as refactorings.<br><br>  - If the user has a [keybinding](https://code.visualstudio.com/docs/editor/refactoring#_keybindings-for-code-actions)<br>    that auto applies a code action and only disabled code actions are returned, the client should show the user an<br>    error message with `reason` in the editor.<br><br>@since 3.16.0
 ---@field public edit? insx.kit.LSP.WorkspaceEdit The workspace edit this code action performs.
 ---@field public command? insx.kit.LSP.Command A command this code action executes. If a code action<br>provides an edit and a command, first the edit is<br>executed and then the command.
 ---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a code action between<br>a `textDocument/codeAction` and a `codeAction/resolve` request.<br><br>@since 3.16.0
-
----@class insx.kit.LSP.CodeAction.disabled
----@field public reason string Human readable description of why the code action is currently disabled.<br><br>This is displayed in the code actions UI.
+---@field public tags? insx.kit.LSP.CodeActionTag[] Tags for this code action.<br><br>@since 3.18.0 - proposed
 
 ---@class insx.kit.LSP.CodeActionRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.CodeActionOptions
 
 ---@class insx.kit.LSP.WorkspaceSymbolParams : insx.kit.LSP.WorkDoneProgressParams, insx.kit.LSP.PartialResultParams
----@field public query string A query string to filter symbols by. Clients may send an empty<br>string here to request all symbols.
+---@field public query string A query string to filter symbols by. Clients may send an empty<br>string here to request all symbols.<br><br>The `query`-parameter should be interpreted in a *relaxed way* as editors<br>will apply their own highlighting and scoring on the results. A good rule<br>of thumb is to match case-insensitive and to simply check that the<br>characters of *query* appear in their order in a candidate symbol.<br>Servers shouldn't use prefix, substring, or similar strict matching.
 
 ---@class insx.kit.LSP.WorkspaceSymbol : insx.kit.LSP.BaseSymbolInformation
----@field public location (insx.kit.LSP.Location | { uri: string }) The location of the symbol. Whether a server is allowed to<br>return a location without a range depends on the client<br>capability `workspace.symbol.resolveSupport`.<br><br>See SymbolInformation#location for more details.
+---@field public location (insx.kit.LSP.Location | insx.kit.LSP.LocationUriOnly) The location of the symbol. Whether a server is allowed to<br>return a location without a range depends on the client<br>capability `workspace.symbol.resolveSupport`.<br><br>See SymbolInformation#location for more details.
 ---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a workspace symbol between a<br>workspace symbol request and a workspace symbol resolve request.
 
 ---@class insx.kit.LSP.WorkspaceSymbolRegistrationOptions : insx.kit.LSP.WorkspaceSymbolOptions
@@ -799,7 +880,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.CodeLens
 ---@field public range insx.kit.LSP.Range The range in which this code lens is valid. Should only span a single line.
 ---@field public command? insx.kit.LSP.Command The command this code lens represents.
----@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a code lens item between<br>a [CodeLensRequest](#CodeLensRequest) and a [CodeLensResolveRequest]<br>(#CodeLensResolveRequest)
+---@field public data? insx.kit.LSP.LSPAny A data entry field that is preserved on a code lens item between<br>a {@link CodeLensRequest} and a {@link CodeLensResolveRequest}
 
 ---@class insx.kit.LSP.CodeLensRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.CodeLensOptions
 
@@ -827,6 +908,11 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.DocumentRangeFormattingRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.DocumentRangeFormattingOptions
 
+---@class insx.kit.LSP.DocumentRangesFormattingParams : insx.kit.LSP.WorkDoneProgressParams
+---@field public textDocument insx.kit.LSP.TextDocumentIdentifier The document to format.
+---@field public ranges insx.kit.LSP.Range[] The ranges to format
+---@field public options insx.kit.LSP.FormattingOptions The format options
+
 ---@class insx.kit.LSP.DocumentOnTypeFormattingParams
 ---@field public textDocument insx.kit.LSP.TextDocumentIdentifier The document to format.
 ---@field public position insx.kit.LSP.Position The position around which the on type formatting should happen.<br>This is not necessarily the exact position where the character denoted<br>by the property `ch` got typed.
@@ -838,7 +924,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.RenameParams : insx.kit.LSP.WorkDoneProgressParams
 ---@field public textDocument insx.kit.LSP.TextDocumentIdentifier The document to rename.
 ---@field public position insx.kit.LSP.Position The position at which this request was sent.
----@field public newName string The new name of the symbol. If the given name is not valid the<br>request must return a [ResponseError](#ResponseError) with an<br>appropriate message set.
+---@field public newName string The new name of the symbol. If the given name is not valid the<br>request must return a {@link ResponseError} with an<br>appropriate message set.
 
 ---@class insx.kit.LSP.RenameRegistrationOptions : insx.kit.LSP.TextDocumentRegistrationOptions, insx.kit.LSP.RenameOptions
 
@@ -853,6 +939,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.ApplyWorkspaceEditParams
 ---@field public label? string An optional label of the workspace edit. This label is<br>presented in the user interface for example on an undo<br>stack to undo the workspace edit.
 ---@field public edit insx.kit.LSP.WorkspaceEdit The edits to apply.
+---@field public metadata? insx.kit.LSP.WorkspaceEditMetadata Additional data about the edit.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.ApplyWorkspaceEditResult
 ---@field public applied boolean Indicates whether the edit was applied or not.
@@ -864,20 +951,20 @@ LSP.TokenFormat = {
 ---@field public title string Mandatory title of the progress operation. Used to briefly inform about<br>the kind of operation being performed.<br><br>Examples: "Indexing" or "Linking dependencies".
 ---@field public cancellable? boolean Controls if a cancel button should show to allow the user to cancel the<br>long running operation. Clients that don't support cancellation are allowed<br>to ignore the setting.
 ---@field public message? string Optional, more detailed associated progress message. Contains<br>complementary information to the `title`.<br><br>Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".<br>If unset, the previous progress message (if any) is still valid.
----@field public percentage? integer Optional progress percentage to display (value 100 is considered 100%).<br>If not provided infinite progress is assumed and clients are allowed<br>to ignore the `percentage` value in subsequent in report notifications.<br><br>The value should be steadily rising. Clients are free to ignore values<br>that are not following this rule. The value range is [0, 100].
+---@field public percentage? integer Optional progress percentage to display (value 100 is considered 100%).<br>If not provided infinite progress is assumed and clients are allowed<br>to ignore the `percentage` value in subsequent report notifications.<br><br>The value should be steadily rising. Clients are free to ignore values<br>that are not following this rule. The value range is [0, 100].
 
 ---@class insx.kit.LSP.WorkDoneProgressReport
 ---@field public kind "report"
 ---@field public cancellable? boolean Controls enablement state of a cancel button.<br><br>Clients that don't support cancellation or don't support controlling the button's<br>enablement state are allowed to ignore the property.
 ---@field public message? string Optional, more detailed associated progress message. Contains<br>complementary information to the `title`.<br><br>Examples: "3/25 files", "project/src/module2", "node_modules/some_dep".<br>If unset, the previous progress message (if any) is still valid.
----@field public percentage? integer Optional progress percentage to display (value 100 is considered 100%).<br>If not provided infinite progress is assumed and clients are allowed<br>to ignore the `percentage` value in subsequent in report notifications.<br><br>The value should be steadily rising. Clients are free to ignore values<br>that are not following this rule. The value range is [0, 100]
+---@field public percentage? integer Optional progress percentage to display (value 100 is considered 100%).<br>If not provided infinite progress is assumed and clients are allowed<br>to ignore the `percentage` value in subsequent report notifications.<br><br>The value should be steadily rising. Clients are free to ignore values<br>that are not following this rule. The value range is [0, 100].
 
 ---@class insx.kit.LSP.WorkDoneProgressEnd
 ---@field public kind "end"
 ---@field public message? string Optional, a final message indicating to for example indicate the outcome<br>of the operation.
 
 ---@class insx.kit.LSP.SetTraceParams
----@field public value insx.kit.LSP.TraceValues
+---@field public value insx.kit.LSP.TraceValue
 
 ---@class insx.kit.LSP.LogTraceParams
 ---@field public message string
@@ -896,6 +983,9 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.WorkDoneProgressParams
 ---@field public workDoneToken? insx.kit.LSP.ProgressToken An optional token that a server can use to report work done progress.
+
+---@class insx.kit.LSP.PartialResultParams
+---@field public partialResultToken? insx.kit.LSP.ProgressToken An optional token that a server can use to report partial results (e.g. streaming) to<br>the client.
 
 ---@class insx.kit.LSP.LocationLink
 ---@field public originSelectionRange? insx.kit.LSP.Range Span of the origin of this link.<br><br>Used as the underlined span for mouse interaction. Defaults to the word range at<br>the definition position.
@@ -948,7 +1038,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.SemanticTokensOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public legend insx.kit.LSP.SemanticTokensLegend The legend used by the server
 ---@field public range? (boolean | {  }) Server supports providing semantic tokens for a specific range<br>of a document.
----@field public full? (boolean | { delta?: boolean }) Server supports providing semantic tokens for a full document.
+---@field public full? (boolean | insx.kit.LSP.SemanticTokensFullDelta) Server supports providing semantic tokens for a full document.
 
 ---@class insx.kit.LSP.SemanticTokensEdit
 ---@field public start integer The start offset of the edit.
@@ -962,7 +1052,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.TextDocumentEdit
 ---@field public textDocument insx.kit.LSP.OptionalVersionedTextDocumentIdentifier The text document to change.
----@field public edits (insx.kit.LSP.TextEdit | insx.kit.LSP.AnnotatedTextEdit)[] The edits to be applied.<br><br>@since 3.16.0 - support for AnnotatedTextEdit. This is guarded using a<br>client capability.
+---@field public edits (insx.kit.LSP.TextEdit | insx.kit.LSP.AnnotatedTextEdit | insx.kit.LSP.SnippetTextEdit)[] The edits to be applied.<br><br>@since 3.16.0 - support for AnnotatedTextEdit. This is guarded using a<br>client capability.<br><br>@since 3.18.0 - support for SnippetTextEdit. This is guarded using a<br>client capability.
 
 ---@class insx.kit.LSP.CreateFile : insx.kit.LSP.ResourceOperation
 ---@field public kind "create" A create
@@ -1065,9 +1155,13 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.TextDocumentItem
 ---@field public uri string The text document's uri.
----@field public languageId string The text document's language identifier.
+---@field public languageId insx.kit.LSP.LanguageKind The text document's language identifier.
 ---@field public version integer The version number of this document (it will increase after each<br>change, including undo/redo).
 ---@field public text string The content of the opened text document.
+
+---@class insx.kit.LSP.NotebookDocumentSyncOptions
+---@field public notebookSelector (insx.kit.LSP.NotebookDocumentFilterWithNotebook | insx.kit.LSP.NotebookDocumentFilterWithCells)[] The notebooks to be synced
+---@field public save? boolean Whether save notification should be forwarded to<br>the server. Will only be honored if mode === `notebook`.
 
 ---@class insx.kit.LSP.VersionedNotebookDocumentIdentifier
 ---@field public version integer The version number of this notebook document.
@@ -1075,20 +1169,20 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.NotebookDocumentChangeEvent
 ---@field public metadata? insx.kit.LSP.LSPObject The changed meta data if any.<br><br>Note: should always be an object literal (e.g. LSPObject)
----@field public cells? insx.kit.LSP.NotebookDocumentChangeEvent.cells Changes to cells
-
----@class insx.kit.LSP.NotebookDocumentChangeEvent.cells
----@field public structure? insx.kit.LSP.NotebookDocumentChangeEvent.cells.structure Changes to the cell structure to add or<br>remove cells.
----@field public data? insx.kit.LSP.NotebookCell[] Changes to notebook cells properties like its<br>kind, execution summary or metadata.
----@field public textContent? { document: insx.kit.LSP.VersionedTextDocumentIdentifier, changes: insx.kit.LSP.TextDocumentContentChangeEvent[] }[] Changes to the text content of notebook cells.
-
----@class insx.kit.LSP.NotebookDocumentChangeEvent.cells.structure
----@field public array insx.kit.LSP.NotebookCellArrayChange The change to the cell array.
----@field public didOpen? insx.kit.LSP.TextDocumentItem[] Additional opened cell text documents.
----@field public didClose? insx.kit.LSP.TextDocumentIdentifier[] Additional closed cell text documents.
+---@field public cells? insx.kit.LSP.NotebookDocumentCellChanges Changes to cells
 
 ---@class insx.kit.LSP.NotebookDocumentIdentifier
 ---@field public uri string The notebook document's uri.
+
+---@class insx.kit.LSP.InlineCompletionContext
+---@field public triggerKind insx.kit.LSP.InlineCompletionTriggerKind Describes how the inline completion was triggered.
+---@field public selectedCompletionInfo? insx.kit.LSP.SelectedCompletionInfo Provides information about the currently selected item in the autocomplete widget if it is visible.
+
+---@class insx.kit.LSP.StringValue
+---@field public kind "snippet" The kind of string value.
+---@field public value string The snippet string.
+
+---@class insx.kit.LSP.InlineCompletionOptions : insx.kit.LSP.WorkDoneProgressOptions
 
 ---@class insx.kit.LSP.Registration
 ---@field public id string The id used to register the request. The id can be used to deregister<br>the request again.
@@ -1101,17 +1195,13 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP._InitializeParams : insx.kit.LSP.WorkDoneProgressParams
 ---@field public processId (integer | nil) The process Id of the parent process that started<br>the server.<br><br>Is `null` if the process has not been started by another process.<br>If the parent process is not alive then the server should exit.
----@field public clientInfo? insx.kit.LSP._InitializeParams.clientInfo Information about the client<br><br>@since 3.15.0
+---@field public clientInfo? insx.kit.LSP.ClientInfo Information about the client<br><br>@since 3.15.0
 ---@field public locale? string The locale the client is currently showing the user interface<br>in. This must not necessarily be the locale of the operating<br>system.<br><br>Uses IETF language tags as the value's syntax<br>(See https://en.wikipedia.org/wiki/IETF_language_tag)<br><br>@since 3.16.0
 ---@field public rootPath? (string | nil) The rootPath of the workspace. Is null<br>if no folder is open.<br><br>@deprecated in favour of rootUri.
 ---@field public rootUri (string | nil) The rootUri of the workspace. Is null if no<br>folder is open. If both `rootPath` and `rootUri` are set<br>`rootUri` wins.<br><br>@deprecated in favour of workspaceFolders.
 ---@field public capabilities insx.kit.LSP.ClientCapabilities The capabilities provided by the client (editor or tool)
 ---@field public initializationOptions? insx.kit.LSP.LSPAny User provided initialization options.
----@field public trace? ("off" | "messages" | "compact" | "verbose") The initial trace setting. If omitted trace is disabled ('off').
-
----@class insx.kit.LSP._InitializeParams.clientInfo
----@field public name string The name of the client as defined by the client.
----@field public version? string The client's version as defined by the client.
+---@field public trace? insx.kit.LSP.TraceValue The initial trace setting. If omitted trace is disabled ('off').
 
 ---@class insx.kit.LSP.WorkspaceFoldersInitializeParams
 ---@field public workspaceFolders? (insx.kit.LSP.WorkspaceFolder[] | nil) The workspace folders configured in the client when the server starts.<br><br>This property is only available if the client supports workspace folders.<br>It can be `null` if the client supports workspace folders but none are<br>configured.<br><br>@since 3.6.0
@@ -1150,12 +1240,13 @@ LSP.TokenFormat = {
 ---@field public inlineValueProvider? (boolean | insx.kit.LSP.InlineValueOptions | insx.kit.LSP.InlineValueRegistrationOptions) The server provides inline values.<br><br>@since 3.17.0
 ---@field public inlayHintProvider? (boolean | insx.kit.LSP.InlayHintOptions | insx.kit.LSP.InlayHintRegistrationOptions) The server provides inlay hints.<br><br>@since 3.17.0
 ---@field public diagnosticProvider? (insx.kit.LSP.DiagnosticOptions | insx.kit.LSP.DiagnosticRegistrationOptions) The server has support for pull model diagnostics.<br><br>@since 3.17.0
----@field public workspace? insx.kit.LSP.ServerCapabilities.workspace Workspace specific server capabilities.
+---@field public inlineCompletionProvider? (boolean | insx.kit.LSP.InlineCompletionOptions) Inline completion options used during static registration.<br><br>@since 3.18.0<br>@proposed
+---@field public workspace? insx.kit.LSP.WorkspaceOptions Workspace specific server capabilities.
 ---@field public experimental? insx.kit.LSP.LSPAny Experimental server capabilities.
 
----@class insx.kit.LSP.ServerCapabilities.workspace
----@field public workspaceFolders? insx.kit.LSP.WorkspaceFoldersServerCapabilities The server supports workspace folder.<br><br>@since 3.6.0
----@field public fileOperations? insx.kit.LSP.FileOperationOptions The server is interested in notifications/requests for operations on files.<br><br>@since 3.16.0
+---@class insx.kit.LSP.ServerInfo
+---@field public name string The name of the server as defined by the server.
+---@field public version? string The server's version as defined by the server.
 
 ---@class insx.kit.LSP.VersionedTextDocumentIdentifier : insx.kit.LSP.TextDocumentIdentifier
 ---@field public version integer The version number of this document.
@@ -1173,7 +1264,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.Diagnostic
 ---@field public range insx.kit.LSP.Range The range at which the message applies
----@field public severity? insx.kit.LSP.DiagnosticSeverity The diagnostic's severity. Can be omitted. If omitted it is up to the<br>client to interpret diagnostics as error, warning, info or hint.
+---@field public severity? insx.kit.LSP.DiagnosticSeverity The diagnostic's severity. To avoid interpretation mismatches when a<br>server is used with different clients it is highly recommended that servers<br>always provide a severity value.
 ---@field public code? (integer | string) The diagnostic's code, which usually appear in the user interface.
 ---@field public codeDescription? insx.kit.LSP.CodeDescription An optional property to describe the error code.<br>Requires the code field (above) to be present/not null.<br><br>@since 3.16.0
 ---@field public source? string A human-readable string describing the source of this<br>diagnostic, e.g. 'typescript' or 'super lint'. It usually<br>appears in the user interface.
@@ -1195,14 +1286,18 @@ LSP.TokenFormat = {
 ---@field public insert insx.kit.LSP.Range The range if the insert is requested
 ---@field public replace insx.kit.LSP.Range The range if the replace is requested.
 
+---@class insx.kit.LSP.CompletionItemDefaults
+---@field public commitCharacters? string[] A default commit character set.<br><br>@since 3.17.0
+---@field public editRange? (insx.kit.LSP.Range | insx.kit.LSP.EditRangeWithInsertReplace) A default edit range.<br><br>@since 3.17.0
+---@field public insertTextFormat? insx.kit.LSP.InsertTextFormat A default insert text format.<br><br>@since 3.17.0
+---@field public insertTextMode? insx.kit.LSP.InsertTextMode A default insert text mode.<br><br>@since 3.17.0
+---@field public data? insx.kit.LSP.LSPAny A default data value.<br><br>@since 3.17.0
+
 ---@class insx.kit.LSP.CompletionOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public triggerCharacters? string[] Most tools trigger completion request automatically without explicitly requesting<br>it using a keyboard shortcut (e.g. Ctrl+Space). Typically they do so when the user<br>starts to type an identifier. For example if the user types `c` in a JavaScript file<br>code complete will automatically pop up present `console` besides others as a<br>completion item. Characters that make up identifiers don't need to be listed here.<br><br>If code complete should automatically be trigger on characters not being valid inside<br>an identifier (for example `.` in JavaScript) list them in `triggerCharacters`.
 ---@field public allCommitCharacters? string[] The list of all possible characters that commit a completion. This field can be used<br>if clients don't support individual commit characters per completion item. See<br>`ClientCapabilities.textDocument.completion.completionItem.commitCharactersSupport`<br><br>If a server provides both `allCommitCharacters` and commit characters on an individual<br>completion item the ones on the completion item win.<br><br>@since 3.2.0
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a completion item.
----@field public completionItem? insx.kit.LSP.CompletionOptions.completionItem The server supports the following `CompletionItem` specific<br>capabilities.<br><br>@since 3.17.0
-
----@class insx.kit.LSP.CompletionOptions.completionItem
----@field public labelDetailsSupport? boolean The server has support for completion item label<br>details (see also `CompletionItemLabelDetails`) when<br>receiving a completion item in a resolve call.<br><br>@since 3.17.0
+---@field public completionItem? insx.kit.LSP.ServerCompletionItemOptions The server supports the following `CompletionItem` specific<br>capabilities.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.HoverOptions : insx.kit.LSP.WorkDoneProgressOptions
 
@@ -1216,7 +1311,7 @@ LSP.TokenFormat = {
 ---@field public label string The label of this signature. Will be shown in<br>the UI.
 ---@field public documentation? (string | insx.kit.LSP.MarkupContent) The human-readable doc-comment of this signature. Will be shown<br>in the UI but can be omitted.
 ---@field public parameters? insx.kit.LSP.ParameterInformation[] The parameters of this signature.
----@field public activeParameter? integer The index of the active parameter.<br><br>If provided, this is used in place of `SignatureHelp.activeParameter`.<br><br>@since 3.16.0
+---@field public activeParameter? (integer | nil) The index of the active parameter.<br><br>If `null`, no parameter of the signature is active (for example a named<br>argument that does not match any declared parameters). This is only valid<br>if the client specifies the client capability<br>`textDocument.signatureHelp.noActiveParameterSupport === true`<br><br>If provided (or `null`), this is used in place of<br>`SignatureHelp.activeParameter`.<br><br>@since 3.16.0
 
 ---@class insx.kit.LSP.SignatureHelpOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public triggerCharacters? string[] List of characters that trigger signature help automatically.
@@ -1245,9 +1340,16 @@ LSP.TokenFormat = {
 ---@field public only? insx.kit.LSP.CodeActionKind[] Requested kind of actions to return.<br><br>Actions not of this kind are filtered out by the client before being shown. So servers<br>can omit computing them.
 ---@field public triggerKind? insx.kit.LSP.CodeActionTriggerKind The reason why code actions were requested.<br><br>@since 3.17.0
 
+---@class insx.kit.LSP.CodeActionDisabled
+---@field public reason string Human readable description of why the code action is currently disabled.<br><br>This is displayed in the code actions UI.
+
 ---@class insx.kit.LSP.CodeActionOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public codeActionKinds? insx.kit.LSP.CodeActionKind[] CodeActionKinds that this server may return.<br><br>The list of kinds may be generic, such as `CodeActionKind.Refactor`, or the server<br>may list out every specific kind they provide.
+---@field public documentation? insx.kit.LSP.CodeActionKindDocumentation[] Static documentation for a class of code actions.<br><br>Documentation from the provider should be shown in the code actions menu if either:<br><br>- Code actions of `kind` are requested by the editor. In this case, the editor will show the documentation that<br>  most closely matches the requested code action kind. For example, if a provider has documentation for<br>  both `Refactor` and `RefactorExtract`, when the user requests code actions for `RefactorExtract`,<br>  the editor will use the documentation for `RefactorExtract` instead of the documentation for `Refactor`.<br><br>- Any code actions of `kind` are returned by the provider.<br><br>At most one documentation entry should be shown per provider.<br><br>@since 3.18.0<br>@proposed
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a code action.<br><br>@since 3.16.0
+
+---@class insx.kit.LSP.LocationUriOnly
+---@field public uri string
 
 ---@class insx.kit.LSP.WorkspaceSymbolOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public resolveProvider? boolean The server provides support to resolve additional<br>information for a workspace symbol.<br><br>@since 3.17.0
@@ -1268,6 +1370,7 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.DocumentFormattingOptions : insx.kit.LSP.WorkDoneProgressOptions
 
 ---@class insx.kit.LSP.DocumentRangeFormattingOptions : insx.kit.LSP.WorkDoneProgressOptions
+---@field public rangesSupport? boolean Whether the server supports formatting multiple ranges at once.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.DocumentOnTypeFormattingOptions
 ---@field public firstTriggerCharacter string A character on which formatting should be triggered, like `{`.
@@ -1276,18 +1379,36 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.RenameOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public prepareProvider? boolean Renames should be checked and tested before being executed.<br><br>@since version 3.12.0
 
+---@class insx.kit.LSP.PrepareRenamePlaceholder
+---@field public range insx.kit.LSP.Range
+---@field public placeholder string
+
+---@class insx.kit.LSP.PrepareRenameDefaultBehavior
+---@field public defaultBehavior boolean
+
 ---@class insx.kit.LSP.ExecuteCommandOptions : insx.kit.LSP.WorkDoneProgressOptions
 ---@field public commands string[] The commands to be executed on the server
+
+---@class insx.kit.LSP.WorkspaceEditMetadata
+---@field public isRefactoring? boolean Signal to the editor that this edit is a refactoring.
 
 ---@class insx.kit.LSP.SemanticTokensLegend
 ---@field public tokenTypes string[] The token types a server uses.
 ---@field public tokenModifiers string[] The token modifiers a server uses.
+
+---@class insx.kit.LSP.SemanticTokensFullDelta
+---@field public delta? boolean The server supports deltas for full documents.
 
 ---@class insx.kit.LSP.OptionalVersionedTextDocumentIdentifier : insx.kit.LSP.TextDocumentIdentifier
 ---@field public version (integer | nil) The version number of this document. If a versioned text document identifier<br>is sent from the server to the client and the file is not open in the editor<br>(the server has not received an open notification before) the server can send<br>`null` to indicate that the version is unknown and the content on disk is the<br>truth (as specified with document content ownership).
 
 ---@class insx.kit.LSP.AnnotatedTextEdit : insx.kit.LSP.TextEdit
 ---@field public annotationId insx.kit.LSP.ChangeAnnotationIdentifier The actual identifier of the change annotation
+
+---@class insx.kit.LSP.SnippetTextEdit
+---@field public range insx.kit.LSP.Range The range of the text document to be manipulated.
+---@field public snippet insx.kit.LSP.StringValue The snippet to be inserted.
+---@field public annotationId? insx.kit.LSP.ChangeAnnotationIdentifier The actual identifier of the snippet edit.
 
 ---@class insx.kit.LSP.ResourceOperation
 ---@field public kind string The resource operation kind.
@@ -1318,18 +1439,32 @@ LSP.TokenFormat = {
 ---@field public uri string The URI for which diagnostic information is reported.
 ---@field public version (integer | nil) The version number for which the diagnostics are reported.<br>If the document is not marked as open `null` can be provided.
 
----@class insx.kit.LSP.LSPObject
-
 ---@class insx.kit.LSP.NotebookCell
 ---@field public kind insx.kit.LSP.NotebookCellKind The cell's kind
 ---@field public document string The URI of the cell's text document<br>content.
 ---@field public metadata? insx.kit.LSP.LSPObject Additional metadata stored with the cell.<br><br>Note: should always be an object literal (e.g. LSPObject)
 ---@field public executionSummary? insx.kit.LSP.ExecutionSummary Additional execution summary information<br>if supported by the client.
 
----@class insx.kit.LSP.NotebookCellArrayChange
----@field public start integer The start oftest of the cell that changed.
----@field public deleteCount integer The deleted cells
----@field public cells? insx.kit.LSP.NotebookCell[] The new cells, if any
+---@class insx.kit.LSP.NotebookDocumentFilterWithNotebook
+---@field public notebook (string | insx.kit.LSP.NotebookDocumentFilter) The notebook to be synced If a string<br>value is provided it matches against the<br>notebook type. '*' matches every notebook.
+---@field public cells? insx.kit.LSP.NotebookCellLanguage[] The cells of the matching notebook to be synced.
+
+---@class insx.kit.LSP.NotebookDocumentFilterWithCells
+---@field public notebook? (string | insx.kit.LSP.NotebookDocumentFilter) The notebook to be synced If a string<br>value is provided it matches against the<br>notebook type. '*' matches every notebook.
+---@field public cells insx.kit.LSP.NotebookCellLanguage[] The cells of the matching notebook to be synced.
+
+---@class insx.kit.LSP.NotebookDocumentCellChanges
+---@field public structure? insx.kit.LSP.NotebookDocumentCellChangeStructure Changes to the cell structure to add or<br>remove cells.
+---@field public data? insx.kit.LSP.NotebookCell[] Changes to notebook cells properties like its<br>kind, execution summary or metadata.
+---@field public textContent? insx.kit.LSP.NotebookDocumentCellContentChanges[] Changes to the text content of notebook cells.
+
+---@class insx.kit.LSP.SelectedCompletionInfo
+---@field public range insx.kit.LSP.Range The range that will be replaced if this completion item is accepted.
+---@field public text string The text the range will be replaced with if this completion is accepted.
+
+---@class insx.kit.LSP.ClientInfo
+---@field public name string The name of the client as defined by the client.
+---@field public version? string The client's version as defined by the client.
 
 ---@class insx.kit.LSP.ClientCapabilities
 ---@field public workspace? insx.kit.LSP.WorkspaceClientCapabilities Workspace specific client capabilities.
@@ -1346,23 +1481,17 @@ LSP.TokenFormat = {
 ---@field public willSaveWaitUntil? boolean If present will save wait until requests are sent to the server. If omitted the request should not be<br>sent.
 ---@field public save? (boolean | insx.kit.LSP.SaveOptions) If present save notifications are sent to the server. If omitted the notification should not be<br>sent.
 
----@class insx.kit.LSP.NotebookDocumentSyncOptions
----@field public notebookSelector ({ notebook: (string | insx.kit.LSP.NotebookDocumentFilter), cells?: { language: string }[] } | { notebook?: (string | insx.kit.LSP.NotebookDocumentFilter), cells: { language: string }[] })[] The notebooks to be synced
----@field public save? boolean Whether save notification should be forwarded to<br>the server. Will only be honored if mode === `notebook`.
+---@class insx.kit.LSP.WorkspaceOptions
+---@field public workspaceFolders? insx.kit.LSP.WorkspaceFoldersServerCapabilities The server supports workspace folder.<br><br>@since 3.6.0
+---@field public fileOperations? insx.kit.LSP.FileOperationOptions The server is interested in notifications/requests for operations on files.<br><br>@since 3.16.0
 
----@class insx.kit.LSP.NotebookDocumentSyncRegistrationOptions : insx.kit.LSP.NotebookDocumentSyncOptions, insx.kit.LSP.StaticRegistrationOptions
+---@class insx.kit.LSP.TextDocumentContentChangePartial
+---@field public range insx.kit.LSP.Range The range of the document that changed.
+---@field public rangeLength? integer The optional length of the range that got replaced.<br><br>@deprecated use range instead.
+---@field public text string The new text for the provided range.
 
----@class insx.kit.LSP.WorkspaceFoldersServerCapabilities
----@field public supported? boolean The server has support for workspace folders
----@field public changeNotifications? (string | boolean) Whether the server wants to receive workspace folder<br>change notifications.<br><br>If a string is provided the string is treated as an ID<br>under which the notification is registered on the client<br>side. The ID can be used to unregister for these events<br>using the `client/unregisterCapability` request.
-
----@class insx.kit.LSP.FileOperationOptions
----@field public didCreate? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didCreateFiles notifications.
----@field public willCreate? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willCreateFiles requests.
----@field public didRename? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didRenameFiles notifications.
----@field public willRename? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willRenameFiles requests.
----@field public didDelete? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didDeleteFiles file notifications.
----@field public willDelete? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willDeleteFiles file requests.
+---@class insx.kit.LSP.TextDocumentContentChangeWholeDocument
+---@field public text string The new text of the whole document.
 
 ---@class insx.kit.LSP.CodeDescription
 ---@field public href string An URI to open with more information about the diagnostic error.
@@ -1371,9 +1500,24 @@ LSP.TokenFormat = {
 ---@field public location insx.kit.LSP.Location The location of this related diagnostic information.
 ---@field public message string The message of this related diagnostic information.
 
+---@class insx.kit.LSP.EditRangeWithInsertReplace
+---@field public insert insx.kit.LSP.Range
+---@field public replace insx.kit.LSP.Range
+
+---@class insx.kit.LSP.ServerCompletionItemOptions
+---@field public labelDetailsSupport? boolean The server has support for completion item label<br>details (see also `CompletionItemLabelDetails`) when<br>receiving a completion item in a resolve call.<br><br>@since 3.17.0
+
+---@class insx.kit.LSP.MarkedStringWithLanguage
+---@field public language string
+---@field public value string
+
 ---@class insx.kit.LSP.ParameterInformation
----@field public label (string | (integer | integer)[]) The label of this parameter information.<br><br>Either a string or an inclusive start and exclusive end offsets within its containing<br>signature label. (see SignatureInformation.label). The offsets are based on a UTF-16<br>string representation as `Position` and `Range` does.<br><br>*Note*: a label of type string should be a substring of its containing signature label.<br>Its intended use case is to highlight the parameter label part in the `SignatureInformation.label`.
+---@field public label (string | (integer | integer)[]) The label of this parameter information.<br><br>Either a string or an inclusive start and exclusive end offsets within its containing<br>signature label. (see SignatureInformation.label). The offsets are based on a UTF-16<br>string representation as `Position` and `Range` does.<br><br>To avoid ambiguities a server should use the [start, end] offset value instead of using<br>a substring. Whether a client support this is controlled via `labelOffsetSupport` client<br>capability.<br><br>*Note*: a label of type string should be a substring of its containing signature label.<br>Its intended use case is to highlight the parameter label part in the `SignatureInformation.label`.
 ---@field public documentation? (string | insx.kit.LSP.MarkupContent) The human-readable doc-comment of this parameter. Will be shown<br>in the UI but can be omitted.
+
+---@class insx.kit.LSP.CodeActionKindDocumentation
+---@field public kind insx.kit.LSP.CodeActionKind The kind of the code action being documented.<br><br>If the kind is generic, such as `CodeActionKind.Refactor`, the documentation will be shown whenever any<br>refactorings are returned. If the kind if more specific, such as `CodeActionKind.RefactorExtract`, the<br>documentation will only be shown when extract refactoring code actions are returned.
+---@field public command insx.kit.LSP.Command Command that is ued to display the documentation to the user.<br><br>The title of this documentation code action is taken from {@linkcode Command.title}
 
 ---@class insx.kit.LSP.NotebookCellTextDocumentFilter
 ---@field public notebook (string | insx.kit.LSP.NotebookDocumentFilter) A filter that matches against the notebook<br>containing the notebook cell. If a string<br>value is provided it matches against the<br>notebook type. '*' matches every notebook.
@@ -1385,6 +1529,18 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.ExecutionSummary
 ---@field public executionOrder integer A strict monotonically increasing value<br>indicating the execution order of a cell<br>inside a notebook.
 ---@field public success? boolean Whether the execution was successful or<br>not if known by the client.
+
+---@class insx.kit.LSP.NotebookCellLanguage
+---@field public language string
+
+---@class insx.kit.LSP.NotebookDocumentCellChangeStructure
+---@field public array insx.kit.LSP.NotebookCellArrayChange The change to the cell array.
+---@field public didOpen? insx.kit.LSP.TextDocumentItem[] Additional opened cell text documents.
+---@field public didClose? insx.kit.LSP.TextDocumentIdentifier[] Additional closed cell text documents.
+
+---@class insx.kit.LSP.NotebookDocumentCellContentChanges
+---@field public document insx.kit.LSP.VersionedTextDocumentIdentifier
+---@field public changes insx.kit.LSP.TextDocumentContentChangeEvent[]
 
 ---@class insx.kit.LSP.WorkspaceClientCapabilities
 ---@field public applyEdit? boolean The client supports applying batch edits<br>to the workspace by supporting the request<br>'workspace/applyEdit'
@@ -1401,6 +1557,7 @@ LSP.TokenFormat = {
 ---@field public inlineValue? insx.kit.LSP.InlineValueWorkspaceClientCapabilities Capabilities specific to the inline values requests scoped to the<br>workspace.<br><br>@since 3.17.0.
 ---@field public inlayHint? insx.kit.LSP.InlayHintWorkspaceClientCapabilities Capabilities specific to the inlay hint requests scoped to the<br>workspace.<br><br>@since 3.17.0.
 ---@field public diagnostics? insx.kit.LSP.DiagnosticWorkspaceClientCapabilities Capabilities specific to the diagnostic requests scoped to the<br>workspace.<br><br>@since 3.17.0.
+---@field public foldingRange? insx.kit.LSP.FoldingRangeWorkspaceClientCapabilities Capabilities specific to the folding range requests scoped to the workspace.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.TextDocumentClientCapabilities
 ---@field public synchronization? insx.kit.LSP.TextDocumentSyncClientCapabilities Defines which synchronization capabilities the client supports.
@@ -1433,6 +1590,7 @@ LSP.TokenFormat = {
 ---@field public inlineValue? insx.kit.LSP.InlineValueClientCapabilities Capabilities specific to the `textDocument/inlineValue` request.<br><br>@since 3.17.0
 ---@field public inlayHint? insx.kit.LSP.InlayHintClientCapabilities Capabilities specific to the `textDocument/inlayHint` request.<br><br>@since 3.17.0
 ---@field public diagnostic? insx.kit.LSP.DiagnosticClientCapabilities Capabilities specific to the diagnostic pull model.<br><br>@since 3.17.0
+---@field public inlineCompletion? insx.kit.LSP.InlineCompletionClientCapabilities Client capabilities specific to inline completions.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.NotebookDocumentClientCapabilities
 ---@field public synchronization insx.kit.LSP.NotebookDocumentSyncClientCapabilities Capabilities specific to notebook document synchronization<br><br>@since 3.17.0
@@ -1443,28 +1601,70 @@ LSP.TokenFormat = {
 ---@field public showDocument? insx.kit.LSP.ShowDocumentClientCapabilities Capabilities specific to the showDocument request.<br><br>@since 3.16.0
 
 ---@class insx.kit.LSP.GeneralClientCapabilities
----@field public staleRequestSupport? insx.kit.LSP.GeneralClientCapabilities.staleRequestSupport Client capability that signals how the client<br>handles stale requests (e.g. a request<br>for which the client will not process the response<br>anymore since the information is outdated).<br><br>@since 3.17.0
+---@field public staleRequestSupport? insx.kit.LSP.StaleRequestSupportOptions Client capability that signals how the client<br>handles stale requests (e.g. a request<br>for which the client will not process the response<br>anymore since the information is outdated).<br><br>@since 3.17.0
 ---@field public regularExpressions? insx.kit.LSP.RegularExpressionsClientCapabilities Client capabilities specific to regular expressions.<br><br>@since 3.16.0
 ---@field public markdown? insx.kit.LSP.MarkdownClientCapabilities Client capabilities specific to the client's markdown parser.<br><br>@since 3.16.0
 ---@field public positionEncodings? insx.kit.LSP.PositionEncodingKind[] The position encodings supported by the client. Client and server<br>have to agree on the same position encoding to ensure that offsets<br>(e.g. character position in a line) are interpreted the same on both<br>sides.<br><br>To keep the protocol backwards compatible the following applies: if<br>the value 'utf-16' is missing from the array of position encodings<br>servers can assume that the client supports UTF-16. UTF-16 is<br>therefore a mandatory encoding.<br><br>If omitted it defaults to ['utf-16'].<br><br>Implementation considerations: since the conversion from one encoding<br>into another requires the content of the file / line the conversion<br>is best done where the file is read which is usually on the server<br>side.<br><br>@since 3.17.0
 
----@class insx.kit.LSP.GeneralClientCapabilities.staleRequestSupport
----@field public cancel boolean The client will actively cancel the request.
----@field public retryOnContentModified string[] The list of requests for which the client<br>will retry the request if it receives a<br>response with error code `ContentModified`
+---@class insx.kit.LSP.WorkspaceFoldersServerCapabilities
+---@field public supported? boolean The server has support for workspace folders
+---@field public changeNotifications? (string | boolean) Whether the server wants to receive workspace folder<br>change notifications.<br><br>If a string is provided the string is treated as an ID<br>under which the notification is registered on the client<br>side. The ID can be used to unregister for these events<br>using the `client/unregisterCapability` request.
+
+---@class insx.kit.LSP.FileOperationOptions
+---@field public didCreate? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didCreateFiles notifications.
+---@field public willCreate? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willCreateFiles requests.
+---@field public didRename? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didRenameFiles notifications.
+---@field public willRename? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willRenameFiles requests.
+---@field public didDelete? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving didDeleteFiles file notifications.
+---@field public willDelete? insx.kit.LSP.FileOperationRegistrationOptions The server is interested in receiving willDeleteFiles file requests.
 
 ---@class insx.kit.LSP.RelativePattern
 ---@field public baseUri (insx.kit.LSP.WorkspaceFolder | string) A workspace folder or a base URI to which this pattern will be matched<br>against relatively.
 ---@field public pattern insx.kit.LSP.Pattern The actual glob pattern;
+
+---@class insx.kit.LSP.TextDocumentFilterLanguage
+---@field public language string A language id, like `typescript`.
+---@field public scheme? string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern? insx.kit.LSP.GlobPattern A glob pattern, like **​/*.{ts,js}. See TextDocumentFilter for examples.<br><br>@since 3.18.0 - support for relative patterns.
+
+---@class insx.kit.LSP.TextDocumentFilterScheme
+---@field public language? string A language id, like `typescript`.
+---@field public scheme string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern? insx.kit.LSP.GlobPattern A glob pattern, like **​/*.{ts,js}. See TextDocumentFilter for examples.<br><br>@since 3.18.0 - support for relative patterns.
+
+---@class insx.kit.LSP.TextDocumentFilterPattern
+---@field public language? string A language id, like `typescript`.
+---@field public scheme? string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern insx.kit.LSP.GlobPattern A glob pattern, like **​/*.{ts,js}. See TextDocumentFilter for examples.<br><br>@since 3.18.0 - support for relative patterns.
+
+---@class insx.kit.LSP.NotebookDocumentFilterNotebookType
+---@field public notebookType string The type of the enclosing notebook.
+---@field public scheme? string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern? insx.kit.LSP.GlobPattern A glob pattern.
+
+---@class insx.kit.LSP.NotebookDocumentFilterScheme
+---@field public notebookType? string The type of the enclosing notebook.
+---@field public scheme string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern? insx.kit.LSP.GlobPattern A glob pattern.
+
+---@class insx.kit.LSP.NotebookDocumentFilterPattern
+---@field public notebookType? string The type of the enclosing notebook.
+---@field public scheme? string A Uri {@link Uri.scheme scheme}, like `file` or `untitled`.
+---@field public pattern insx.kit.LSP.GlobPattern A glob pattern.
+
+---@class insx.kit.LSP.NotebookCellArrayChange
+---@field public start integer The start oftest of the cell that changed.
+---@field public deleteCount integer The deleted cells
+---@field public cells? insx.kit.LSP.NotebookCell[] The new cells, if any
 
 ---@class insx.kit.LSP.WorkspaceEditClientCapabilities
 ---@field public documentChanges? boolean The client supports versioned document changes in `WorkspaceEdit`s
 ---@field public resourceOperations? insx.kit.LSP.ResourceOperationKind[] The resource operations the client supports. Clients should at least<br>support 'create', 'rename' and 'delete' files and folders.<br><br>@since 3.13.0
 ---@field public failureHandling? insx.kit.LSP.FailureHandlingKind The failure handling strategy of a client if applying the workspace edit<br>fails.<br><br>@since 3.13.0
 ---@field public normalizesLineEndings? boolean Whether the client normalizes line endings to the client specific<br>setting.<br>If set to `true` the client will normalize line ending characters<br>in a workspace edit to the client-specified new line<br>character.<br><br>@since 3.16.0
----@field public changeAnnotationSupport? insx.kit.LSP.WorkspaceEditClientCapabilities.changeAnnotationSupport Whether the client in general supports change annotations on text edits,<br>create file, rename file and delete file changes.<br><br>@since 3.16.0
-
----@class insx.kit.LSP.WorkspaceEditClientCapabilities.changeAnnotationSupport
----@field public groupsOnLabel? boolean Whether the client groups edits with equal labels into tree nodes,<br>for instance all edits labelled with "Changes in Strings" would<br>be a tree node.
+---@field public changeAnnotationSupport? insx.kit.LSP.ChangeAnnotationsSupportOptions Whether the client in general supports change annotations on text edits,<br>create file, rename file and delete file changes.<br><br>@since 3.16.0
+---@field public metadataSupport? boolean Whether the client supports `WorkspaceEditMetadata` in `WorkspaceEdit`s.<br><br>@since 3.18.0<br>@proposed
+---@field public snippetEditSupport? boolean Whether the client supports snippets as text edits.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.DidChangeConfigurationClientCapabilities
 ---@field public dynamicRegistration? boolean Did change configuration notification supports dynamic registration.
@@ -1475,18 +1675,9 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.WorkspaceSymbolClientCapabilities
 ---@field public dynamicRegistration? boolean Symbol request supports dynamic registration.
----@field public symbolKind? insx.kit.LSP.WorkspaceSymbolClientCapabilities.symbolKind Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
----@field public tagSupport? insx.kit.LSP.WorkspaceSymbolClientCapabilities.tagSupport The client supports tags on `SymbolInformation`.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.16.0
----@field public resolveSupport? insx.kit.LSP.WorkspaceSymbolClientCapabilities.resolveSupport The client support partial workspace symbols. The client will send the<br>request `workspaceSymbol/resolve` to the server to resolve additional<br>properties.<br><br>@since 3.17.0
-
----@class insx.kit.LSP.WorkspaceSymbolClientCapabilities.symbolKind
----@field public valueSet? insx.kit.LSP.SymbolKind[] The symbol kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.<br><br>If this property is not present the client only supports<br>the symbol kinds from `File` to `Array` as defined in<br>the initial version of the protocol.
-
----@class insx.kit.LSP.WorkspaceSymbolClientCapabilities.tagSupport
----@field public valueSet insx.kit.LSP.SymbolTag[] The tags supported by the client.
-
----@class insx.kit.LSP.WorkspaceSymbolClientCapabilities.resolveSupport
----@field public properties string[] The properties that a client can resolve lazily. Usually<br>`location.range`
+---@field public symbolKind? insx.kit.LSP.ClientSymbolKindOptions Specific capabilities for the `SymbolKind` in the `workspace/symbol` request.
+---@field public tagSupport? insx.kit.LSP.ClientSymbolTagOptions The client supports tags on `SymbolInformation`.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.16.0
+---@field public resolveSupport? insx.kit.LSP.ClientSymbolResolveOptions The client support partial workspace symbols. The client will send the<br>request `workspaceSymbol/resolve` to the server to resolve additional<br>properties.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.ExecuteCommandClientCapabilities
 ---@field public dynamicRegistration? boolean Execute command supports dynamic registration.
@@ -1515,6 +1706,9 @@ LSP.TokenFormat = {
 ---@class insx.kit.LSP.DiagnosticWorkspaceClientCapabilities
 ---@field public refreshSupport? boolean Whether the client implementation supports a refresh request sent from<br>the server to the client.<br><br>Note that this event is global and will force the client to refresh all<br>pulled diagnostics currently shown. It should be used with absolute care and<br>is useful for situation where a server for example detects a project wide<br>change that requires such a calculation.
 
+---@class insx.kit.LSP.FoldingRangeWorkspaceClientCapabilities
+---@field public refreshSupport? boolean Whether the client implementation supports a refresh request sent from the<br>server to the client.<br><br>Note that this event is global and will force the client to refresh all<br>folding ranges currently shown. It should be used with absolute care and is<br>useful for situation where a server for example detects a project wide<br>change that requires such a calculation.<br><br>@since 3.18.0<br>@proposed
+
 ---@class insx.kit.LSP.TextDocumentSyncClientCapabilities
 ---@field public dynamicRegistration? boolean Whether text document synchronization supports dynamic registration.
 ---@field public willSave? boolean The client supports sending will save notifications.
@@ -1523,38 +1717,11 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.CompletionClientCapabilities
 ---@field public dynamicRegistration? boolean Whether completion supports dynamic registration.
----@field public completionItem? insx.kit.LSP.CompletionClientCapabilities.completionItem The client supports the following `CompletionItem` specific<br>capabilities.
----@field public completionItemKind? insx.kit.LSP.CompletionClientCapabilities.completionItemKind
+---@field public completionItem? insx.kit.LSP.ClientCompletionItemOptions The client supports the following `CompletionItem` specific<br>capabilities.
+---@field public completionItemKind? insx.kit.LSP.ClientCompletionItemOptionsKind
 ---@field public insertTextMode? insx.kit.LSP.InsertTextMode Defines how the client handles whitespace and indentation<br>when accepting a completion item that uses multi line<br>text in either `insertText` or `textEdit`.<br><br>@since 3.17.0
 ---@field public contextSupport? boolean The client supports to send additional context information for a<br>`textDocument/completion` request.
----@field public completionList? insx.kit.LSP.CompletionClientCapabilities.completionList The client supports the following `CompletionList` specific<br>capabilities.<br><br>@since 3.17.0
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionItem
----@field public snippetSupport? boolean Client supports snippets as insert text.<br><br>A snippet can define tab stops and placeholders with `$1`, `$2`<br>and `${3:foo}`. `$0` defines the final tab stop, it defaults to<br>the end of the snippet. Placeholders with equal identifiers are linked,<br>that is typing in one will update others too.
----@field public commitCharactersSupport? boolean Client supports commit characters on a completion item.
----@field public documentationFormat? insx.kit.LSP.MarkupKind[] Client supports the following content formats for the documentation<br>property. The order describes the preferred format of the client.
----@field public deprecatedSupport? boolean Client supports the deprecated property on a completion item.
----@field public preselectSupport? boolean Client supports the preselect property on a completion item.
----@field public tagSupport? insx.kit.LSP.CompletionClientCapabilities.completionItem.tagSupport Client supports the tag property on a completion item. Clients supporting<br>tags have to handle unknown tags gracefully. Clients especially need to<br>preserve unknown tags when sending a completion item back to the server in<br>a resolve call.<br><br>@since 3.15.0
----@field public insertReplaceSupport? boolean Client support insert replace edit to control different behavior if a<br>completion item is inserted in the text or should replace text.<br><br>@since 3.16.0
----@field public resolveSupport? insx.kit.LSP.CompletionClientCapabilities.completionItem.resolveSupport Indicates which properties a client can resolve lazily on a completion<br>item. Before version 3.16.0 only the predefined properties `documentation`<br>and `details` could be resolved lazily.<br><br>@since 3.16.0
----@field public insertTextModeSupport? insx.kit.LSP.CompletionClientCapabilities.completionItem.insertTextModeSupport The client supports the `insertTextMode` property on<br>a completion item to override the whitespace handling mode<br>as defined by the client (see `insertTextMode`).<br><br>@since 3.16.0
----@field public labelDetailsSupport? boolean The client has support for completion item label<br>details (see also `CompletionItemLabelDetails`).<br><br>@since 3.17.0
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionItem.tagSupport
----@field public valueSet insx.kit.LSP.CompletionItemTag[] The tags supported by the client.
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionItem.resolveSupport
----@field public properties string[] The properties that a client can resolve lazily.
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionItem.insertTextModeSupport
----@field public valueSet insx.kit.LSP.InsertTextMode[]
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionItemKind
----@field public valueSet? insx.kit.LSP.CompletionItemKind[] The completion item kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.<br><br>If this property is not present the client only supports<br>the completion items kinds from `Text` to `Reference` as defined in<br>the initial version of the protocol.
-
----@class insx.kit.LSP.CompletionClientCapabilities.completionList
----@field public itemDefaults? string[] The client supports the following itemDefaults on<br>a completion list.<br><br>The value lists the supported property names of the<br>`CompletionList.itemDefaults` object. If omitted<br>no properties are supported.<br><br>@since 3.17.0
+---@field public completionList? insx.kit.LSP.CompletionListCapabilities The client supports the following `CompletionList` specific<br>capabilities.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.HoverClientCapabilities
 ---@field public dynamicRegistration? boolean Whether hover supports dynamic registration.
@@ -1562,16 +1729,8 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.SignatureHelpClientCapabilities
 ---@field public dynamicRegistration? boolean Whether signature help supports dynamic registration.
----@field public signatureInformation? insx.kit.LSP.SignatureHelpClientCapabilities.signatureInformation The client supports the following `SignatureInformation`<br>specific properties.
+---@field public signatureInformation? insx.kit.LSP.ClientSignatureInformationOptions The client supports the following `SignatureInformation`<br>specific properties.
 ---@field public contextSupport? boolean The client supports to send additional context information for a<br>`textDocument/signatureHelp` request. A client that opts into<br>contextSupport will also support the `retriggerCharacters` on<br>`SignatureHelpOptions`.<br><br>@since 3.15.0
-
----@class insx.kit.LSP.SignatureHelpClientCapabilities.signatureInformation
----@field public documentationFormat? insx.kit.LSP.MarkupKind[] Client supports the following content formats for the documentation<br>property. The order describes the preferred format of the client.
----@field public parameterInformation? insx.kit.LSP.SignatureHelpClientCapabilities.signatureInformation.parameterInformation Client capabilities specific to parameter information.
----@field public activeParameterSupport? boolean The client supports the `activeParameter` property on `SignatureInformation`<br>literal.<br><br>@since 3.16.0
-
----@class insx.kit.LSP.SignatureHelpClientCapabilities.signatureInformation.parameterInformation
----@field public labelOffsetSupport? boolean The client supports processing label offsets instead of a<br>simple label string.<br><br>@since 3.14.0
 
 ---@class insx.kit.LSP.DeclarationClientCapabilities
 ---@field public dynamicRegistration? boolean Whether declaration supports dynamic registration. If this is set to `true`<br>the client supports the new `DeclarationRegistrationOptions` return value<br>for the corresponding server capability as well.
@@ -1597,37 +1756,28 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.DocumentSymbolClientCapabilities
 ---@field public dynamicRegistration? boolean Whether document symbol supports dynamic registration.
----@field public symbolKind? insx.kit.LSP.DocumentSymbolClientCapabilities.symbolKind Specific capabilities for the `SymbolKind` in the<br>`textDocument/documentSymbol` request.
+---@field public symbolKind? insx.kit.LSP.ClientSymbolKindOptions Specific capabilities for the `SymbolKind` in the<br>`textDocument/documentSymbol` request.
 ---@field public hierarchicalDocumentSymbolSupport? boolean The client supports hierarchical document symbols.
----@field public tagSupport? insx.kit.LSP.DocumentSymbolClientCapabilities.tagSupport The client supports tags on `SymbolInformation`. Tags are supported on<br>`DocumentSymbol` if `hierarchicalDocumentSymbolSupport` is set to true.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.16.0
+---@field public tagSupport? insx.kit.LSP.ClientSymbolTagOptions The client supports tags on `SymbolInformation`. Tags are supported on<br>`DocumentSymbol` if `hierarchicalDocumentSymbolSupport` is set to true.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.16.0
 ---@field public labelSupport? boolean The client supports an additional label presented in the UI when<br>registering a document symbol provider.<br><br>@since 3.16.0
-
----@class insx.kit.LSP.DocumentSymbolClientCapabilities.symbolKind
----@field public valueSet? insx.kit.LSP.SymbolKind[] The symbol kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.<br><br>If this property is not present the client only supports<br>the symbol kinds from `File` to `Array` as defined in<br>the initial version of the protocol.
-
----@class insx.kit.LSP.DocumentSymbolClientCapabilities.tagSupport
----@field public valueSet insx.kit.LSP.SymbolTag[] The tags supported by the client.
 
 ---@class insx.kit.LSP.CodeActionClientCapabilities
 ---@field public dynamicRegistration? boolean Whether code action supports dynamic registration.
----@field public codeActionLiteralSupport? insx.kit.LSP.CodeActionClientCapabilities.codeActionLiteralSupport The client support code action literals of type `CodeAction` as a valid<br>response of the `textDocument/codeAction` request. If the property is not<br>set the request can only return `Command` literals.<br><br>@since 3.8.0
+---@field public codeActionLiteralSupport? insx.kit.LSP.ClientCodeActionLiteralOptions The client support code action literals of type `CodeAction` as a valid<br>response of the `textDocument/codeAction` request. If the property is not<br>set the request can only return `Command` literals.<br><br>@since 3.8.0
 ---@field public isPreferredSupport? boolean Whether code action supports the `isPreferred` property.<br><br>@since 3.15.0
 ---@field public disabledSupport? boolean Whether code action supports the `disabled` property.<br><br>@since 3.16.0
 ---@field public dataSupport? boolean Whether code action supports the `data` property which is<br>preserved between a `textDocument/codeAction` and a<br>`codeAction/resolve` request.<br><br>@since 3.16.0
----@field public resolveSupport? insx.kit.LSP.CodeActionClientCapabilities.resolveSupport Whether the client supports resolving additional code action<br>properties via a separate `codeAction/resolve` request.<br><br>@since 3.16.0
+---@field public resolveSupport? insx.kit.LSP.ClientCodeActionResolveOptions Whether the client supports resolving additional code action<br>properties via a separate `codeAction/resolve` request.<br><br>@since 3.16.0
 ---@field public honorsChangeAnnotations? boolean Whether the client honors the change annotations in<br>text edits and resource operations returned via the<br>`CodeAction#edit` property by for example presenting<br>the workspace edit in the user interface and asking<br>for confirmation.<br><br>@since 3.16.0
+---@field public documentationSupport? boolean Whether the client supports documentation for a class of<br>code actions.<br><br>@since 3.18.0<br>@proposed
+---@field public tagSupport? insx.kit.LSP.CodeActionTagOptions Client supports the tag property on a code action. Clients<br>supporting tags have to handle unknown tags gracefully.<br><br>@since 3.18.0 - proposed
 
----@class insx.kit.LSP.CodeActionClientCapabilities.codeActionLiteralSupport
----@field public codeActionKind insx.kit.LSP.CodeActionClientCapabilities.codeActionLiteralSupport.codeActionKind The code action kind is support with the following value<br>set.
-
----@class insx.kit.LSP.CodeActionClientCapabilities.codeActionLiteralSupport.codeActionKind
----@field public valueSet insx.kit.LSP.CodeActionKind[] The code action kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.
-
----@class insx.kit.LSP.CodeActionClientCapabilities.resolveSupport
----@field public properties string[] The properties that a client can resolve lazily.
+---@class insx.kit.LSP.CodeActionTagOptions
+---@field public valueSet insx.kit.LSP.CodeActionTag[] The tags supported by the client.
 
 ---@class insx.kit.LSP.CodeLensClientCapabilities
 ---@field public dynamicRegistration? boolean Whether code lens supports dynamic registration.
+---@field public resolveSupport? insx.kit.LSP.ClientCodeLensResolveOptions Whether the client supports resolving additional code lens<br>properties via a separate `codeLens/resolve` request.<br><br>@since 3.18.0
 
 ---@class insx.kit.LSP.DocumentLinkClientCapabilities
 ---@field public dynamicRegistration? boolean Whether document link supports dynamic registration.
@@ -1641,6 +1791,7 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.DocumentRangeFormattingClientCapabilities
 ---@field public dynamicRegistration? boolean Whether range formatting supports dynamic registration.
+---@field public rangesSupport? boolean Whether the client supports formatting multiple ranges at once.<br><br>@since 3.18.0<br>@proposed
 
 ---@class insx.kit.LSP.DocumentOnTypeFormattingClientCapabilities
 ---@field public dynamicRegistration? boolean Whether on type formatting supports dynamic registration.
@@ -1655,34 +1806,21 @@ LSP.TokenFormat = {
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration for folding range<br>providers. If this is set to `true` the client supports the new<br>`FoldingRangeRegistrationOptions` return value for the corresponding<br>server capability as well.
 ---@field public rangeLimit? integer The maximum number of folding ranges that the client prefers to receive<br>per document. The value serves as a hint, servers are free to follow the<br>limit.
 ---@field public lineFoldingOnly? boolean If set, the client signals that it only supports folding complete lines.<br>If set, client will ignore specified `startCharacter` and `endCharacter`<br>properties in a FoldingRange.
----@field public foldingRangeKind? insx.kit.LSP.FoldingRangeClientCapabilities.foldingRangeKind Specific options for the folding range kind.<br><br>@since 3.17.0
----@field public foldingRange? insx.kit.LSP.FoldingRangeClientCapabilities.foldingRange Specific options for the folding range.<br><br>@since 3.17.0
-
----@class insx.kit.LSP.FoldingRangeClientCapabilities.foldingRangeKind
----@field public valueSet? insx.kit.LSP.FoldingRangeKind[] The folding range kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.
-
----@class insx.kit.LSP.FoldingRangeClientCapabilities.foldingRange
----@field public collapsedText? boolean If set, the client signals that it supports setting collapsedText on<br>folding ranges to display custom labels instead of the default text.<br><br>@since 3.17.0
+---@field public foldingRangeKind? insx.kit.LSP.ClientFoldingRangeKindOptions Specific options for the folding range kind.<br><br>@since 3.17.0
+---@field public foldingRange? insx.kit.LSP.ClientFoldingRangeOptions Specific options for the folding range.<br><br>@since 3.17.0
 
 ---@class insx.kit.LSP.SelectionRangeClientCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration for selection range providers. If this is set to `true`<br>the client supports the new `SelectionRangeRegistrationOptions` return value for the corresponding server<br>capability as well.
 
----@class insx.kit.LSP.PublishDiagnosticsClientCapabilities
----@field public relatedInformation? boolean Whether the clients accepts diagnostics with related information.
----@field public tagSupport? insx.kit.LSP.PublishDiagnosticsClientCapabilities.tagSupport Client supports the tag property to provide meta data about a diagnostic.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.15.0
+---@class insx.kit.LSP.PublishDiagnosticsClientCapabilities : insx.kit.LSP.DiagnosticsCapabilities
 ---@field public versionSupport? boolean Whether the client interprets the version property of the<br>`textDocument/publishDiagnostics` notification's parameter.<br><br>@since 3.15.0
----@field public codeDescriptionSupport? boolean Client supports a codeDescription property<br><br>@since 3.16.0
----@field public dataSupport? boolean Whether code action supports the `data` property which is<br>preserved between a `textDocument/publishDiagnostics` and<br>`textDocument/codeAction` request.<br><br>@since 3.16.0
-
----@class insx.kit.LSP.PublishDiagnosticsClientCapabilities.tagSupport
----@field public valueSet insx.kit.LSP.DiagnosticTag[] The tags supported by the client.
 
 ---@class insx.kit.LSP.CallHierarchyClientCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration. If this is set to `true`<br>the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`<br>return value for the corresponding server capability as well.
 
 ---@class insx.kit.LSP.SemanticTokensClientCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration. If this is set to `true`<br>the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`<br>return value for the corresponding server capability as well.
----@field public requests insx.kit.LSP.SemanticTokensClientCapabilities.requests Which requests the client supports and might send to the server<br>depending on the server's capability. Please note that clients might not<br>show semantic tokens or degrade some of the user experience if a range<br>or full request is advertised by the client but not provided by the<br>server. If for example the client capability `requests.full` and<br>`request.range` are both set to true but the server only provides a<br>range provider the client might not render a minimap correctly or might<br>even decide to not show any semantic tokens at all.
+---@field public requests insx.kit.LSP.ClientSemanticTokensRequestOptions Which requests the client supports and might send to the server<br>depending on the server's capability. Please note that clients might not<br>show semantic tokens or degrade some of the user experience if a range<br>or full request is advertised by the client but not provided by the<br>server. If for example the client capability `requests.full` and<br>`request.range` are both set to true but the server only provides a<br>range provider the client might not render a minimap correctly or might<br>even decide to not show any semantic tokens at all.
 ---@field public tokenTypes string[] The token types that the client supports.
 ---@field public tokenModifiers string[] The token modifiers that the client supports.
 ---@field public formats insx.kit.LSP.TokenFormat[] The token formats the clients supports.
@@ -1690,10 +1828,6 @@ LSP.TokenFormat = {
 ---@field public multilineTokenSupport? boolean Whether the client supports tokens that can span multiple lines.
 ---@field public serverCancelSupport? boolean Whether the client allows the server to actively cancel a<br>semantic token request, e.g. supports returning<br>LSPErrorCodes.ServerCancelled. If a server does the client<br>needs to retrigger the request.<br><br>@since 3.17.0
 ---@field public augmentsSyntaxTokens? boolean Whether the client uses semantic tokens to augment existing<br>syntax tokens. If set to `true` client side created syntax<br>tokens and semantic tokens are both used for colorization. If<br>set to `false` the client only uses the returned semantic tokens<br>for colorization.<br><br>If the value is `undefined` then the client behavior is not<br>specified.<br><br>@since 3.17.0
-
----@class insx.kit.LSP.SemanticTokensClientCapabilities.requests
----@field public range? (boolean | {  }) The client will send the `textDocument/semanticTokens/range` request if<br>the server provides a corresponding handler.
----@field public full? (boolean | { delta?: boolean }) The client will send the `textDocument/semanticTokens/full` request if<br>the server provides a corresponding handler.
 
 ---@class insx.kit.LSP.LinkedEditingRangeClientCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration. If this is set to `true`<br>the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`<br>return value for the corresponding server capability as well.
@@ -1709,36 +1843,125 @@ LSP.TokenFormat = {
 
 ---@class insx.kit.LSP.InlayHintClientCapabilities
 ---@field public dynamicRegistration? boolean Whether inlay hints support dynamic registration.
----@field public resolveSupport? insx.kit.LSP.InlayHintClientCapabilities.resolveSupport Indicates which properties a client can resolve lazily on an inlay<br>hint.
+---@field public resolveSupport? insx.kit.LSP.ClientInlayHintResolveOptions Indicates which properties a client can resolve lazily on an inlay<br>hint.
 
----@class insx.kit.LSP.InlayHintClientCapabilities.resolveSupport
----@field public properties string[] The properties that a client can resolve lazily.
-
----@class insx.kit.LSP.DiagnosticClientCapabilities
+---@class insx.kit.LSP.DiagnosticClientCapabilities : insx.kit.LSP.DiagnosticsCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration. If this is set to `true`<br>the client supports the new `(TextDocumentRegistrationOptions & StaticRegistrationOptions)`<br>return value for the corresponding server capability as well.
 ---@field public relatedDocumentSupport? boolean Whether the clients supports related documents for document diagnostic pulls.
+
+---@class insx.kit.LSP.InlineCompletionClientCapabilities
+---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration for inline completion providers.
 
 ---@class insx.kit.LSP.NotebookDocumentSyncClientCapabilities
 ---@field public dynamicRegistration? boolean Whether implementation supports dynamic registration. If this is<br>set to `true` the client supports the new<br>`(TextDocumentRegistrationOptions & StaticRegistrationOptions)`<br>return value for the corresponding server capability as well.
 ---@field public executionSummarySupport? boolean The client supports sending execution summary data per cell.
 
 ---@class insx.kit.LSP.ShowMessageRequestClientCapabilities
----@field public messageActionItem? insx.kit.LSP.ShowMessageRequestClientCapabilities.messageActionItem Capabilities specific to the `MessageActionItem` type.
-
----@class insx.kit.LSP.ShowMessageRequestClientCapabilities.messageActionItem
----@field public additionalPropertiesSupport? boolean Whether the client supports additional attributes which<br>are preserved and send back to the server in the<br>request's response.
+---@field public messageActionItem? insx.kit.LSP.ClientShowMessageActionItemOptions Capabilities specific to the `MessageActionItem` type.
 
 ---@class insx.kit.LSP.ShowDocumentClientCapabilities
 ---@field public support boolean The client has support for the showDocument<br>request.
 
+---@class insx.kit.LSP.StaleRequestSupportOptions
+---@field public cancel boolean The client will actively cancel the request.
+---@field public retryOnContentModified string[] The list of requests for which the client<br>will retry the request if it receives a<br>response with error code `ContentModified`
+
 ---@class insx.kit.LSP.RegularExpressionsClientCapabilities
----@field public engine string The engine's name.
+---@field public engine insx.kit.LSP.RegularExpressionEngineKind The engine's name.
 ---@field public version? string The engine's version.
 
 ---@class insx.kit.LSP.MarkdownClientCapabilities
 ---@field public parser string The name of the parser.
 ---@field public version? string The version of the parser.
 ---@field public allowedTags? string[] A list of HTML tags that the client allows / supports in<br>Markdown.<br><br>@since 3.17.0
+
+---@class insx.kit.LSP.ChangeAnnotationsSupportOptions
+---@field public groupsOnLabel? boolean Whether the client groups edits with equal labels into tree nodes,<br>for instance all edits labelled with "Changes in Strings" would<br>be a tree node.
+
+---@class insx.kit.LSP.ClientSymbolKindOptions
+---@field public valueSet? insx.kit.LSP.SymbolKind[] The symbol kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.<br><br>If this property is not present the client only supports<br>the symbol kinds from `File` to `Array` as defined in<br>the initial version of the protocol.
+
+---@class insx.kit.LSP.ClientSymbolTagOptions
+---@field public valueSet insx.kit.LSP.SymbolTag[] The tags supported by the client.
+
+---@class insx.kit.LSP.ClientSymbolResolveOptions
+---@field public properties string[] The properties that a client can resolve lazily. Usually<br>`location.range`
+
+---@class insx.kit.LSP.ClientCompletionItemOptions
+---@field public snippetSupport? boolean Client supports snippets as insert text.<br><br>A snippet can define tab stops and placeholders with `$1`, `$2`<br>and `${3:foo}`. `$0` defines the final tab stop, it defaults to<br>the end of the snippet. Placeholders with equal identifiers are linked,<br>that is typing in one will update others too.
+---@field public commitCharactersSupport? boolean Client supports commit characters on a completion item.
+---@field public documentationFormat? insx.kit.LSP.MarkupKind[] Client supports the following content formats for the documentation<br>property. The order describes the preferred format of the client.
+---@field public deprecatedSupport? boolean Client supports the deprecated property on a completion item.
+---@field public preselectSupport? boolean Client supports the preselect property on a completion item.
+---@field public tagSupport? insx.kit.LSP.CompletionItemTagOptions Client supports the tag property on a completion item. Clients supporting<br>tags have to handle unknown tags gracefully. Clients especially need to<br>preserve unknown tags when sending a completion item back to the server in<br>a resolve call.<br><br>@since 3.15.0
+---@field public insertReplaceSupport? boolean Client support insert replace edit to control different behavior if a<br>completion item is inserted in the text or should replace text.<br><br>@since 3.16.0
+---@field public resolveSupport? insx.kit.LSP.ClientCompletionItemResolveOptions Indicates which properties a client can resolve lazily on a completion<br>item. Before version 3.16.0 only the predefined properties `documentation`<br>and `details` could be resolved lazily.<br><br>@since 3.16.0
+---@field public insertTextModeSupport? insx.kit.LSP.ClientCompletionItemInsertTextModeOptions The client supports the `insertTextMode` property on<br>a completion item to override the whitespace handling mode<br>as defined by the client (see `insertTextMode`).<br><br>@since 3.16.0
+---@field public labelDetailsSupport? boolean The client has support for completion item label<br>details (see also `CompletionItemLabelDetails`).<br><br>@since 3.17.0
+
+---@class insx.kit.LSP.ClientCompletionItemOptionsKind
+---@field public valueSet? insx.kit.LSP.CompletionItemKind[] The completion item kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.<br><br>If this property is not present the client only supports<br>the completion items kinds from `Text` to `Reference` as defined in<br>the initial version of the protocol.
+
+---@class insx.kit.LSP.CompletionListCapabilities
+---@field public itemDefaults? string[] The client supports the following itemDefaults on<br>a completion list.<br><br>The value lists the supported property names of the<br>`CompletionList.itemDefaults` object. If omitted<br>no properties are supported.<br><br>@since 3.17.0
+
+---@class insx.kit.LSP.ClientSignatureInformationOptions
+---@field public documentationFormat? insx.kit.LSP.MarkupKind[] Client supports the following content formats for the documentation<br>property. The order describes the preferred format of the client.
+---@field public parameterInformation? insx.kit.LSP.ClientSignatureParameterInformationOptions Client capabilities specific to parameter information.
+---@field public activeParameterSupport? boolean The client supports the `activeParameter` property on `SignatureInformation`<br>literal.<br><br>@since 3.16.0
+---@field public noActiveParameterSupport? boolean The client supports the `activeParameter` property on<br>`SignatureHelp`/`SignatureInformation` being set to `null` to<br>indicate that no parameter should be active.<br><br>@since 3.18.0<br>@proposed
+
+---@class insx.kit.LSP.ClientCodeActionLiteralOptions
+---@field public codeActionKind insx.kit.LSP.ClientCodeActionKindOptions The code action kind is support with the following value<br>set.
+
+---@class insx.kit.LSP.ClientCodeActionResolveOptions
+---@field public properties string[] The properties that a client can resolve lazily.
+
+---@class insx.kit.LSP.ClientCodeLensResolveOptions
+---@field public properties string[] The properties that a client can resolve lazily.
+
+---@class insx.kit.LSP.ClientFoldingRangeKindOptions
+---@field public valueSet? insx.kit.LSP.FoldingRangeKind[] The folding range kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.
+
+---@class insx.kit.LSP.ClientFoldingRangeOptions
+---@field public collapsedText? boolean If set, the client signals that it supports setting collapsedText on<br>folding ranges to display custom labels instead of the default text.<br><br>@since 3.17.0
+
+---@class insx.kit.LSP.DiagnosticsCapabilities
+---@field public relatedInformation? boolean Whether the clients accepts diagnostics with related information.
+---@field public tagSupport? insx.kit.LSP.ClientDiagnosticsTagOptions Client supports the tag property to provide meta data about a diagnostic.<br>Clients supporting tags have to handle unknown tags gracefully.<br><br>@since 3.15.0
+---@field public codeDescriptionSupport? boolean Client supports a codeDescription property<br><br>@since 3.16.0
+---@field public dataSupport? boolean Whether code action supports the `data` property which is<br>preserved between a `textDocument/publishDiagnostics` and<br>`textDocument/codeAction` request.<br><br>@since 3.16.0
+
+---@class insx.kit.LSP.ClientSemanticTokensRequestOptions
+---@field public range? (boolean | {  }) The client will send the `textDocument/semanticTokens/range` request if<br>the server provides a corresponding handler.
+---@field public full? (boolean | insx.kit.LSP.ClientSemanticTokensRequestFullDelta) The client will send the `textDocument/semanticTokens/full` request if<br>the server provides a corresponding handler.
+
+---@class insx.kit.LSP.ClientInlayHintResolveOptions
+---@field public properties string[] The properties that a client can resolve lazily.
+
+---@class insx.kit.LSP.ClientShowMessageActionItemOptions
+---@field public additionalPropertiesSupport? boolean Whether the client supports additional attributes which<br>are preserved and send back to the server in the<br>request's response.
+
+---@class insx.kit.LSP.CompletionItemTagOptions
+---@field public valueSet insx.kit.LSP.CompletionItemTag[] The tags supported by the client.
+
+---@class insx.kit.LSP.ClientCompletionItemResolveOptions
+---@field public properties string[] The properties that a client can resolve lazily.
+
+---@class insx.kit.LSP.ClientCompletionItemInsertTextModeOptions
+---@field public valueSet insx.kit.LSP.InsertTextMode[]
+
+---@class insx.kit.LSP.ClientSignatureParameterInformationOptions
+---@field public labelOffsetSupport? boolean The client supports processing label offsets instead of a<br>simple label string.<br><br>@since 3.14.0
+
+---@class insx.kit.LSP.ClientCodeActionKindOptions
+---@field public valueSet insx.kit.LSP.CodeActionKind[] The code action kind values the client supports. When this<br>property exists the client also guarantees that it will<br>handle values outside its set gracefully and falls back<br>to a default value when unknown.
+
+---@class insx.kit.LSP.ClientDiagnosticsTagOptions
+---@field public valueSet insx.kit.LSP.DiagnosticTag[] The tags supported by the client.
+
+---@class insx.kit.LSP.ClientSemanticTokensRequestFullDelta
+---@field public delta? boolean The client will send the `textDocument/semanticTokens/full/delta` request if<br>the server provides a corresponding handler.
 
 ---@alias insx.kit.LSP.TextDocumentImplementationResponse (insx.kit.LSP.Definition | insx.kit.LSP.DefinitionLink[] | nil)
 
@@ -1753,6 +1976,8 @@ LSP.TokenFormat = {
 ---@alias insx.kit.LSP.TextDocumentColorPresentationResponse insx.kit.LSP.ColorPresentation[]
 
 ---@alias insx.kit.LSP.TextDocumentFoldingRangeResponse (insx.kit.LSP.FoldingRange[] | nil)
+
+---@alias insx.kit.LSP.WorkspaceFoldingRangeRefreshResponse nil
 
 ---@alias insx.kit.LSP.TextDocumentDeclarationResponse (insx.kit.LSP.Declaration | insx.kit.LSP.DeclarationLink[] | nil)
 
@@ -1808,6 +2033,8 @@ LSP.TokenFormat = {
 
 ---@alias insx.kit.LSP.WorkspaceDiagnosticRefreshResponse nil
 
+---@alias insx.kit.LSP.TextDocumentInlineCompletionResponse (insx.kit.LSP.InlineCompletionList | insx.kit.LSP.InlineCompletionItem[] | nil)
+
 ---@alias insx.kit.LSP.ClientRegisterCapabilityResponse nil
 
 ---@alias insx.kit.LSP.ClientUnregisterCapabilityResponse nil
@@ -1858,6 +2085,8 @@ LSP.TokenFormat = {
 
 ---@alias insx.kit.LSP.TextDocumentRangeFormattingResponse (insx.kit.LSP.TextEdit[] | nil)
 
+---@alias insx.kit.LSP.TextDocumentRangesFormattingResponse (insx.kit.LSP.TextEdit[] | nil)
+
 ---@alias insx.kit.LSP.TextDocumentOnTypeFormattingResponse (insx.kit.LSP.TextEdit[] | nil)
 
 ---@alias insx.kit.LSP.TextDocumentRenameResponse (insx.kit.LSP.WorkspaceEdit | nil)
@@ -1884,28 +2113,32 @@ LSP.TokenFormat = {
 
 ---@alias insx.kit.LSP.DocumentDiagnosticReport (insx.kit.LSP.RelatedFullDocumentDiagnosticReport | insx.kit.LSP.RelatedUnchangedDocumentDiagnosticReport)
 
----@alias insx.kit.LSP.PrepareRenameResult (insx.kit.LSP.Range | { range: insx.kit.LSP.Range, placeholder: string } | { defaultBehavior: boolean })
-
----@alias insx.kit.LSP.ProgressToken (integer | string)
+---@alias insx.kit.LSP.PrepareRenameResult (insx.kit.LSP.Range | insx.kit.LSP.PrepareRenamePlaceholder | insx.kit.LSP.PrepareRenameDefaultBehavior)
 
 ---@alias insx.kit.LSP.DocumentSelector insx.kit.LSP.DocumentFilter[]
+
+---@alias insx.kit.LSP.ProgressToken (integer | string)
 
 ---@alias insx.kit.LSP.ChangeAnnotationIdentifier string
 
 ---@alias insx.kit.LSP.WorkspaceDocumentDiagnosticReport (insx.kit.LSP.WorkspaceFullDocumentDiagnosticReport | insx.kit.LSP.WorkspaceUnchangedDocumentDiagnosticReport)
 
----@alias insx.kit.LSP.TextDocumentContentChangeEvent ({ range: insx.kit.LSP.Range, rangeLength?: integer, text: string } | { text: string })
+---@alias insx.kit.LSP.TextDocumentContentChangeEvent (insx.kit.LSP.TextDocumentContentChangePartial | insx.kit.LSP.TextDocumentContentChangeWholeDocument)
 
----@alias insx.kit.LSP.MarkedString (string | { language: string, value: string })
+---@alias insx.kit.LSP.MarkedString (string | insx.kit.LSP.MarkedStringWithLanguage)
 
 ---@alias insx.kit.LSP.DocumentFilter (insx.kit.LSP.TextDocumentFilter | insx.kit.LSP.NotebookCellTextDocumentFilter)
 
+---@alias insx.kit.LSP.LSPObject table<string, insx.kit.LSP.LSPAny>
+
 ---@alias insx.kit.LSP.GlobPattern (insx.kit.LSP.Pattern | insx.kit.LSP.RelativePattern)
 
----@alias insx.kit.LSP.TextDocumentFilter ({ language: string, scheme?: string, pattern?: string } | { language?: string, scheme: string, pattern?: string } | { language?: string, scheme?: string, pattern: string })
+---@alias insx.kit.LSP.TextDocumentFilter (insx.kit.LSP.TextDocumentFilterLanguage | insx.kit.LSP.TextDocumentFilterScheme | insx.kit.LSP.TextDocumentFilterPattern)
 
----@alias insx.kit.LSP.NotebookDocumentFilter ({ notebookType: string, scheme?: string, pattern?: string } | { notebookType?: string, scheme: string, pattern?: string } | { notebookType?: string, scheme?: string, pattern: string })
+---@alias insx.kit.LSP.NotebookDocumentFilter (insx.kit.LSP.NotebookDocumentFilterNotebookType | insx.kit.LSP.NotebookDocumentFilterScheme | insx.kit.LSP.NotebookDocumentFilterPattern)
 
 ---@alias insx.kit.LSP.Pattern string
+
+---@alias insx.kit.LSP.RegularExpressionEngineKind string
 
 return LSP

@@ -52,7 +52,7 @@ AsyncTask.Status = {
 ---Handle unhandled rejection.
 ---@param err any
 function AsyncTask.on_unhandled_rejection(err)
-  error('AsyncTask.on_unhandled_rejection: ' .. vim.inspect(err))
+  error('AsyncTask.on_unhandled_rejection: ' .. vim.inspect(err), 2)
 end
 
 ---Return the value is AsyncTask or not.
@@ -67,6 +67,11 @@ end
 ---@return insx.kit.Async.AsyncTask
 function AsyncTask.all(tasks)
   return AsyncTask.new(function(resolve, reject)
+    if #tasks == 0 then
+      resolve({})
+      return
+    end
+
     local values = {}
     local count = 0
     for i, task in ipairs(tasks) do
@@ -144,24 +149,24 @@ end
 
 ---Sync async task.
 ---@NOTE: This method uses `vim.wait` so that this can't wait the typeahead to be empty.
----@param timeout? integer
+---@param timeout integer
 ---@return any
 function AsyncTask:sync(timeout)
   self.synced = true
 
   local time = uv.now()
-  while self.status == AsyncTask.Status.Pending do
+  while uv.now() - time <= timeout do
+    if self.status ~= AsyncTask.Status.Pending then
+      break
+    end
     if is_thread then
       uv.run('once')
     else
       vim.wait(0)
     end
-    if timeout then
-      local elapsed = uv.now() - time
-      if elapsed > timeout then
-        error('AsyncTask:sync is timeout.', 2)
-      end
-    end
+  end
+  if self.status == AsyncTask.Status.Pending then
+    error('AsyncTask:sync is timeout.', 2)
   end
   if self.status == AsyncTask.Status.Rejected then
     error(self.value, 2)

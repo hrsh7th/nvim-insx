@@ -2,6 +2,14 @@
 
 local kit = {}
 
+---Clear table.
+---@param tbl table
+kit.clear = require('table.clear') or function(tbl)
+  for k, _ in pairs(tbl) do
+    tbl[k] = nil
+  end
+end
+
 ---Create gabage collection detector.
 ---@param callback fun(...: any): any
 ---@return userdata
@@ -15,6 +23,62 @@ function kit.gc(callback)
   return gc
 end
 
+---Safe version of vim.schedule.
+---@param fn fun(...: any): any
+function kit.safe_schedule(fn)
+  if vim.is_thread() then
+    local timer = assert(vim.uv.new_timer())
+    timer:start(0, 0, function()
+      timer:stop()
+      timer:close()
+      fn()
+    end)
+  else
+    vim.schedule(fn)
+  end
+end
+
+---Safe version of vim.schedule_wrap.
+---@param fn fun(...: any): any
+function kit.safe_schedule_wrap(fn)
+  if vim.is_thread() then
+    return function(...)
+      local args = { ... }
+      local timer = assert(vim.uv.new_timer())
+      timer:start(0, 0, function()
+        timer:stop()
+        timer:close()
+        fn(unpack(args))
+      end)
+    end
+  else
+    return vim.schedule_wrap(fn)
+  end
+end
+
+---Fast version of vim.schedule.
+---@param fn fun(): any
+function kit.fast_schedule(fn)
+  if vim.in_fast_event() then
+    kit.safe_schedule(fn)
+  else
+    fn()
+  end
+end
+
+---Safe version of vim.schedule_wrap.
+---@generic A
+---@param fn fun(...: A)
+---@return fun(...: A)
+function kit.fast_schedule_wrap(fn)
+  return function(...)
+    local args = { ... }
+    kit.fast_schedule(function()
+      fn(unpack(args))
+    end)
+  end
+end
+
 ---Find up directory.
 ---@param path string
 ---@param markers string[]
@@ -26,9 +90,7 @@ function kit.findup(path, markers)
   while path ~= '/' do
     for _, marker in ipairs(markers) do
       local target = vim.fs.joinpath(path, (marker:gsub('/', '')))
-      if marker:match('/$') and vim.fn.isdirectory(target) == 1 then
-        return path
-      elseif vim.fn.filereadable(target) == 1 then
+      if vim.fn.isdirectory(target) == 1 or vim.fn.filereadable(target) == 1 then
         return path
       end
     end
@@ -36,6 +98,7 @@ function kit.findup(path, markers)
   end
 end
 
+<<<<<<< HEAD
 ---Create debounced callback.
 ---@generic T: fun(...: any): nil
 ---@param callback T
@@ -100,9 +163,13 @@ function kit.clear(tbl)
   return tbl
 end
 
+=======
+>>>>>>> b3456f8 (update nvim-kit)
 do
-  local mpack = require('mpack')
+  _G.kit = _G.kit or {}
+  _G.kit.unique_id = 0
 
+<<<<<<< HEAD
   local MpackFunctionType = {}
   MpackFunctionType.__index = MpackFunctionType
 
@@ -286,10 +353,18 @@ function kit.merge(tbl1, tbl2)
     return kit.clone(tbl2)
   else
     return kit.clone(tbl1)
+=======
+  ---Create unique id.
+  ---@return integer
+  kit.unique_id = function()
+    _G.kit.unique_id = _G.kit.unique_id + 1
+    return _G.kit.unique_id
+>>>>>>> b3456f8 (update nvim-kit)
   end
 end
 
 ---Map array.
+---@deprecated
 ---@param array table
 ---@param fn fun(item: unknown, index: integer): unknown
 ---@return unknown[]
@@ -301,118 +376,8 @@ function kit.map(array, fn)
   return new_array
 end
 
----Concatenate two tables.
----NOTE: This doesn't concatenate dict-like table.
----@param tbl1 table
----@param tbl2 table
----@return table
-function kit.concat(tbl1, tbl2)
-  local new_tbl = {}
-  for _, item in ipairs(tbl1) do
-    table.insert(new_tbl, item)
-  end
-  for _, item in ipairs(tbl2) do
-    table.insert(new_tbl, item)
-  end
-  return new_tbl
-end
-
----Return true if v is contained in array.
----@param array any[]
----@param v any
----@return boolean
-function kit.contains(array, v)
-  for _, item in ipairs(array) do
-    if item == v then
-      return true
-    end
-  end
-  return false
-end
-
----Slice the array.
----@generic T: any[]
----@param array T
----@param s integer
----@param e integer
----@return T
-function kit.slice(array, s, e)
-  if not kit.is_array(array) then
-    error('[kit] specified value is not an array.')
-  end
-  local new_array = {}
-  for i = s, e do
-    table.insert(new_array, array[i])
-  end
-  return new_array
-end
-
----The value to array.
----@param value any
----@return table
-function kit.to_array(value)
-  if type(value) == 'table' then
-    if kit.is_array(value) then
-      return value
-    end
-  end
-  return { value }
-end
-
----Check the value is array.
----@param value any
----@return boolean
-function kit.is_array(value)
-  if type(value) ~= 'table' then
-    return false
-  end
-  for k, _ in pairs(value) do
-    if type(k) ~= 'number' then
-      return false
-    end
-  end
-  return true
-end
-
----Check the value is dict.
----@param value any
----@return boolean
-function kit.is_dict(value)
-  return type(value) == 'table' and (not kit.is_array(value) or kit.is_empty(value))
-end
-
----Check the value is empty.
----@param value any
----@return boolean
-function kit.is_empty(value)
-  if type(value) ~= 'table' then
-    return false
-  end
-  if #value == 0 then
-    return true
-  end
-  for _ in pairs(value) do
-    return false
-  end
-  return true
-end
-
----Reverse the array.
----@param array table
----@return table
-function kit.reverse(array)
-  if not kit.is_array(array) then
-    error('[kit] specified value is not an array.')
-  end
-
-  local new_array = {}
-  for i = #array, 1, -1 do
-    table.insert(new_array, array[i])
-  end
-  return new_array
-end
-
 ---@generic T
+---@deprecated
 ---@param value T?
 ---@param default T
 function kit.default(value, default)
@@ -457,6 +422,260 @@ function kit.set(value, path, new_value)
     current = current[key]
   end
   current[path[#path]] = new_value
+end
+
+---Create debounced callback.
+---@generic T: fun(...: any): nil
+---@param callback T
+---@param timeout_ms integer
+---@return T
+function kit.debounce(callback, timeout_ms)
+  local timer = assert(vim.uv.new_timer())
+  return setmetatable({
+    timeout_ms = timeout_ms,
+    is_running = function()
+      return timer:is_active()
+    end,
+    stop = function()
+      timer:stop()
+    end,
+  }, {
+    __call = function(self, ...)
+      local arguments = { ... }
+
+      self.running = true
+      timer:stop()
+      timer:start(self.timeout_ms, 0, function()
+        self.running = false
+        timer:stop()
+        callback(unpack(arguments))
+      end)
+    end,
+  })
+end
+
+---Create throttled callback.
+---First call will be called immediately.
+---@generic T: fun(...: any): nil
+---@param callback T
+---@param timeout_ms integer
+function kit.throttle(callback, timeout_ms)
+  local timer = assert(vim.uv.new_timer())
+  local arguments = nil
+  local last_time = (vim.uv.hrtime() / 1000000) - timeout_ms - 1
+  return setmetatable({
+    timeout_ms = timeout_ms,
+    is_running = function()
+      return timer:is_active()
+    end,
+    stop = function()
+      timer:stop()
+    end,
+  }, {
+    __call = function(self, ...)
+      arguments = { ... }
+
+      if self.is_running() then
+        timer:stop()
+      end
+      local delay_ms = self.timeout_ms - ((vim.uv.hrtime() / 1000000) - last_time)
+      if delay_ms > 0 then
+        timer:start(delay_ms, 0, function()
+          timer:stop()
+          last_time = (vim.uv.hrtime() / 1000000)
+          callback(unpack(arguments))
+        end)
+      else
+        last_time = (vim.uv.hrtime() / 1000000)
+        callback(unpack(arguments))
+      end
+    end,
+  })
+end
+
+do
+  ---@generic T
+  ---@param target T
+  ---@param seen table<any, any>
+  ---@return T
+  local function do_clone(target, seen)
+    if type(target) ~= 'table' then
+      return target
+    end
+    if seen[target] then
+      return seen[target]
+    end
+    if kit.is_array(target) then
+      local new_tbl = {}
+      seen[target] = new_tbl
+      for k, v in ipairs(target) do
+        new_tbl[k] = do_clone(v, seen)
+      end
+      return new_tbl
+    else
+      local new_tbl = {}
+      local meta = getmetatable(target)
+      if meta then
+        setmetatable(new_tbl, meta)
+      end
+      seen[target] = new_tbl
+      for k, v in pairs(target) do
+        new_tbl[k] = do_clone(v, seen)
+      end
+      return new_tbl
+    end
+  end
+
+  ---Clone object.
+  ---@generic T
+  ---@param target T
+  ---@return T
+  function kit.clone(target)
+    return do_clone(target, {})
+  end
+end
+
+---Merge two tables.
+---@generic T: any[]
+---NOTE: This doesn't merge array-like table.
+---@param tbl1 T
+---@param tbl2 T
+---@return T
+function kit.merge(tbl1, tbl2)
+  local is_dict1 = kit.is_dict(tbl1) and getmetatable(tbl1) == nil
+  local is_dict2 = kit.is_dict(tbl2) and getmetatable(tbl2) == nil
+  if is_dict1 and is_dict2 then
+    local new_tbl = {}
+    for k, v in pairs(tbl2) do
+      if tbl1[k] ~= vim.NIL then
+        new_tbl[k] = kit.merge(tbl1[k], v)
+      end
+    end
+    for k, v in pairs(tbl1) do
+      if tbl2[k] == nil then
+        if v ~= vim.NIL then
+          new_tbl[k] = kit.merge(v, {})
+        else
+          new_tbl[k] = nil
+        end
+      end
+    end
+    return new_tbl
+  end
+
+  -- premitive like values.
+  if tbl1 == vim.NIL then
+    return nil
+  elseif tbl1 == nil then
+    return kit.merge(tbl2, {}) -- clone & prevent vim.NIL
+  end
+  return tbl1
+end
+
+---Concatenate two tables.
+---NOTE: This doesn't concatenate dict-like table.
+---@param tbl1 table
+---@param ... table
+---@return table
+function kit.concat(tbl1, ...)
+  local new_tbl = {}
+
+  local off = 0
+  for _, item in pairs(tbl1) do
+    new_tbl[off + 1] = item
+    off = off + 1
+  end
+
+  for _, tbl2 in ipairs({ ... }) do
+    for _, item in pairs(kit.to_array(tbl2)) do
+      new_tbl[off + 1] = item
+      off = off + 1
+    end
+  end
+  return new_tbl
+end
+
+---Slice the array.
+---@generic T: any[]
+---@param array T
+---@param s integer
+---@param e integer
+---@return T
+function kit.slice(array, s, e)
+  if not kit.is_array(array) then
+    error('[kit] specified value is not an array.')
+  end
+  local new_array = {}
+  for i = s, e do
+    table.insert(new_array, array[i])
+  end
+  return new_array
+end
+
+---The value to array.
+---@param value any
+---@return table
+function kit.to_array(value)
+  if type(value) == 'table' then
+    if kit.is_array(value) then
+      return value
+    end
+  end
+  return { value }
+end
+
+---Check the value is array.
+---@param value any
+---@return boolean
+function kit.is_array(value)
+  if type(value) ~= 'table' then
+    return false
+  end
+
+  for k, _ in pairs(value) do
+    if type(k) ~= 'number' then
+      return false
+    end
+  end
+  return true
+end
+
+---Check the value is dict.
+---@param value any
+---@return boolean
+function kit.is_dict(value)
+  return type(value) == 'table' and (not kit.is_array(value) or kit.is_empty(value))
+end
+
+---Check the value is empty.
+---@param value any
+---@return boolean
+function kit.is_empty(value)
+  if type(value) ~= 'table' then
+    return false
+  end
+  for _ in pairs(value) do
+    return false
+  end
+  if #value == 0 then
+    return true
+  end
+  return true
+end
+
+---Reverse the array.
+---@param array table
+---@return table
+function kit.reverse(array)
+  if not kit.is_array(array) then
+    error('[kit] specified value is not an array.')
+  end
+
+  local new_array = {}
+  for i = #array, 1, -1 do
+    table.insert(new_array, array[i])
+  end
+  return new_array
 end
 
 ---String dedent.
