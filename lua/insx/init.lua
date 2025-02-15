@@ -359,6 +359,10 @@ end
 ---@param char string
 ---@return string
 function insx.expand(char)
+  if vim.b.insx_disabled then
+    return char
+  end
+
   char = Keymap.normalize(char)
 
   local ctx = create_context(char)
