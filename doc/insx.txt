@@ -14,7 +14,7 @@ TYPINGS                                                           |insx-typings|
 CUSTOM RECIPE                                               |insx-custom-recipe|
 BUILT-IN RECIPE                                           |insx-built_in-recipe|
 TIPS                                                                 |insx-tips|
-
+VARIABLE                                                         |insx-variable|
 
 
 ==============================================================================
@@ -491,6 +491,18 @@ require('insx.recipe.pair_spacing').decrease: fun(option): insx.RecipeSource~
     close_pat = esc(')')
   }))
 <  -----
+
+
+
+==============================================================================
+VARIABLE                                                        *insx-variable*
+
+## Buffer Variables
+
+                                           *insx-variable.buffer.insx_disabled*
+vim.b.insx_disabled: boolean~
+
+  This variable is used to disable the insx feature in the current buffer.
 
 
 
