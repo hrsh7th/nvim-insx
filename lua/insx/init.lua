@@ -360,7 +360,7 @@ end
 ---@return string
 function insx.expand(char)
   if vim.b.insx_disabled then
-    return char
+    return Keymap.termcodes(char)
   end
 
   char = Keymap.normalize(char)
