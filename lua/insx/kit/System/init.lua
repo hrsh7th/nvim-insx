@@ -71,8 +71,6 @@ function System.LineBuffering:create(callback)
         end
       end
     end,
-<<<<<<< HEAD
-=======
     close = function()
       for byte, i in buffer.iter_bytes() do
         if byte == bytes['\n'] then
@@ -87,7 +85,6 @@ function System.LineBuffering:create(callback)
       end
       callback_wrapped(buffer.get())
     end,
->>>>>>> b3456f8 (update nvim-kit)
   }
 end
 
@@ -206,54 +203,6 @@ function System.DelimiterBuffering:create(callback)
   return buffer
 end
 
-<<<<<<< HEAD
----@class insx.kit.System.PatternBuffering: insx.kit.System.Buffering
----@field pattern string
-System.PatternBuffering = {}
-System.PatternBuffering.__index = System.PatternBuffering
-
----Create PatternBuffering.
----@param option { pattern: string }
-function System.PatternBuffering.new(option)
-  return setmetatable({
-    pattern = option.pattern,
-  }, System.PatternBuffering)
-end
-
----Create PatternBuffer object.
-function System.PatternBuffering:create(callback)
-  local buffer = {}
-  return {
-    write = function(data)
-      table.insert(buffer, data)
-      while true do
-        local text = table.concat(buffer, '')
-        local s, e = text:find(self.pattern, 1, true)
-        if s and e then
-          callback(text:sub(1, s - 1))
-          if e < #text then
-            buffer = { text:sub(e + 1) }
-          else
-            buffer = {}
-          end
-        else
-          break
-        end
-      end
-    end,
-<<<<<<< HEAD
-=======
-    close = function()
-      if #buffer > 0 then
-        callback(table.concat(buffer, ''))
-      end
-    end,
->>>>>>> b3456f8 (update nvim-kit)
-  }
-end
-
-=======
->>>>>>> 9dff5db (chore: update nvim-kit)
 ---@class insx.kit.System.RawBuffering: insx.kit.System.Buffering
 System.RawBuffering = {}
 System.RawBuffering.__index = System.RawBuffering
@@ -269,12 +218,9 @@ function System.RawBuffering:create(callback)
     write = function(data)
       callback(data)
     end,
-<<<<<<< HEAD
-=======
     close = function()
       -- noop.
     end,
->>>>>>> b3456f8 (update nvim-kit)
   }
 end
 
@@ -355,15 +301,6 @@ function System.spawn(command, params)
     end
     if data then
       stdout_buffer.write(data)
-<<<<<<< HEAD
-    end
-  end)
-
-  local stderr_buffer = buffering:create(function(text)
-    if params.on_stderr then
-      params.on_stderr(text)
-=======
->>>>>>> b3456f8 (update nvim-kit)
     end
   end)
   stderr:read_start(function(err, data)

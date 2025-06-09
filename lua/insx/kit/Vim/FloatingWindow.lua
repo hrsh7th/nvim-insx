@@ -1,41 +1,5 @@
 local kit = require('insx.kit')
 
-<<<<<<< HEAD
----Analyze border size.
----@param border string | string[]
----@return { top: integer, right: integer, bottom: integer, left: integer }
-local function analyze_border_size(border)
-  if not border then
-    return { top = 0, right = 0, bottom = 0, left = 0 }
-  end
-  if type(border) == 'string' then
-    if border == 'none' then
-      return { top = 0, right = 0, bottom = 0, left = 0 }
-    elseif border == 'single' then
-      return { top = 1, right = 1, bottom = 1, left = 1 }
-    elseif border == 'double' then
-      return { top = 2, right = 2, bottom = 2, left = 2 }
-    elseif border == 'rounded' then
-      return { top = 1, right = 1, bottom = 1, left = 1 }
-    elseif border == 'solid' then
-      return { top = 1, right = 1, bottom = 1, left = 1 }
-    elseif border == 'shadow' then
-      return { top = 0, right = 1, bottom = 1, left = 0 }
-    end
-    return { top = 0, right = 0, bottom = 0, left = 0 }
-  end
-  local chars = border --[=[@as string[]]=]
-  while #chars < 8 do
-    chars = kit.concat(chars, chars)
-  end
-  return {
-    top = vim.fn.strdisplaywidth(chars[2]),
-    right = vim.fn.strdisplaywidth(chars[4]),
-    bottom = vim.fn.strdisplaywidth(chars[6]),
-    left = vim.fn.strdisplaywidth(chars[8]),
-  }
-end
-=======
 ---@alias insx.kit.Vim.FloatingWindow.WindowKind 'main' | 'scrollbar_track' | 'scrollbar_thumb'
 
 ---@class insx.kit.Vim.FloatingWindow.BorderSize
@@ -95,7 +59,6 @@ end
 ---@field private _scrollbar_thumb_win? integer
 local FloatingWindow = {}
 FloatingWindow.__index = FloatingWindow
->>>>>>> b3456f8 (update nvim-kit)
 
 ---Returns true if the window is visible
 ---@param win? integer
@@ -132,16 +95,6 @@ local function show_or_move(win, buf, win_config)
   if is_visible(win) then
     vim.api.nvim_win_set_config(win --[=[@as integer]=], {
       relative = 'editor',
-<<<<<<< HEAD
-      width = config.width,
-      height = config.height,
-      row = config.row,
-      col = config.col,
-      anchor = config.anchor,
-      style = config.style,
-      border = config.border,
-      zindex = config.zindex,
-=======
       row = win_config.row,
       col = win_config.col,
       width = win_config.width,
@@ -154,23 +107,12 @@ local function show_or_move(win, buf, win_config)
       footer = win_config.footer,
       footer_pos = win_config.footer_pos,
       zindex = win_config.zindex,
->>>>>>> b3456f8 (update nvim-kit)
     })
     return win --[=[@as integer]=]
   else
     return vim.api.nvim_open_win(buf, false, {
       noautocmd = true,
       relative = 'editor',
-<<<<<<< HEAD
-      width = config.width,
-      height = config.height,
-      row = config.row,
-      col = config.col,
-      anchor = config.anchor,
-      style = config.style,
-      border = config.border,
-      zindex = config.zindex,
-=======
       row = win_config.row,
       col = win_config.col,
       width = win_config.width,
@@ -183,7 +125,6 @@ local function show_or_move(win, buf, win_config)
       footer = win_config.footer,
       footer_pos = win_config.footer_pos,
       zindex = win_config.zindex,
->>>>>>> b3456f8 (update nvim-kit)
     })
   end
 end
@@ -499,22 +440,6 @@ function FloatingWindow:get_viewport()
     error('this method can only be called if window is showing.')
   end
 
-<<<<<<< HEAD
-  -- calculate content height.
-  local content_height --[=[@as integer]=]
-  do
-    local possible_inner_width = config.max_width - border_size.left - border_size.right - 1 -- `-1` means possible scollbar width.
-    local height = 0
-    for _, text_width in ipairs(text_widths) do
-      if self:get_win_option('wrap') then
-        height = height + math.max(1, math.ceil(text_width / possible_inner_width))
-      else
-        height = height + 1
-      end
-    end
-    content_height = height
-  end
-=======
   local win_config = vim.api.nvim_win_get_config(self:get_win() --[[@as integer]])
   local win_position = vim.api.nvim_win_get_position(self:get_win() --[[@as integer]])
   local border_size = FloatingWindow.get_border_size(win_config.border)
@@ -525,7 +450,6 @@ function FloatingWindow:get_viewport()
     markdown = self:get_config().markdown,
   })
   local scrollbar = win_config.height < content_size.height
->>>>>>> b3456f8 (update nvim-kit)
 
   local ui_width = border_size.h + (scrollbar and 1 or 0)
   local ui_height = border_size.v
@@ -539,43 +463,16 @@ function FloatingWindow:get_viewport()
     ui_width = ui_width,
     ui_height = ui_height,
     border_size = border_size,
-<<<<<<< HEAD
-    scrollbar = scrollbar,
-=======
     content_size = content_size,
     scrollbar = scrollbar,
     border = win_config.border,
     zindex = win_config.zindex,
->>>>>>> b3456f8 (update nvim-kit)
   }
 end
 
 ---Update scrollbar.
 function FloatingWindow:_update_scrollbar()
   if is_visible(self._win) then
-<<<<<<< HEAD
-    local win_width = vim.api.nvim_win_get_width(self._win)
-    local win_height = vim.api.nvim_win_get_height(self._win)
-    local win_pos = vim.api.nvim_win_get_position(self._win)
-    local win_config = vim.api.nvim_win_get_config(self._win)
-    local border_size = analyze_border_size(win_config.border)
-
-    local analyzed = self:analyze({
-      max_width = win_width + border_size.left + border_size.right + 1,
-      max_height = win_height + border_size.top + border_size.bottom,
-      border = win_config.border,
-    })
-
-    if analyzed.scrollbar then
-      do
-        self._scrollbar_track_win = show_or_move(self._scrollbar_track_win, self._scrollbar_track_buf, {
-          row = win_pos[1] + analyzed.border_size.top,
-          col = win_pos[2] + analyzed.outer_width - 1 - analyzed.border_size.right,
-          width = 1,
-          height = analyzed.inner_height,
-          style = 'minimal',
-          zindex = win_config.zindex + 1,
-=======
     local viewport = self:get_viewport()
     if viewport.scrollbar then
       do
@@ -586,26 +483,11 @@ function FloatingWindow:_update_scrollbar()
           height = viewport.inner_height,
           style = 'minimal',
           zindex = viewport.zindex + 1,
-<<<<<<< HEAD
->>>>>>> b3456f8 (update nvim-kit)
-=======
           border = 'none',
->>>>>>> 9dff5db (chore: update nvim-kit)
         })
       end
       do
         local topline = vim.fn.getwininfo(self._win)[1].topline
-<<<<<<< HEAD
-        local thumb_height = math.ceil(analyzed.inner_height * (analyzed.inner_height / analyzed.content_height))
-        local thumb_row = math.floor(analyzed.inner_height * (topline / analyzed.content_height))
-        self._scrollbar_thumb_win = show_or_move(self._scrollbar_thumb_win, self._scrollbar_thumb_buf, {
-          row = win_pos[1] + analyzed.border_size.top + thumb_row,
-          col = win_pos[2] + analyzed.outer_width - 1 - analyzed.border_size.right,
-          width = 1,
-          height = thumb_height,
-          style = 'minimal',
-          zindex = win_config.zindex + 2,
-=======
         local ratio = topline / (viewport.content_size.height - viewport.inner_height)
         local thumb_height = viewport.inner_height / viewport.content_size.height * viewport.inner_height
         local thumb_row = (viewport.inner_height - thumb_height) * ratio
@@ -617,11 +499,7 @@ function FloatingWindow:_update_scrollbar()
           height = math.ceil(thumb_height),
           style = 'minimal',
           zindex = viewport.zindex + 2,
-<<<<<<< HEAD
->>>>>>> b3456f8 (update nvim-kit)
-=======
           border = 'none',
->>>>>>> 9dff5db (chore: update nvim-kit)
         })
       end
       return

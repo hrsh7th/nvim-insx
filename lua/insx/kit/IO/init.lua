@@ -117,21 +117,11 @@ local uv_fs_realpath = Async.promisify(uv.fs_realpath)
 function IO.is_directory(path)
   path = IO.normalize(path)
   return Async.run(function()
-<<<<<<< HEAD
-    return IO.fs_stat(path)
-      :catch(function()
-        return {}
-      end)
-      :await().type == 'directory'
-<<<<<<< HEAD
-=======
-=======
     return uv_fs_stat(path)
         :catch(function()
           return {}
         end)
         :await().type == 'directory'
->>>>>>> 9dff5db (chore: update nvim-kit)
   end)
 end
 
@@ -141,17 +131,6 @@ end
 function IO.exists(path)
   path = IO.normalize(path)
   return Async.run(function()
-<<<<<<< HEAD
-    return IO.fs_stat(path)
-      :next(function()
-        return true
-      end)
-      :catch(function()
-        return false
-      end)
-      :await()
->>>>>>> b3456f8 (update nvim-kit)
-=======
     return uv_fs_stat(path)
         :next(function()
           return true
@@ -180,7 +159,6 @@ function IO.stat(path)
   path = IO.normalize(path)
   return Async.run(function()
     return uv_fs_stat(path):await()
->>>>>>> 9dff5db (chore: update nvim-kit)
   end)
 end
 
