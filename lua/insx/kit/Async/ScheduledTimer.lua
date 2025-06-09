@@ -27,21 +27,12 @@ function ScheduledTimer:start(ms, repeat_ms, callback)
   self._revision = self._revision + 1
   local revision = self._revision
 
-  local function on_tick()
+  local on_tick
+  local tick
+
+  on_tick = function()
     if revision ~= self._revision then
       return
-    end
-    local function tick()
-      if revision ~= self._revision then
-        return
-      end
-      if repeat_ms ~= 0 then
-        callback()
-        self:start(repeat_ms, repeat_ms, callback)
-      else
-        self._running = false
-        callback()
-      end
     end
     if vim.in_fast_event() then
       vim.schedule(tick)
@@ -49,10 +40,27 @@ function ScheduledTimer:start(ms, repeat_ms, callback)
       tick()
     end
   end
+
+  tick = function()
+    if revision ~= self._revision then
+      return
+    end
+    callback() -- `callback()` can restart timer, so it need to check revision here again.
+    if revision ~= self._revision then
+      return
+    end
+    if repeat_ms ~= 0 then
+      self._timer:start(repeat_ms, 0, on_tick)
+    else
+      self._running = false
+    end
+  end
+
   if ms == 0 then
     on_tick()
     return
   end
+  self._timer:stop()
   self._timer:start(ms, 0, on_tick)
 end
 

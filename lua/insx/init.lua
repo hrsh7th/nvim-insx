@@ -209,7 +209,8 @@ local function create_context(char)
         return {
           ctx.row(),
           ctx.col() + after_match_s,
-          matches = vim.fn.matchlist(ctx.text():sub(before_match_s + 1, ctx.col() + after_match_s), before_pat .. after_pat),
+          matches = vim.fn.matchlist(ctx.text():sub(before_match_s + 1, ctx.col() + after_match_s),
+            before_pat .. after_pat),
         }
       end
       return {
@@ -233,8 +234,10 @@ local function create_context(char)
         key_specifier.keys = Keymap.termcodes(key_specifier.keys)
         if ctx.mode() ~= 'c' then
           key_specifier.keys = RegExp.gsub(key_specifier.keys, undojoin, '')
-          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left, undojoin .. left)
-          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right, undojoin .. right)
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. left,
+            undojoin .. left)
+          key_specifier.keys = RegExp.gsub(key_specifier.keys, [[\%(]] .. undobreak .. [[\)\@<!]] .. right,
+            undojoin .. right)
         end
         return key_specifier
       end, key_specifiers)
@@ -333,11 +336,9 @@ function insx.add(char, recipe_source_like, option)
       mode_recipes_map[mode][char] = {}
 
       vim.keymap.set(mode, char, function()
-        return insx.expand(char)
+        Keymap.send(insx.expand(char))
       end, {
         desc = 'insx',
-        expr = true,
-        replace_keycodes = false,
       })
     end
 

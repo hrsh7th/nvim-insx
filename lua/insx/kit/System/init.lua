@@ -3,6 +3,11 @@
 local kit = require('insx.kit')
 local Async = require('insx.kit.Async')
 
+local bytes = {
+  ['\n'] = 10,
+  ['\r'] = 13,
+}
+
 local System = {}
 
 ---@class insx.kit.System.Buffer
@@ -26,41 +31,61 @@ function System.LineBuffering.new(option)
 end
 
 ---Create LineBuffer object.
+---@param callback fun(data: string)
 function System.LineBuffering:create(callback)
-  local buffer = {}
+  local callback_wrapped = callback
+  if self.ignore_empty then
+    ---@param data string
+    function callback_wrapped(data)
+      if data ~= '' then
+        return callback(data)
+      end
+    end
+  end
+
+  local buffer = kit.buffer()
+  local iter = buffer.iter_bytes()
+  ---@type insx.kit.System.Buffer
   return {
     write = function(data)
-      data = (data:gsub('\r\n?', '\n'))
-      table.insert(buffer, data)
-
-      local has = false
-      for i = #data, 1, -1 do
-        if data:sub(i, i) == '\n' then
-          has = true
-          break
-        end
-      end
-
-      if has then
-        local texts = vim.split(table.concat(buffer, ''), '\n')
-        buffer = texts[#texts] ~= '' and { table.remove(texts) } or {}
-        for _, text in ipairs(texts) do
-          if self.ignore_empty then
-            if not text:match('^%s*$') then
-              callback(text)
+      buffer.put(data)
+      local found = true
+      while found do
+        found = false
+        for i, byte in iter do
+          if byte == bytes['\n'] then
+            if buffer.peek(i - 1) == bytes['\r'] then
+              callback_wrapped(buffer.get(i - 2))
+              buffer.skip(2)
+            else
+              callback_wrapped(buffer.get(i - 1))
+              buffer.skip(1)
             end
-          else
-            callback(text)
+            iter = buffer.iter_bytes()
+            found = true
+            break
           end
+        end
+        if not found then
+          break
         end
       end
     end,
 <<<<<<< HEAD
 =======
     close = function()
-      if #buffer > 0 then
-        callback(table.concat(buffer, ''))
+      for byte, i in buffer.iter_bytes() do
+        if byte == bytes['\n'] then
+          if buffer.peek(i - 1) == bytes['\r'] then
+            callback_wrapped(buffer.get(i - 2))
+            buffer.skip(2)
+          else
+            callback_wrapped(buffer.get(i - 1))
+            buffer.skip(1)
+          end
+        end
       end
+      callback_wrapped(buffer.get())
     end,
 >>>>>>> b3456f8 (update nvim-kit)
   }
@@ -181,6 +206,7 @@ function System.DelimiterBuffering:create(callback)
   return buffer
 end
 
+<<<<<<< HEAD
 ---@class insx.kit.System.PatternBuffering: insx.kit.System.Buffering
 ---@field pattern string
 System.PatternBuffering = {}
@@ -226,6 +252,8 @@ function System.PatternBuffering:create(callback)
   }
 end
 
+=======
+>>>>>>> 9dff5db (chore: update nvim-kit)
 ---@class insx.kit.System.RawBuffering: insx.kit.System.Buffering
 System.RawBuffering = {}
 System.RawBuffering.__index = System.RawBuffering
@@ -264,11 +292,11 @@ end
 ---@return fun(signal?: integer)
 function System.spawn(command, params)
   command = vim
-    .iter(command)
-    :filter(function(c)
-      return c ~= nil
-    end)
-    :totable()
+      .iter(command)
+      :filter(function(c)
+        return c ~= nil
+      end)
+      :totable()
 
   local cmd = command[1]
   local args = {}

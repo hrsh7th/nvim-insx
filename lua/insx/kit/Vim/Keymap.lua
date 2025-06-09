@@ -3,6 +3,8 @@ local Async = require('insx.kit.Async')
 
 local buf = vim.api.nvim_create_buf(false, true)
 
+local resolve_key = vim.api.nvim_replace_termcodes('<Cmd>lua require("insx.kit.Vim.Keymap")._resolve(%s)<CR>', true, true, true)
+
 ---@alias insx.kit.Vim.Keymap.Keys { keys: string, remap?: boolean }
 ---@alias insx.kit.Vim.Keymap.KeysSpecifier string|insx.kit.Vim.Keymap.Keys
 
@@ -59,7 +61,7 @@ function Keymap.send(keys, no_insert)
   return Async.new(function(resolve, _)
     _G.kit.Vim.Keymap.callbacks[unique_id] = resolve
 
-    local callback = Keymap.termcodes(('<Cmd>lua require("insx.kit.Vim.Keymap")._resolve(%s)<CR>'):format(unique_id))
+    local callback = resolve_key:format(unique_id)
     if no_insert then
       for _, keys_ in ipairs(kit.to_array(keys)) do
         keys_ = to_keys(keys_)
@@ -86,7 +88,7 @@ function Keymap.to_sendable(callback)
   _G.kit.Vim.Keymap.callbacks[unique_id] = function()
     Async.run(callback)
   end
-  return Keymap.termcodes(('<Cmd>lua require("insx.kit.Vim.Keymap")._resolve(%s)<CR>'):format(unique_id))
+  return resolve_key:format(unique_id)
 end
 
 ---Test spec helper.

@@ -9,7 +9,7 @@ local is_thread = vim.is_thread()
 ---@field private status insx.kit.Async.AsyncTask.Status
 ---@field private synced boolean
 ---@field private chained boolean
----@field private children (fun(): any)[]
+---@field private children (fun(): any)[]?
 local AsyncTask = {}
 AsyncTask.__index = AsyncTask
 
@@ -20,8 +20,10 @@ AsyncTask.__index = AsyncTask
 local function settle(task, status, value)
   task.status = status
   task.value = value
-  for _, c in ipairs(task.children) do
-    c()
+  if task.children then
+    for _, c in ipairs(task.children) do
+      c()
+    end
   end
 
   if status == AsyncTask.Status.Rejected then
@@ -52,7 +54,7 @@ AsyncTask.Status = {
 ---Handle unhandled rejection.
 ---@param err any
 function AsyncTask.on_unhandled_rejection(err)
-  error('AsyncTask.on_unhandled_rejection: ' .. vim.inspect(err), 2)
+  error('AsyncTask.on_unhandled_rejection: ' .. (type(err) == 'table' and vim.inspect(err) or tostring(err)), 2)
 end
 
 ---Return the value is AsyncTask or not.
@@ -125,13 +127,13 @@ end
 ---Create new async task object.
 ---@param runner fun(resolve?: fun(value: any?), reject?: fun(err: any?))
 function AsyncTask.new(runner)
-  local self = setmetatable({}, AsyncTask)
-
-  self.value = nil
-  self.status = AsyncTask.Status.Pending
-  self.synced = false
-  self.chained = false
-  self.children = {}
+  local self = setmetatable({
+    value = nil,
+    status = AsyncTask.Status.Pending,
+    synced = false,
+    chained = false,
+    children = nil,
+  }, AsyncTask)
   local ok, err = pcall(runner, function(res)
     if self.status == AsyncTask.Status.Pending then
       settle(self, AsyncTask.Status.Fulfilled, res)
@@ -201,21 +203,27 @@ function AsyncTask:state()
   }
 end
 
----Register next step.
----@param on_fulfilled fun(value: any): any
-function AsyncTask:next(on_fulfilled)
-  return self:dispatch(on_fulfilled, function(err)
+do
+  local default_on_rejected = function(err)
     error(err, 2)
-  end)
+  end
+  ---Register next step.
+  ---@param on_fulfilled fun(value: any): any
+  function AsyncTask:next(on_fulfilled)
+    return self:dispatch(on_fulfilled, default_on_rejected)
+  end
 end
 
----Register catch step.
----@param on_rejected fun(value: any): any
----@return insx.kit.Async.AsyncTask
-function AsyncTask:catch(on_rejected)
-  return self:dispatch(function(value)
+do
+  local default_on_fulfilled = function(value)
     return value
-  end, on_rejected)
+  end
+  ---Register catch step.
+  ---@param on_rejected fun(value: any): any
+  ---@return insx.kit.Async.AsyncTask
+  function AsyncTask:catch(on_rejected)
+    return self:dispatch(default_on_fulfilled, on_rejected)
+  end
 end
 
 ---Dispatch task state.
@@ -241,9 +249,11 @@ function AsyncTask:dispatch(on_fulfilled, on_rejected)
 
   if self.status == AsyncTask.Status.Pending then
     return AsyncTask.new(function(resolve, reject)
-      table.insert(self.children, function()
-        dispatch(resolve, reject)
-      end)
+      local function dispatcher()
+        return dispatch(resolve, reject)
+      end
+      self.children = self.children or {}
+      table.insert(self.children, dispatcher)
     end)
   end
   return AsyncTask.new(dispatch)
