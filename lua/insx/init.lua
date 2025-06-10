@@ -389,12 +389,16 @@ function insx.expand(char)
   return Keymap.to_sendable(function()
     Async.run(function()
       local lazyredraw = vim.o.lazyredraw
-      vim.o.lazyredraw = true
       local virtualedit = vim.o.virtualedit
-      vim.o.virtualedit = 'all'
+      vim._with({ noautocmd = true }, function()
+        vim.o.lazyredraw = true
+        vim.o.virtualedit = 'all'
+      end)
       ctx.next()
-      vim.o.lazyredraw = lazyredraw
-      vim.o.virtualedit = virtualedit
+      vim._with({ noautocmd = true }, function()
+        vim.o.lazyredraw = lazyredraw
+        vim.o.virtualedit = virtualedit
+      end)
     end)
   end)
 end
